@@ -4,7 +4,7 @@ from datetime import datetime
 from os.path import dirname, abspath
 
 pathway = str(dirname(dirname(abspath(__file__))))
-workdir = pathway + "/uniform/"
+workdir = pathway + "/tests/"
 date = (datetime.now()).strftime("%Y-%m-%d_%H-%M-%S")
 config = [workdir, date]
 

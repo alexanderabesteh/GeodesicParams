@@ -22,7 +22,7 @@ z = vecs_au.z.value.tolist()
 data_points = array(list(zip(x, y, z)))
 
 pathway = str(dirname(dirname(abspath(__file__))))
-workdir = pathway + "/uniform/"
+workdir = pathway + "/tests/"
 date = (datetime.now()).strftime("%Y-%m-%d_%H-%M-%S")
 config = [workdir, date, 15]
 
