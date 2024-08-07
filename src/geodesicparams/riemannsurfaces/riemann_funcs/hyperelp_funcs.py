@@ -1,9 +1,10 @@
 from mpmath import exp, sin, cos, pi, re, im, mp
 from numpy import matrix, kron, array 
 
-def hyp_theta(z, riemannM, minMax = 5):
+def hyp_theta(z, riemannM, derivatives = [], minMax = 5):
 
     g = [1/2, 1/2]; h = [0, 1/2]
+    g = [0, 0]; h = [0, 0]
     result = 0
 
     for m1 in range(-minMax, minMax + 1):
@@ -14,10 +15,40 @@ def hyp_theta(z, riemannM, minMax = 5):
             for i in range(2):
                 tau_sum = 0
                 for j in range(2):
-                    tau_sum += riemannM[i, j] * (m[j] + g[j])# + 2 * z[i] + 2 * h[i] 
+                    tau_sum += riemannM[i, j] * (m[j] + g[j])# + 2 * z[i] + 2 * h[i]
                 char_sum += (m[i] + g[i]) * (tau_sum + 2 * z[i] + 2 * h[i])
+                
+            if len(derivatives) == 0:
+                result += exp(1j * pi * char_sum)
+            elif derivatives[0] != 0 and derivatives[1] != 0:
+                result += exp(1j * pi * char_sum) * (m1 + g[0])**(derivatives[0]) * (m2 + g[1])**(derivatives[1])
+            elif derivatives[0] != 0:
+                result += exp(1j * pi * char_sum) * (m1 + g[0])**(derivatives[0])
+            elif derivatives[1] != 0:
+                result += exp(1j * pi * char_sum) * (m2 + g[1])**(derivatives[1])
 
-            result += exp(1j * pi * char_sum)
+    if len(derivatives) != 0:
+        return (2 * pi * 1j)**(derivatives[0] + derivatives[1]) * result
+    else:
+        return result
+
+z = [0, 0]
+z = [1.7 - 1.2j, -0.4 +1j/3]
+tau = mp.matrix([[1j, -0.5], [-0.5, 1j]])
+print(hyp_theta(z, tau, [0, 5], 30))
+
+def kleinian_sigma(z, riemannM):
+    result = 1
+
+    return result
+
+def kleinian_zeta(z, riemannM):
+    result = 1
+
+    return result
+
+def kleinian_P(z, riemannM, derivatives = []):
+    result = 1
 
     return result
 
