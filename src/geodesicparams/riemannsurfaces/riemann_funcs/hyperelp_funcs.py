@@ -37,15 +37,32 @@ z = [1.7 - 1.2j, -0.4 +1j/3]
 tau = mp.matrix([[1j, -0.5], [-0.5, 1j]])
 print(hyp_theta(z, tau, [0, 5], 30))
 
-def kleinian_sigma(z, riemannM):
-    result = 1
+def kleinian_sigma(z, omega, eta, char, riemannM):
+    omega_inv = omega**(-1)
+    exp_part = exp(-1/2 * z.T * eta * omega_inv * z)
+    theta_part = calculate_theta(omega_inv * z, riemannM, char)
 
-    return result
+    return exp_part * theta_part
 
-def kleinian_zeta(z, riemannM):
-    result = 1
+def kleinian_zeta(z, omega, eta, char, riemannM, derivatives = []):
+    sigma = kleinian_sigma(z, omega, eta, char, riemannM)
+    g = char[0]; h = char[1]
+    minMax = 30
 
-    return result
+    for m1 in range(-minMax, minMax + 1):
+        for m2 in range(-minMax, minMax + 1):
+            m = [m1, m2]
+            char_sum = 0
+
+            for i in range(2):
+                tau_sum = 0
+                for j in range(2):
+                    tau_sum += riemannM[i, j] * (m[j] + g[j]) 
+                char_sum += (m[i] + g[i]) * (tau_sum + 2 * z[i] + 2 * h[i])
+
+            result += exp(1j * pi * char_sum) * 2 * pi * 1j * (m1 + g[0])
+
+    return result / sigma
 
 def kleinian_P(z, riemannM, derivatives = []):
     result = 1
