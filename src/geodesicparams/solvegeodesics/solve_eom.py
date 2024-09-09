@@ -1,9 +1,20 @@
-from sympy import sympify, Poly, degree, sin as spsin, asin as spasin, sqrt as spsqrt, Symbol, lambdify, apart, together, solve, oo, collect, pprint, sympify, assemble_partfrac_list, apart_list
-from ..utilities import separate_zeros, inlist
-from mpmath import im, re, fabs, sign, matrix, exp, ln, quad, nint, log, mpc, chop, sqrt
-from pickle import dump, load
-from numpy import load as npload, save, array
+#!/usr/bin/env python
+"""
+Procedures for inverting and solving the equations of motion for a variety of spacetimes.
 
+Equations of motion used by these procedures are required to be in standard form, which can
+be achieved through convert_polynomial and solve_geodesic_orbit. Period matrices are required
+for each procedure (except for when the equation of motion is a degree 2 polynomial), and are
+either computed through the period_matrices modules in riemannsurfaces, or provided directly.
+
+"""
+
+from mpmath import im, re, fabs, sign, matrix, exp, ln, quad, nint, log, mpc, chop, sqrt
+from numpy import load as npload, save, array
+from pickle import dump, load
+from sympy import sympify, Poly, degree, sin as spsin, asin as spasin, sqrt as spsqrt, Symbol, lambdify, apart, together, solve, oo, collect, pprint, sympify, assemble_partfrac_list, apart_list
+
+from ..utilities import separate_zeros, inlist
 from ..riemannsurfaces.riemann_funcs.elliptic_funcs import weierstrass_P, inverse_weierstrass_P, weierstrass_zeta, weierstrass_sigma
 from ..riemannsurfaces.riemann_funcs.hyperelp_funcs import *
 from ..riemannsurfaces.period_matrices.periods_genus1_first import periods_firstkind
@@ -12,14 +23,56 @@ from ..riemannsurfaces.period_matrices.periods_genus2_first import periods, eval
 from ..riemannsurfaces.integrations.integrate_hyperelliptic import myint_genus2, int_genus2_complex, myint_genus2_second, int_genus2_complex_second
 from ..riemannsurfaces.period_matrices.periods_genus2_second import periods_second
 
+# Global period matrices
 periods_inverse = 0
 riemannM = 0
 
-def invert_eom(polynomial, zeros, integrand, initial_values, int_sign, substitution, periodM, digits, datafile = None):
+def invert_eom(polynomial, zeros, integrand, initial_values, int_sign, substitution, periodM = None, digits, datafile = None):
+    """
+    Procedure for inverting equations of motion of trigonometric, elliptic, and 
+    hyperelliptic type for various spacetimes. Specifically 
+
+    The polynomial utilized is expected to be in standard form, converted by convert_polynomial.
+    Unless provided, the period matrices have to be computed.
+    
+    Parameters
+    ----------
+    polynomial : symbolic
+        A symbolic statement representing the polynomial in standard form.
+    zeros : list
+        A list of complex or real numbers representing the converted zeros of <polynomial>.
+    integrand : symbolic
+        The integrand in the equation above.
+    initial_values : list
+        The initial values converted by the same substitution used to convert <polynomial>.
+    int_sign : int
+        The sign of square root in the differential equation, either +1 or -1. The 
+        signs must have also been converted by the same substitution used to convert 
+        <polynomial>.
+    substitution : callable
+        The substitution used to convert <polynomial> as a callable lambda function.
+    periodM : list, optional
+        Either a 1x2 list for elliptic equations of motion, representing the period
+        matrices of a genus 1 Riemann surface, or a 2x4 mpmath matrix, representing the
+        period matrix of a genus 2 Riemann surface.
+    digits : int
+        The number of digits to be used in the computation.
+    datafile : string, optional
+        A file name to store information pertaining to the computation, such as the 
+        period matrix. This is optional, unlike solve_eom.
+        
+    Returns
+    -------
+    callable
+        The solution function for the differential equation.
+
+    """
+
     p = polynomial
     sym = Poly(p).gen
     deg_p = degree(polynomial, sym)
 
+    # Hyperelliptic (genus 2)
     if deg_p == 5:
         if (sympify(1/integrand).is_polynomial()):
             if degree(Poly(1/integrand, sym), sym) == 2 and (1/integrand).coeff(sym, 0) == 0 and (1/integrand).coeff(sym, 1) == 0:
@@ -36,6 +89,8 @@ def invert_eom(polynomial, zeros, integrand, initial_values, int_sign, substitut
                 raise ValueError("Equations of motions of hyperelliptic type and second kind are not supported.")
         else:
             raise ValueError("Equations of motions of hyperelliptic type and third kind can not be inverted.")
+
+    # Elliptic (genus 1)
     elif deg_p == 3:
         if (sympify(1/integrand)).is_polynomial(sym):
             if degree(Poly(1/integrand, sym), sym) == 0:
@@ -47,6 +102,8 @@ def invert_eom(polynomial, zeros, integrand, initial_values, int_sign, substitut
                 raise ValueError("Equations of motion elliptic type and second kind: tbd.")
         else:
             raise ValueError("Equations of motion of elliptic type and third kind cannot be inverted.")
+
+    # Trigonometric
     elif deg_p <= 2:
         if datafile == None:
             return invert_trigonometric_first(polynomial, initial_values, int_sign, integrand)
@@ -56,10 +113,43 @@ def invert_eom(polynomial, zeros, integrand, initial_values, int_sign, substitut
         raise ValueError(f"Polynomial {polynomial} is not of the standard form needed by invert_eom.")
 
 def integrate_eom(polynomial, zeros, substitution, integrand, datafile, digits):
+    """
+    Procedure for integrating equations of motion of trigonometric, elliptic, and 
+    hyperelliptic type for various spacetimes. Specifically 
+
+    The polynomial utilized is expected to be in standard form, converted by convert_polynomial.
+    Unless provided, the period matrices have to be computed.
+    
+    Parameters
+    ----------
+    polynomial : symbolic
+        A symbolic statement representing the polynomial in standard form.
+    zeros : list
+        A list of complex or real numbers representing the converted zeros of <polynomial>.
+    integrand : symbolic
+        The integrand in the equation above (different from invert_eom).
+    datafile : string
+        A file name (including the ending, i.e .npy, etc) containing information about the
+        computation, such as the period matrix. This is required for the integration.
+    digits : int
+        The number of decimal digits to be used in the computation.
+
+    Returns
+    -------
+    callable
+        The solution function for the integral.
+
+    Notes
+    -----
+    1. Fix partial fraction decomposition bug in genus 2 equations of motion.
+
+    """
+
     p = polynomial
     int_sym = list(integrand.free_symbols) #Poly((1 / integrand).simplify()).gen
     deg_p = degree(polynomial)
 
+    # Degree 2 or less
     if deg_p <= 2:
         s = Symbol("s")
         sol_nu, inits = load(open(f"{datafile}.pickle", "rb"))
@@ -67,11 +157,12 @@ def integrate_eom(polynomial, zeros, substitution, integrand, datafile, digits):
         integrand_subs = lambdify(s, integrand.subs(int_sym, sol_nu).simplify(), "mpmath")
         res_func = lambda s : quad(integrand_subs, [inits[0], s])
     else:
-
+        # Define symbols in the polynomial and integrand
         u = Symbol("u", positive = True)
         p_sym = Poly(p).gen
         int_sym = [i for i in int_sym if i not in [p_sym]][0]
         
+        # Degree 5
         if deg_p == 5:
         #    integrand = integrand.subs(int_sym, u).simplify()
             integrand = integrand.subs(int_sym, substitution).subs(p_sym, u).simplify()
@@ -80,6 +171,7 @@ def integrate_eom(polynomial, zeros, substitution, integrand, datafile, digits):
             #print(str(integrand))
             #integrand = sympify(str(integrand).replace("Abs", ""))
             #integrand = integrand.subs(list(integrand.free_symbols)[0], u)
+        # Degree 3
         else:
             integrand = integrand.subs(int_sym, u).simplify()
 
@@ -87,25 +179,30 @@ def integrate_eom(polynomial, zeros, substitution, integrand, datafile, digits):
         #f_parfrac = apart(integrand, full = True).evalf()
         #pprint(f_parfrac)
         
+        # Bronstein partial fraction decomposition
         f_parfrac = assemble_partfrac_list(apart_list(integrand)).doit()#.doit()
        # pprint(f_parfrac)
       #  pprint(together(f_parfrac).simplify())
         poly_fracs = []
         rat_fracs = []
         rat_fracs_final = []
-        
+       
+        # Separate rational and polynomial fractions
         for i in range(len(f_parfrac.args)):
             if sympify(f_parfrac.args[i]).is_polynomial(u):
                 poly_fracs.append(f_parfrac.args[i])
             else:
                 rat_fracs.append(f_parfrac.args[i])
-
+        
+        # Degree 5
         if deg_p == 5:
             for i in rat_fracs:
                 rat_fracs_final.append(i.subs(u, p_sym))
             for i in range(len(poly_fracs)):
                 poly_fracs[i] = poly_fracs[i].subs(u, p_sym)
+        # Degree 3
         else:
+            # Apply substitution to partial fractions
             for i in range(len(rat_fracs)):
                 rat = apart(rat_fracs[i].subs(u, substitution).simplify(), full = True).evalf()
                 for j in range(len(rat.args)):
@@ -114,6 +211,7 @@ def integrate_eom(polynomial, zeros, substitution, integrand, datafile, digits):
                     else:
                         rat_fracs_final.append(rat.args[j].simplify())
 
+            # Fix rational fractions
             for i in range(len(rat_fracs_final)):
                 top_frac, inv_frac = rat_fracs_final[i].as_numer_denom()
                 coeff = inv_frac.coeff(p_sym, 1)
@@ -153,6 +251,7 @@ def integrate_eom(polynomial, zeros, substitution, integrand, datafile, digits):
 
     """
 
+    # Solution procedures
     if deg_p == 5:
 
         def res_hyp(s):
@@ -164,6 +263,7 @@ def integrate_eom(polynomial, zeros, substitution, integrand, datafile, digits):
             res = []
 
             s = list(s)
+            # Separate polynomial fracs into 1st degree and 0 degree lists
             for i in range(len(poly_fracs)):
                 if degree(poly_fracs[i].as_poly(p_sym), p_sym) > 1:
                     raise ValueError("Equations of motion of hyperelliptic type and second kind are not supported")
@@ -175,6 +275,7 @@ def integrate_eom(polynomial, zeros, substitution, integrand, datafile, digits):
                     poly_second.append(poly_fracs[i].coeff(p_sym, 1))
                     poly_second_int.append(integrate_hyperelliptic_first(2, datafile))
 
+            # Compute integrations of rat fracs
             if len(rat_fracs_final) > 0:
                 periodMatrix, invert_data, eps = npload(f"{datafile}.npy", allow_pickle = True)
 
@@ -183,6 +284,8 @@ def integrate_eom(polynomial, zeros, substitution, integrand, datafile, digits):
                 integrations = [integrate_hyperelliptic_third(zeros, r1, r2, eta, i, datafile, digits)(s) for i in rat_fracs_final]
                # pprint(rat_fracs_final)
                 #pprint(rat_fracs_final[3].as_numer_denom()[0])
+
+                # Compute rat frac solutions
                 rat_res = [rat_fracs_final[0].as_numer_denom()[0] * integrations[0][i] for i in range(len(integrations[0]))]
                 for j in range(1, len(integrations)):
                     rat_res = [rat_res[i] + rat_fracs_final[j].as_numer_denom()[0] * integrations[j][i] for i in range(len(integrations[j]))]
@@ -193,6 +296,8 @@ def integrate_eom(polynomial, zeros, substitution, integrand, datafile, digits):
                 length = len(s)
             #print("")
           #  pprint(rat_res)
+
+            # Combine polynomial and rat frac solutions
             for i in range(length):
                 poly_res = 0
                 for j in range(len(poly_first)):
@@ -215,12 +320,16 @@ def integrate_eom(polynomial, zeros, substitution, integrand, datafile, digits):
 
     elif deg_p == 3:
         periods, g2, g3, int_init, inits = npload(f"{datafile}.npy", allow_pickle = True)
+        
+        # Solution function
         def res_elp(s):
             poly_first = []
             poly_second = []
             res = []
 
             s = list(s)
+
+            # Split poly fracs into degree 0 and degree 1 polynomials
             for i in range(len(poly_fracs)):
                 if degree(poly_fracs[i].as_poly(p_sym), p_sym) == 0:
                     poly_first.append(poly_fracs[i])
@@ -229,10 +338,12 @@ def integrate_eom(polynomial, zeros, substitution, integrand, datafile, digits):
 
             integrations = [integrate_elliptic_third(i, datafile)(s) for i in rat_fracs_final]
             rat_res = integrations[0]
-
+            
+            # Compute rational fracs
             for j in range(1, len(integrations)):
                 rat_res = [rat_res[i] + integrations[j][i] for i in range(len(s))]
 
+            # Combine poly and rat fracs
             for i in range(len(s)):
                 poly_res = 0
 
@@ -252,6 +363,8 @@ def integrate_eom(polynomial, zeros, substitution, integrand, datafile, digits):
 
         return lambda s : res_elp(s)
     elif deg_p <= 2:
+
+        # Solution function
         def trig_res(s):
             res = [res_func(i) for i in s]
 
@@ -262,8 +375,39 @@ def integrate_eom(polynomial, zeros, substitution, integrand, datafile, digits):
 
         return lambda s : trig_res(s)
 
+"""
+Functions with invert_<something> and integrate_<something> have the same inputs as invert_eom
+and integrate_eom respectively. 
+
+"""
 
 def invert_trigonometric_first(polynomial, initial_values, int_sign, constant, datafile = None):
+    """
+    Inverts an equation of motion of trigonometric type (<= 2nd degree polynomial).
+
+    Parameters
+    ----------
+    polynomial : symbolic
+        A symbolic statement representing the polynomial in standard form.
+    initial_values : list
+        The initial values converted by the same substitution used to convert <polynomial>.
+    int_sign : int
+        The sign of square root in the differential equation, either +1 or -1. The 
+        signs must have also been converted by the same substitution used to convert 
+        <polynomial>.
+    constant : real
+       The constant in front of the differential equation.
+    datafile : string, optional
+        A file name to store information pertaining to the computation, such as the 
+        initial values. This is optional, unlike solve_eom.
+
+    Returns
+    -------
+    callable
+        The solution function for the differential equation.
+
+    """
+
     p = polynomial
     sym = Poly(p).gen
     s = Symbol("s")
@@ -271,11 +415,14 @@ def invert_trigonometric_first(polynomial, initial_values, int_sign, constant, d
     coeff_2 = polynomial.coeff(sym, 2)
     coeff_0 = polynomial.coeff(sym, 0)
 
+    # Invert differential equation
     root = spsqrt(-coeff_2/coeff_0)
     init_const = spasin(initial_values[1] * root)
     inverse = 1 / root * spsin(int_sign * spsqrt(-coeff_2) * constant * (s - initial_values[0] + init_const))
 
     sol_func = lambdify(s, inverse, "mpmath")
+
+    # Save inverse polynomial and initial values to <datafile>
     if datafile != None:
         with open(f"{datafile}.pickle", "wb") as output_file:
             dump([inverse, initial_values], output_file)
@@ -283,90 +430,180 @@ def invert_trigonometric_first(polynomial, initial_values, int_sign, constant, d
     return sol_func
 
 def invert_elliptic_first(polynomial, initial_values, int_sign, constant, substitution, periodM = None, datafile = None):
+    """
+    Inverts an equation of motion of elliptic type and first kind.
+
+    Parameters
+    ----------
+    polynomial : symbolic
+        A symbolic statement representing the polynomial in standard form.
+    initial_values : list
+        The initial values converted by the same substitution used to convert <polynomial>.
+    int_sign : int
+        The sign of square root in the differential equation, either +1 or -1. The 
+        signs must have also been converted by the same substitution used to convert 
+        <polynomial>.
+    substitution : callable
+        A lambda function that computes the substitution that casted <polynomial> into
+        standard form.
+    constant : real
+       The constant in front of the differential equation.
+    periodM : matrix, optional
+        A 1x2 list representing the period matricex of a genus 1 Riemann surface.
+    datafile : string, optional
+        A file name to store information pertaining to the computation, such as the 
+        initial values. This is optional, unlike solve_eom.
+
+    Returns
+    -------
+    callable
+        The solution function for the differential equation.
+
+    """
+
     p = polynomial
     sym = Poly(p).gen
     g2 = - p.coeff(sym, 1)
     g3 = - p.coeff(sym, 0)
 
+    # Compute periods if necessairy
     if periodM == None:
         periodMatrix = periods_firstkind(g2, g3)
     else:
         periodMatrix = periodM
     print("periodMatrix = ", periodMatrix)
 
+    # Compute initial values
     if type(initial_values[1]) == oo:
         int_initial = 0
     else:
         int_initial = int_sign * inverse_weierstrass_P(initial_values[1], periodMatrix[0], periodMatrix[1])
-
+        
+        # Correct initial direction if necessairy
         if sign(weierstrass_P(initial_values[0] - int_initial, periodMatrix[0], periodMatrix[1], 1)) != int_sign:
             int_initial *= -1
 
+    # Save to datafile
     if datafile != None:
         integrate_initial = int_initial
         initials = initial_values
         data = array([periodMatrix, g2, g3, integrate_initial, initials], dtype = object)
         save(datafile, data)
         print(f"In invert_elliptic_first: periodMatrix saved to, {datafile}.npy")
+
     return lambda s : substitution(re(weierstrass_P(sqrt(constant) * s - initial_values[0] - int_initial, periodMatrix[0], periodMatrix[1])))
 
 def invert_hyperelliptic_first(zeros, physical_comp, initial_values, int_sign, constant, substitution, digits, periodM = None, datafile = None):
+    """
+    Inverts an equation of motion of hyperelliptic type and first kind. The majority
+    of the computation is performed by <orbitdata>.
+    
+    Parameters
+    ----------
+    polynomial : symbolic
+        A symbolic statement representing the polynomial in standard form.
+    zeros : list
+        A list of complex or real numbers representing the converted zeros of <polynomial>.
+    physical_comp : int
+        An integer, either 1 or 0, representing the component of the theta divisor which
+        corresponds to physical values (i.e. to the component of the vector of holomorphic
+        differentials dz = [1/sqrt(P(z), z/sqrt(P(z))], where P(z) = <polynomial>).
+    initial_values : list
+        The initial values converted by the same substitution used to convert <polynomial>.
+    int_sign : int
+        The sign of square root in the differential equation, either +1 or -1. The 
+        signs must have also been converted by the same substitution used to convert 
+        <polynomial>. NOTE: this has yet to be implemented for hyperelliptic differential
+        equations (i.e. this function).
+    substitution : callable
+        The substitution used to convert <polynomial> as a callable lambda function.
+    periodM : list, optional
+        A 2x4 mpmath matrix, representing the period matrix of a genus 2 Riemann surface.
+        If not provided, it will be computed.
+    digits : int
+        The number of digits to be used in the computation.
+    datafile : string, optional
+        A file name to store information pertaining to the computation, such as the 
+        period matrix. This is optional, unlike solve_eom.
+        
+    Returns
+    -------
+    callable
+        The solution function for the differential equation.
+
+    """
+
     global periods_inverse, riemannM 
     realNS, complexNS = separate_zeros(zeros)
 
+    # Compute periods if necessairy
     if periodM == None:
         print("Computing periods ...")
         periodMatrix = periods(realNS, complexNS, digits)
     else:
         periodMatrix = periodM
-
-    periods_inverse, riemannM = set_period_globals_genus2(periodMatrix)
-
     print("periodMatrix = ", periodMatrix)
     
     omega1 = periodMatrix[0:2, 0:2]
     omega2 = periodMatrix[0:2, 2:4]
-    
+
+    # Define the inverse of the first period matrix and the Riemann matrix tau
+    periods_inverse, riemannM = set_period_globals_genus2(periodMatrix)
+
+    # Compute Legendre relation
     m = omega2 * omega1.T - omega1 * omega2.T
     print("Legendre relation = ", m)
 
+    # Check accuracy
     if fabs(m[0, 1]) > 10**(-digits):
         eps = fabs(m[0, 1]) * 10
         print(f"WARNING in invert_hyperelliptic_first: accuracy reduced to {eps} due to Legendre relation.")
     else:
         eps = 10**(-digits + 1)
 
+    # Compute inital value for Newton method and integration constant
     if physical_comp == 1:
         print("WARNING in invert_hyperelliptic_first: case that physical component is the first has to be tested")
 
         if type(initial_values[1]) == oo:
             initNewton = 0; modified_init = spsqrt(constant) * initial_values[0]
+        # Initial value in real zeros
         elif inlist(initial_values[1], realNS) >= 0:
             initNewton = -eval_period(inlist(initial_values[1], realNS), oo, realNS, zeros, periodMatrix, 1)
             modified_init = spsqrt(constant) * initial_values[0] + eval_period(inlist(initial_values[1], realNS), oo, realNS, zeros, periodMatrix, 0)
         else:
             k = inlist(initial_values[1], sorted(realNS + [initial_values[1]], key = lambda x : re(x)))
+            
+            # Correct index since the size of <realNS> was changed above when computing <k>
             if k == len(realNS):
                 k = len(realNS) - 1
+
             h = int_genus2_first(zeros, initial_values[1], realNS[k], digits, periodMatrix)
             initNewton = -eval_period(k, oo, realNS, zeros, periodMatrix, 0) - h[1]
             modified_init = spsqrt(constant) * initial_values[0] + eval_period(k, oo, realNS, zeros, periodMatrix, 1) + h[0]
     else:
         if type(initial_values[1]) == oo:
             initNewton = 0; modified_init = spsqrt(constant) * initial_values[0]
+        # Initial value in real zeros
         elif inlist(initial_values[1], realNS) >= 0:
             initNewton = -eval_period(inlist(initial_values[1], realNS), oo, realNS, zeros, periodMatrix, 0)
             modified_init = spsqrt(constant) * initial_values[0] + eval_period(inlist(initial_values[1], realNS), oo, realNS, zeros, periodMatrix, 1)
         else:
             k = inlist(initial_values[1], sorted(realNS + [initial_values[1]], key = lambda x : re(x)))
+            
+            # Correct index since the size of <realNS> was changed above when computing <k>
             if k == len(realNS):
                 k = len(realNS) - 1
+
             h = int_genus2_first(zeros, initial_values[1], realNS[k], digits, periodMatrix)
             initNewton = -eval_period(k, oo, realNS, zeros, periodMatrix, 0) - h[0]
             modified_init = spsqrt(constant) * initial_values[0] + eval_period(k, oo, realNS, zeros, periodMatrix, 1) + h[1]
+   
     print("Check initial value for Newton method ...")
     max = check_initNewton(physical_comp, initNewton, [spsqrt(constant) * initial_values[0], initial_values[1]], modified_init, eps)
-    
+   
+    # If <datafile> is provided, store initial values, period matrix, and accurary in <datafile>
+    # Otherwise just compute solution
     if datafile != None:
         initials_mod = [spsqrt(constant) * i for i in initial_values]
         if physical_comp == 1:
@@ -375,12 +612,33 @@ def invert_hyperelliptic_first(zeros, physical_comp, initial_values, int_sign, c
             invert_data = [initials_mod, [-initNewton, modified_init - spsqrt(constant) * initial_values[0]], max]
         save(datafile, array([periodMatrix.tolist(), invert_data, eps], dtype = object))
         print(f"In invert_hyperelliptic_first: period matrix saved to, {datafile}.npy")
+        
         sol = lambda affine_list : orbitdata(initial_values, modified_init, [spsqrt(constant) * i for i in affine_list], substitution, initNewton, eps, max, physical_comp, datafile)
     else:
         sol = lambda affine_list : orbitdata(initial_values, modified_init, [spsqrt(constant) * i for i in affine_list], substitution, initNewton, eps, max, physical_comp)
     return sol
 
 def integrate_hyperelliptic_first(component, datafile):
+    """
+    Procedure for inverting equations of motion of trigonometric, elliptic, and 
+    hyperelliptic type for various spacetimes. Specifically 
+    
+    Parameters
+    ----------
+    physical_comp : int
+        An integer, either 1 or 0, representing the component of the theta divisor which
+        corresponds to physical values (i.e. to the component of the vector of holomorphic
+        differentials dz = [1/sqrt(P(z), z/sqrt(P(z))], where P(z) = <polynomial>).
+    datafile : string
+        The file
+        
+    Returns
+    -------
+    result : list
+        The result of the integration.
+
+    """
+
     extended_orbitdata = npload(datafile + "_orbitdata.npy", allow_pickle = True)
     invert_data = npload(datafile + ".npy", allow_pickle = True)
     
@@ -529,6 +787,8 @@ def orbitdata(initial_values, modified_init, affine_list, substitution, initNewt
     return subs_coord
  
 def sigma_ln_numerical(x, y, omega1, omega3):
+
+
     value = chop(log(weierstrass_sigma(x-y, omega1, omega3) / weierstrass_sigma(x+y, omega1, omega3)))
 
     if im(value) != 0:
@@ -537,6 +797,8 @@ def sigma_ln_numerical(x, y, omega1, omega3):
     return value
 
 def sigma_ln(x, y, omega1, omega3):
+
+
 
     result = []
     eta = periods_secondkind(omega1, omega3)[0]
