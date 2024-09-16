@@ -1,34 +1,121 @@
+#!/usr/bin/env python
+"""
+Computations for computing the coefficents of an ellipse within the Sampson Distance that
+fits a set of data.
+
+"""
+
 from mpmath import matrix, fabs, norm, eye, ones, zeros, sqrt
+
 from .levenberg_marquardt import levenbergMarquardtStep 
 from .line_search_step import lineSearchStep
 
 class EllipseData:
-  def __init__(self, use_pseudoinverse, theta_updated, lbd, k, damping_multiplier, gamma, numberOfPoints, f, I, alpha, data_points, tolDelta, tolCost, tolTheta,
+    """
+    A data structure that contains all information used throughout the iteration process. 
+
+    Parameters
+    ----------
+    use_pseudoinverse : bool
+        Determines whether LineSearchStep or LevenbergMarquadtStep or used (True = LineSearchStep, 
+        False = LevenbergMarquadtStep).
+    theta_updated : bool
+        Determines if theta was updated (True for yes, False for no) since in some cases a 
+        LevenbergMarquardtStep does not decrease the cost function.
+    lbd : float
+        Damping parameter in LevenbergMarquadtStep.
+    k : int
+        loop counter index.
+    damping_multiplier : float
+        Used to modify the tradeoff between gradient descent and hessian based descent in 
+        LevenbergMarquadtStep.
+    gamma : float
+        Used in LineSearchStep.
+    numberOfPoints : int
+        The number of data points.
+    f : matrix
+        A barrier term that forces the parameters to stay in the elliptic region.
+    I : matrix
+        A barrier term that forces the parameters to stay in the elliptic region.
+    alpha : float
+        Homotopy parameter that weighs contribution of barrier term.
+    data_points : matrix 
+        The data points that are going to be fitted to the ellipse.
+    tolDelta : float
+        The step-size tolerance.
+    tolCost : float
+        The cost tolerance.
+    tolTheta : float
+        The coefficients tolerance.
+    cost : list
+        The list containing the cost of each iteration.
+    t : matrix
+        The current coefficients estimate.
+    delta : matrix 
+        A 6xK mpmath matrix (where K is the max number of iterations) that stores the 
+        parameter direction of each iteration.
+    r : matrix
+        An N+1x1 mpmath matrix representing the residuals of each step (+1 to store the barrier
+        term).
+    jacobian_matrix : matrix 
+        An Nx6 mpmath matrix representing the jacobian matrix for each iteration.
+    jacobian_matrix_barrier : matrix
+        A 1x6 mpmath matrix representing the jacobian matrix for the barrier term.
+    jacobian_matrix_full : matrix
+        A combination of <jacobian_matrix> and <jacobian_matrix_barrier>.
+    hessian : matrix
+        The hessian matrix.
+    """
+
+    def __init__(self, use_pseudoinverse, theta_updated, lbd, k, damping_multiplier, gamma, numberOfPoints, f, I, alpha, data_points, tolDelta, tolCost, tolTheta,
                cost, t, delta, r, jacobian_matrix, jacobian_matrix_barrier, jacobian_matrix_full, hessian):
-    self.use_pseudoinverse = use_pseudoinverse
-    self.theta_updated = theta_updated
-    self.lbd = lbd
-    self.k = k
-    self.damping_multiplier = damping_multiplier
-    self.gamma = gamma
-    self.numberOfPoints = numberOfPoints
-    self.f = f
-    self.I = I
-    self.alpha = alpha
-    self.data_points = data_points
-    self.tolDelta = tolDelta
-    self.tolCost = tolCost
-    self.tolTheta = tolTheta
-    self.cost = cost
-    self.t = t
-    self.delta = delta
-    self.r = r
-    self.jacobian_matrix = jacobian_matrix
-    self.jacobian_matrix_barrier = jacobian_matrix_barrier
-    self.jacobian_matrix_full = jacobian_matrix_full
-    self.hessian = hessian
+        self.use_pseudoinverse = use_pseudoinverse
+        self.theta_updated = theta_updated
+        self.lbd = lbd
+        self.k = k
+        self.damping_multiplier = damping_multiplier
+        self.gamma = gamma
+        self.numberOfPoints = numberOfPoints
+        self.f = f
+        self.I = I
+        self.alpha = alpha
+        self.data_points = data_points
+        self.tolDelta = tolDelta
+        self.tolCost = tolCost
+        self.tolTheta = tolTheta
+        self.cost = cost
+        self.t = t
+        self.delta = delta
+        self.r = r
+        self.jacobian_matrix = jacobian_matrix
+        self.jacobian_matrix_barrier = jacobian_matrix_barrier
+        self.jacobian_matrix_full = jacobian_matrix_full
+        self.hessian = hessian
 
 def guaranteedEllipseFit(t, data_points):
+    """
+    Compute the coefficients of a general ellipse within the Sampson Distance that fits
+    a set of ellipse data (i.e. Ax**2 + Bxy + Cy**2 + Dx + Ey + F = 0, provided that 
+    B**2 - 4ac < 0). 
+
+    Parameters
+    ----------
+    t : matrix
+        A 1x6 mpmath matrix containing initial estimates of the coefficients.
+    data_points : matrix
+         A 3xN mpmath matrix, where the first row represents the x coordinates of the data
+         points, the second represents the y coordinates of the data points, and the third
+         is a list of one's generated by the coordinate transformation in <ellipse_estiamtes>.
+
+    Returns
+    -------
+    result : matrix
+        A 1x6 matrix representing the coefficients of the ellipse [A, B, C, D, E, F] that
+        fits the data points within the Sampson Distance.
+
+    """
+
+    # Initialize data structure and initial values
     keep_going = True
     fprim = matrix([[0, 0, 2], [0, -1, 0], [2, 0, 0]])
     maxIter = 200
@@ -42,6 +129,7 @@ def guaranteedEllipseFit(t, data_points):
     elp_data.t[3:6, elp_data.k] = t[1, :].T
     elp_data.delta[:, elp_data.k] = ones(6, 1)
 
+    # Main estimation loop
     while keep_going and elp_data.k < maxIter:
         # allocate space for residuals (+1 to store barrier term) 
         elp_data.r = zeros(elp_data.numberOfPoints + 1, 1)
@@ -51,62 +139,79 @@ def guaranteedEllipseFit(t, data_points):
         elp_data.jacobian_matrix_barrier = zeros(1, 6)
         # grab the current parameter estimates
         t = elp_data.t[:, elp_data.k]
+        
         # residuals computed on data points
-
         for i in range(elp_data.numberOfPoints):
             m = data_points[:, i]
+            # Transformed data point
             ux_j = matrix([[m[0]**2, m[0] * m[1], m[1]**2, m[0], m[1], 1]]).T
+
+            # Derivative of transformed data point
             dux_j = matrix([[2 * m[0], m[1], 0, 1, 0, 0], [0, m[0], 2 * m[1], 0, 1, 0]]).T
 
+            # Outer product
             a = ux_j * ux_j.T
+
+            # Use identity covs
             b = dux_j * dux_j.T
            
             tBt = (t.T * b * t)[0, 0]
             tAt = (t.T * a * t)[0, 0]
+
+            # AML cost for i'th data point
             elp_data.r[i] = sqrt(tAt / tBt)
 
+            # Derivative AML component
             M = (a / tBt)
             xbits = b * (tAt / tBt**2)
             x = M - xbits
            
-            # gradient for AML cost function 
+            # Gradient for AML cost function 
             grad = x*t / sqrt(tAt/tBt)
-            # build up jacobian matrix
+            # Build up jacobian matrix
             elp_data.jacobian_matrix[i, :] = grad.T
-       
+      
+        # Barrier term
         tIt = (t.T * elp_data.I * t)[0]
         tFt = (t.T * elp_data.f * t)[0]
 
+        # Add the penalty term 
         elp_data.r[elp_data.numberOfPoints] = elp_data.alpha * (tIt / tFt)
+
+        # Derivative barrier component
         N = elp_data.I / tFt
         ybits = elp_data.f * (tIt) / (tFt)**2
         y = N - ybits
-        # gradient for AML cost function 
         grad_penalty = 2 * elp_data.alpha * y * t
-        # build up jacobian matrix
         elp_data.jacobian_matrix_barrier[0, :] = grad_penalty.T
        
+        # Jacobian matrix after combining AML and barrier terms
         elp_data.jacobian_matrix_full[0:elp_data.numberOfPoints, :] = elp_data.jacobian_matrix 
         elp_data.jacobian_matrix_full[elp_data.numberOfPoints, :] = elp_data.jacobian_matrix_barrier
 
+        # Approximate Hessian matrix
         elp_data.hessian = elp_data.jacobian_matrix_full.T * elp_data.jacobian_matrix_full
+        
+        # Sum of squares cost for the current iteration
         elp_data.cost[elp_data.k] = (elp_data.r.T * elp_data.r)[0]
 
+        # If the barrier term hasn't been overshot, then use LevenbergMarquadt
         if not elp_data.use_pseudoinverse:
             elp_data = levenbergMarquardtStep(elp_data)
         else:
             elp_data = lineSearchStep(elp_data)
-       
+      
+        # Check if the latest update overshot the barrier term
         if (elp_data.t[:, elp_data.k + 1].T * elp_data.f * elp_data.t[:, elp_data.k + 1])[0, 0] <= 0:
-            # from now onwards we will only use lineSearchStep to ensure
-            # that we do not overshoot the barrier 
+            # From now onwards we will only use lineSearchStep to ensure
+            # That we do not overshoot the barrier 
             elp_data.use_pseudoinverse = True
             elp_data.lbd = 0
             elp_data.t[:, elp_data.k + 1] = elp_data.t[:, elp_data.k]
 
             if (elp_data.k > 0):
                 elp_data.t[:, elp_data.k] = elp_data.t[:, elp_data.k - 1]
-
+        # Check for various stopping criteria to end the main loop
         elif (min(norm(elp_data.t[:, elp_data.k + 1] - elp_data.t[:, elp_data.k]), norm(elp_data.t[:, elp_data.k + 1] + elp_data.t[:, elp_data.k])) 
                 < elp_data.tolTheta and elp_data.theta_updated):
             keep_going = False
@@ -121,4 +226,3 @@ def guaranteedEllipseFit(t, data_points):
     theta = theta / norm(theta)
 
     return theta
-
