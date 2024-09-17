@@ -1,3 +1,14 @@
+#!/usr/bin/env python
+"""
+Procedures for computing the periods of the first kind for a genus 2 Riemann surface.
+
+This is done by integrating the vector of canonical holomorphic differentials along the
+contours that connect the branch cuts and the contours that encircle the branch cuts.
+
+NOTE: fix some things here like the precision and documentation.
+
+"""
+
 from mpmath import quad, matrix, fabs, eig, exp, pi, mpc
 from sympy import re, im, Symbol, collect, lambdify, oo, sqrt
 
@@ -5,6 +16,33 @@ from ...utilities import inlist, separate_zeros
 from ..integrations.integrate_hyperelliptic import myint_genus2, int_genus2_complex
 
 def periods(realNS, complexNS, digits):
+    """
+    Computes the periods of the first kind for a genus 2 Riemann surface.
+
+    This is done by integrating the vector of canonical holomorphic differentials along the
+    contours that connect the branch cuts and the contours that encircle the branch cuts.
+
+    Parameters
+    ----------
+    realNS : list
+        A list of real numbers, the real roots of the polynomial defining the Riemann
+        surface.
+    complexNS : list
+        A list of complex numbers, the complex roots of the polynomial defining the Riemann 
+        surface.
+    digits : int
+        The number of digits to be used in the computation.
+
+    Returns
+    -------
+    matrix
+        A 2x4 matrix: the first 2x2 matrix represents the period matrix corresponding to the
+        integrations along the contours encircling the branch cuts. The second 2x2 matrix
+        represents the period matrix corresponding to the integrations along the countours
+        connecting the branch cuts.
+
+    """
+
     realNS = sorted(realNS)
 
     if len(complexNS) == 0:
