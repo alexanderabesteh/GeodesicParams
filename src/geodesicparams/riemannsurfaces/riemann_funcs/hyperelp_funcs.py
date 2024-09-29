@@ -81,7 +81,7 @@ def kleinian_P(z, riemannM, derivatives = []):
 def hyp_theta_genus2(z, tau, char, precision = 53):
     
 
-    LOW_PRECISION = 3000  # Example value for low precision threshold
+    LOW_PRECISION = 3000
 
     # Determine initial precision
     mp.prec = precision
@@ -141,11 +141,10 @@ def hyp_theta_genus2(z, tau, char, precision = 53):
             mp.matrix([[tau[0][0], tau[0][1]], [tau[1][0], tau[1][1]]]), 
             lambda_iwant, det_iwant
         )
-    # Apply AGMPrime to unstick the thetas
+    # Apply agm_prime to unstick the thetas
     theta00z = agm_prime(a, b, z, mp.matrix(tau))[0]
     
     a = [mp.sqrt(a[i] / theta00z) * sign_theta(2, z, mp.matrix(tau)) for i in range(4)]
-   # b = [mp.sqrt(b[i] / theta000) * sign_theta(2, zerolow, tau) for i in range(4)]
 
     z = mp.matrix(z)
     tau = mp.matrix(tau)
@@ -156,6 +155,7 @@ def hyp_theta_genus2(z, tau, char, precision = 53):
     return result
 
 def hyp_theta_RR(xR, xI, wR, wI, l, riemannM, minMax = 5):
+
 
     g = [1/2, 1/2]
     h = [0, 1/2]
@@ -187,6 +187,7 @@ def hyp_theta_RR(xR, xI, wR, wI, l, riemannM, minMax = 5):
  
 def hyp_theta_IR(xR, xI, wR, wI, l, riemannM, minMax = 5):
 
+
     g = [1/2, 1/2]; h = [0, 1/2]
     result = 0
     varR = [xR, wR]
@@ -216,6 +217,7 @@ def hyp_theta_IR(xR, xI, wR, wI, l, riemannM, minMax = 5):
 
 def sigma1(z, riemannM, minMax = 5):
 
+
     g = [1/2, 1/2]
     h = [0, 1/2]
     result = 0
@@ -236,6 +238,7 @@ def sigma1(z, riemannM, minMax = 5):
     return result
 
 def sigma2(z, riemannM, minMax = 5):
+
 
     g = [1/2, 1/2]
     h = [0, 1/2]

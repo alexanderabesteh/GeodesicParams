@@ -8,13 +8,10 @@ from mpmath import mp
 from numpy import matrix, kron, array
 
 def naive_theta_genus2(z, tau, precision = 53):
-    mp.prec = precision  # Set precision
+    mp.prec = precision
    
     # Assume 2 Im(tau_3) <= Im(tau_1) <= Im(tau_2) (Minkowski-reduced)
-    # Compute B
     B = 2 * precision * mp.log(10) / mp.pi + 3
-    # Get the precision right to counter rounding error
-    # In genus 1 this was precision + 7*log(B), let's do precision + 20*log(B), just in case
 
     q1 = mp.exp(mp.j * mp.pi * tau[0, 0])
     q1sq = q1 ** 2
@@ -28,12 +25,10 @@ def naive_theta_genus2(z, tau, precision = 53):
     w2 = mp.exp(mp.j * mp.pi * z[1])
     w2sq = w2 ** 2
 
-    # 4 theta-constants with a=0
     result = mp.mpc(1)
 
     # n=0
-    q1m2 = q1
-    q12mminus2 = q1sq  # At the beginning of the loop, it contains 2(m+1)-2
+    q12mminus2 = q1sq
     r1 = w1sq + 1 / w1sq
     r1m = q1 * r1
     r1mminus1 = 2
@@ -41,28 +36,21 @@ def naive_theta_genus2(z, tau, precision = 53):
 
     for m in range(1, when_to_stop + 1):
         result += r1m
-        q12mminus2timesq1 = q12mminus2 * q1  # Mini-optimization
+        q12mminus2timesq1 = q12mminus2 * q1
         bubu = r1m
         r1m = r1 * r1m * q12mminus2timesq1 - r1mminus1 * (q12mminus2 ** 2)
         r1mminus1 = bubu
-        # Theta constants
-        term = 2 * q1m2
-        q1m2 *= q12mminus2timesq1
         q12mminus2 *= q1sq
 
     # m,n >=1
-    v1 = q3sq + 1 / q3sq
-    vnminus1 = 2
-    vn = v1
     q2to2nminus2 = 1
-    q2n2 = q2
     q3to2n = q3sq
     s1 = w2sq + 1 / w2sq
     w1w2sq = w1sq * w2sq
     w1invw2sq = w2sq / w1sq
     q2s1 = q2 * s1
     q1r1 = q1 * r1
-    q1q2 = q1 * q2  # Small optimisations
+    q1q2 = q1 * q2
     betas = [[q1r1, q1q2 * q3sq * (w1w2sq + 1 / w1w2sq)], [mp.mpc(2), q2s1]]
     betaprimes = [[q1r1, (q1q2 / q3sq) * (w1invw2sq + 1 / w1invw2sq)], [mp.mpc(2), q2s1]]
 
@@ -75,11 +63,11 @@ def naive_theta_genus2(z, tau, precision = 53):
             when_to_stop = 0
         when_to_stop = mp.ceil(mp.sqrt(when_to_stop / mp.im(tau[0, 0]))) + 3
 
-        q1to2mminus2 = q1sq  # This squared gives q^(4m-4)
-        alphamminus1 = 2 * q2n2
-        alpham = q1 * q2n2 * vn
-
-        term = betas[1][1]  # Not betas+betaprimes (since m=0 we only add the term once)
+        # This squared gives q**(4m-4)
+        q1to2mminus2 = q1sq
+ 
+        # Not betas + betaprimes (since m = 0 we only add the term once)
+        term = betas[1][1]
         result += term
 
         alphazm = betas[0][1]
@@ -88,10 +76,6 @@ def naive_theta_genus2(z, tau, precision = 53):
         alphaprimezmminus1 = betaprimes[1][1]
 
         for m in range(1, int(when_to_stop) + 1):
-            term = 2 * alpham
-            bubu = alpham
-            alpham = vn * (q1to2mminus2 * q1) * alpham - (q1to2mminus2 ** 2) * alphamminus1
-            alphamminus1 = bubu
 
             term = alphazm + alphaprimezm
             result += term
@@ -106,11 +90,7 @@ def naive_theta_genus2(z, tau, precision = 53):
 
             q1to2mminus2 *= q1sq
 
-        bubu = vn
-        vn = vn * v1 - vnminus1
-        vnminus1 = bubu
         q2to2nminus2 *= q2sq
-        q2n2 *= q2to2nminus2 * q2
 
         s1Xq2to2nminus2Xq2 = s1 * q2to2nminus2 * q2
         bubu = [betas[0][1], betas[1][1]]
@@ -129,6 +109,8 @@ def naive_theta_genus2(z, tau, precision = 53):
     return result
 
 def theta_char(z, tau, char, precision = 53):
+
+
     mp.prec = precision
 
     z = mp.matrix(z)
@@ -155,6 +137,8 @@ def theta_genus2(n, z, t, precision = 53):
     return theta_char(z, t, char, precision)
 
 def sign_theta(n, z, t):
+
+
     prec = mp.prec
     mp.dps = 20
 
@@ -172,6 +156,8 @@ def sign_theta(n, z, t):
         return 1
 
 def hadamard_matrix(fi, n):
+
+
     # Define the base 2x2 Hadamard matrix
     prec = mp.prec
     mp.prec = mp.re(fi).bc
@@ -180,14 +166,15 @@ def hadamard_matrix(fi, n):
     
     # Initialize the result as the base matrix
     res = m
-    # Compute the n-th order Hadamard matrix using tensor product
+    # Compute the n-th order Hadamard matrix using kronecker product
     for i in range(2, n + 1):
         res = kron(res, m)
 
     return res
 
 def f(a, b, z, t):
-    #n = a.shape[0]
+
+
     n = len(a)
 
     # Extract with the right sign
@@ -204,12 +191,12 @@ def f(a, b, z, t):
 
     result_mults = mp.matrix(hadam)**-1 * mp.matrix(mults) / 4
     result_squares = mp.matrix(hadam)**-1 * mp.matrix(squares) / 4
-   # print(f"mults = {mp.nstr(mults, 5)}")
-    #mp.nprint(mults, 5)
 
     return result_mults, result_squares
 
 def f_infinity(a, b, z, t):
+
+
     p = mp.prec
     myt = t
     r = a
@@ -235,15 +222,19 @@ def Pow2PowN(x, n):
     return r
 
 def agm_prime(a, b, z, t):
+
+
+
     R = f_infinity(a, b, z, t)
     mu = R[-1][1][0]  # R[-1] is the last [r,s]; R[-1][1] is the second element (s)
     qu = R[-1][0][0] / R[-1][1][0]
-    #print(f"mu = {mp.nstr(mu, 5)}")
-    #print(f"qu = {mp.nstr(qu, 5)}")
     lambda_ = Pow2PowN(qu, len(R) - 1) * R[-1][1][0]
     return lambda_, mu
 
 def all_duplication(a, b):
+
+
+
     # Given theta_{0,b}(z,t) and theta_{0,b}(0,t) compute theta_{a,b}(z,t)
     # Explicit formulas for genus 2 are found in Cosset
     
@@ -267,17 +258,17 @@ def all_duplication(a, b):
     return thetaProducts
 
 def to_inverse(a, b, z, t):
+
+
     # Given theta_i/theta_0 (z and 0), compute lambda1, lambda2, lambda3, mu1, mu2, mu3
-    # ya ya, it's weird to have a function which goal is to compute z and tau but you give it z and tau (for the signs) in the args
-    p = mp.re(a[0]).bc
     n = len(a)
 
-    # First step: compute 1/theta00(z)^2, 1/theta00(0)^2
+    # First step: compute 1/theta00(z)**2, 1/theta00(0)**2
     theta00z, theta000 = agm_prime(a, b, z, t)
     theta00z = 1 / theta00z
     theta000 = 1 / theta000
 
-    # then compute the other ones
+    # Then compute the other ones
     thetaZwithAequals0 = [a[i] * theta00z for i in range(4)]
     theta0withAequals0 = [b[i] * theta000 for i in range(4)]
 
@@ -287,7 +278,7 @@ def to_inverse(a, b, z, t):
     sixteenThetas = all_duplication(rootA, rootB)
     sixteenThetaConstants = all_duplication(rootB, rootB)
 
-    # then give it to borchardt
+    # Then give it to the Borchardt mean
     tt = 2 * t
     jm1 = mp.matrix([[-1 - 1 / tt[0, 0], -tt[0, 1] / tt[0, 0]],
                      [-tt[0, 1] / tt[0, 0], tt[1, 1] - tt[0, 1] ** 2 / tt[0, 0]]])
@@ -298,9 +289,8 @@ def to_inverse(a, b, z, t):
                      [(tt[0, 0] * tt[1, 1] - tt[0, 1] ** 2 - tt[0, 1]) / detdetdet, tt[1, 1] / detdetdet]])
     zz1 = mp.matrix([[z[0, 0] / tt[0, 0]], [z[0, 0] * tt[0, 1] / tt[0, 0] - z[1, 0]]])
     zz2 = mp.matrix([[z[1, 0] * tt[0, 1] / tt[1, 1] - z[0, 0]], [z[1, 0] / tt[1, 1]]])
-    zz3 = mp.zeros(2, 1)  # we don't care about z in the third case!
+    zz3 = mp.zeros(2, 1)
 
-    # CAREFUL in Dupont's Phd he confuses M1 and M2 page 151 (tables switched) and page 197 
     lambda1, mu1 = agm_prime(mp.matrix([[mp.mpf(1)], [sixteenThetas[9] / sixteenThetas[8]], 
                                        [sixteenThetas[0] / sixteenThetas[8]], [sixteenThetas[1] / sixteenThetas[8]]]),
                             mp.matrix([[mp.mpf(1)], [sixteenThetaConstants[9] / sixteenThetaConstants[8]], 
@@ -319,36 +309,28 @@ def to_inverse(a, b, z, t):
                                        [sixteenThetaConstants[4] / sixteenThetaConstants[0]], 
                                        [sixteenThetaConstants[12] / sixteenThetaConstants[0]]]), zz3, jm3)
 
-    # then extract the stuff
+    # Then extract the variables
     computedtau1 = mp.j / (mu1 * sixteenThetaConstants[8])
     computedtau2 = mp.j / (mu2 * sixteenThetaConstants[4])
     computedtau3 = 1 / (mu3 * sixteenThetaConstants[0])
-    # computedtau3 := Sqrt(computedtau3 + computedtau1*computedtau2);  // imaginary part positive (cause reduction)
-    # because we used duplication formulas 
+    
+    # Because we used duplication formulas 
     computedtau1 /= 2
     computedtau2 /= 2
     computedtau3 /= 4
     
-   # print(f"lambda3 = {mp.nstr(lambda3, 5)}")
-   # print(f"theta = {mp.nstr(sixteenThetas[12], 5)}") 
-    #print(f"tau1 = {mp.nstr(computedtau1, 5)}")
-    #print(f"tau2 = {mp.nstr(computedtau2, 5)}")
-    #print(f"tau3 = {mp.nstr(computedtau3, 5)}")
-
     # Newton on lambda to avoid computing logs
     computedz1 = lambda1 * (-mp.j * 2 * computedtau1 * sixteenThetas[8])
     computedz2 = lambda2 * (-mp.j * 2 * computedtau2 * sixteenThetas[4])
-    #print(f"z1 = {mp.nstr(computedz1, 5)}")
-   # print(f"z2 = {mp.nstr(computedz2, 5)}")
         
     det2tau = 1 / (-mu3 * sixteenThetaConstants[0])  # don't forget we're still working with 2tau at this point
     thirdformula = lambda3 * det2tau * sixteenThetas[0]  # 2 x 2truc/4det(tau) = i pi
-  #  print(f"det = {mp.nstr(det2tau, 5)}")
-   # print(f"third = {mp.nstr(thirdformula, 5)}")
 
     return [1 / computedz1, 1 / computedz2, 1 / thirdformula, computedtau1, computedtau2, computedtau3]
 
 def diff_finies_one_step(a, b, z, t, lambda_iwant, det_iwant):
+
+
     # Set the precision
     prec = mp.prec
     mp.prec = 2 * prec
@@ -356,14 +338,13 @@ def diff_finies_one_step(a, b, z, t, lambda_iwant, det_iwant):
     # Convert a and b to complex field with higher precision
     newa = [mp.mpc(f"{mp.re(a[i])}", f"{mp.im(a[i])}") for i in range(len(a))]
     newb = [mp.mpc(f"{mp.re(b[i])}", f"{mp.im(b[i])}") for i in range(len(b))]
-    # Compute myAofSize3 and myBofSize3
+    
     my_a_of_size_3 = [newa[i] / newa[0] for i in range(1, len(newa))]
     my_b_of_size_3 = [newb[i] / newb[0] for i in range(1, len(newb))]
     
-   # print(mp.prec)
     epsilon = mp.mpc(f"10e{-prec}")
-   # print(mp.re(epsilon).bc) 
-    # Compute the base toInverse result
+    
+    # Compute the base to_inverse result
     to_inverse_base = to_inverse(
         mp.matrix([[mp.mpc(1)], [my_a_of_size_3[0]], [my_a_of_size_3[1]], [my_a_of_size_3[2]]]),
         mp.matrix([[mp.mpc(1)], [my_b_of_size_3[0]], [my_b_of_size_3[1]], [my_b_of_size_3[2]]]),
@@ -373,7 +354,6 @@ def diff_finies_one_step(a, b, z, t, lambda_iwant, det_iwant):
     
     perturb = []
     
-    # Perturbations and their toInverse results
     perturb.append(
         to_inverse(
             mp.matrix([[mp.mpc(1)], [my_a_of_size_3[0] + epsilon], [my_a_of_size_3[1]], [my_a_of_size_3[2]]]),
@@ -428,7 +408,7 @@ def diff_finies_one_step(a, b, z, t, lambda_iwant, det_iwant):
     for i in range(6):
         for j in range(6):
             jacobian[i, j] = (perturb[j][i] - to_inverse_base[i]) / epsilon
-   # print(jacobian)
+    
     # Compute the changes needed
     changement = mp.matrix([[
         to_inverse_base[0] - lambda_iwant[0],
