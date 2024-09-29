@@ -186,7 +186,7 @@ def hadamard_matrix(fi, n):
 
     return res
 
-def F(a, b, z, t):
+def f(a, b, z, t):
     #n = a.shape[0]
     n = len(a)
 
@@ -209,7 +209,7 @@ def F(a, b, z, t):
 
     return result_mults, result_squares
 
-def Finfty(a, b, z, t):
+def f_infinity(a, b, z, t):
     p = mp.prec
     myt = t
     r = a
@@ -217,23 +217,25 @@ def Finfty(a, b, z, t):
     res = [[r, s]]
 
     while mp.fabs(s[0] - s[1]) > 10**(-p + 10):
-        r, s = F(r, s, z, myt)
+        r, s = f(r, s, z, myt)
         res.append([r, s])
         myt = 2 * myt
 
-    r, s = F(r, s, z, myt)
+    r, s = f(r, s, z, myt)
     res.append([r, s])
 
     return res
 
 def Pow2PowN(x, n):
+    
+
     r = x
     for _ in range(n):
         r = r**2
     return r
 
-def AGMPrime(a, b, z, t):
-    R = Finfty(a, b, z, t)
+def agm_prime(a, b, z, t):
+    R = f_infinity(a, b, z, t)
     mu = R[-1][1][0]  # R[-1] is the last [r,s]; R[-1][1] is the second element (s)
     qu = R[-1][0][0] / R[-1][1][0]
     #print(f"mu = {mp.nstr(mu, 5)}")
@@ -241,37 +243,37 @@ def AGMPrime(a, b, z, t):
     lambda_ = Pow2PowN(qu, len(R) - 1) * R[-1][1][0]
     return lambda_, mu
 
-def AllDuplication(a, b):
+def all_duplication(a, b):
     # Given theta_{0,b}(z,t) and theta_{0,b}(0,t) compute theta_{a,b}(z,t)
     # Explicit formulas for genus 2 are found in Cosset
     
     # Calculate ThetaProducts matrix
-    ThetaProducts = matrix([
+    thetaProducts = matrix([
         [a[0] * b[0], a[0] * b[1], a[0] * b[2], a[0] * b[3]],
         [a[1] * b[1], a[1] * b[0], a[1] * b[3], a[1] * b[2]],
         [a[2] * b[2], a[2] * b[3], a[2] * b[0], a[2] * b[1]],
         [a[3] * b[3], a[3] * b[2], a[3] * b[1], a[3] * b[0]]
     ])
     hadam = hadamard_matrix(a[0], 2)
-    ThetaProducts = (hadam * ThetaProducts).tolist()
-    ThetaProducts =  [item for sublist in ThetaProducts for item in sublist]
-    ThetaProducts = [elem / 4 for elem in ThetaProducts]
+    thetaProducts = (hadam * thetaProducts).tolist()
+    thetaProducts =  [item for sublist in thetaProducts for item in sublist]
+    thetaProducts = [elem / 4 for elem in thetaProducts]
    
     #print(ThetaProducts)
     # Apply the sign change for the odd theta-constants
     for i in [5, 7, 10, 11, 13, 14]:
-        ThetaProducts[i] = -ThetaProducts[i]
+        thetaProducts[i] = -thetaProducts[i]
     
-    return ThetaProducts
+    return thetaProducts
 
-def toInverse(a, b, z, t):
+def to_inverse(a, b, z, t):
     # Given theta_i/theta_0 (z and 0), compute lambda1, lambda2, lambda3, mu1, mu2, mu3
     # ya ya, it's weird to have a function which goal is to compute z and tau but you give it z and tau (for the signs) in the args
     p = mp.re(a[0]).bc
     n = len(a)
 
     # First step: compute 1/theta00(z)^2, 1/theta00(0)^2
-    theta00z, theta000 = AGMPrime(a, b, z, t)
+    theta00z, theta000 = agm_prime(a, b, z, t)
     theta00z = 1 / theta00z
     theta000 = 1 / theta000
 
@@ -282,8 +284,8 @@ def toInverse(a, b, z, t):
     # Then compute everything at 2tau (simpler conceptually and generalizable to genus g)
     rootA = [mp.sqrt(thetaZwithAequals0[i]) * sign_theta(i, z, t) for i in range(n)]
     rootB = [mp.sqrt(theta0withAequals0[i]) * sign_theta(i, mp.matrix([[0], [0]]), t) for i in range(n)]
-    sixteenThetas = AllDuplication(rootA, rootB)
-    sixteenThetaConstants = AllDuplication(rootB, rootB)
+    sixteenThetas = all_duplication(rootA, rootB)
+    sixteenThetaConstants = all_duplication(rootB, rootB)
 
     # then give it to borchardt
     tt = 2 * t
@@ -299,19 +301,19 @@ def toInverse(a, b, z, t):
     zz3 = mp.zeros(2, 1)  # we don't care about z in the third case!
 
     # CAREFUL in Dupont's Phd he confuses M1 and M2 page 151 (tables switched) and page 197 
-    lambda1, mu1 = AGMPrime(mp.matrix([[mp.mpf(1)], [sixteenThetas[9] / sixteenThetas[8]], 
+    lambda1, mu1 = agm_prime(mp.matrix([[mp.mpf(1)], [sixteenThetas[9] / sixteenThetas[8]], 
                                        [sixteenThetas[0] / sixteenThetas[8]], [sixteenThetas[1] / sixteenThetas[8]]]),
                             mp.matrix([[mp.mpf(1)], [sixteenThetaConstants[9] / sixteenThetaConstants[8]], 
                                        [sixteenThetaConstants[0] / sixteenThetaConstants[8]], 
                                        [sixteenThetaConstants[1] / sixteenThetaConstants[8]]]), zz1, jm1)
 
-    lambda2, mu2 = AGMPrime(mp.matrix([[mp.mpf(1)], [sixteenThetas[0] / sixteenThetas[4]], 
+    lambda2, mu2 = agm_prime(mp.matrix([[mp.mpf(1)], [sixteenThetas[0] / sixteenThetas[4]], 
                                        [sixteenThetas[6] / sixteenThetas[4]], [sixteenThetas[2] / sixteenThetas[4]]]),
                             mp.matrix([[mp.mpf(1)], [sixteenThetaConstants[0] / sixteenThetaConstants[4]], 
                                        [sixteenThetaConstants[6] / sixteenThetaConstants[4]], 
                                        [sixteenThetaConstants[2] / sixteenThetaConstants[4]]]), zz2, jm2)
 
-    lambda3, mu3 = AGMPrime(mp.matrix([[mp.mpf(1)], [sixteenThetas[8] / sixteenThetas[0]], 
+    lambda3, mu3 = agm_prime(mp.matrix([[mp.mpf(1)], [sixteenThetas[8] / sixteenThetas[0]], 
                                        [sixteenThetas[4] / sixteenThetas[0]], [sixteenThetas[12] / sixteenThetas[0]]]),
                             mp.matrix([[mp.mpf(1)], [sixteenThetaConstants[8] / sixteenThetaConstants[0]], 
                                        [sixteenThetaConstants[4] / sixteenThetaConstants[0]], 
@@ -362,7 +364,7 @@ def diff_finies_one_step(a, b, z, t, lambda_iwant, det_iwant):
     epsilon = mp.mpc(f"10e{-prec}")
    # print(mp.re(epsilon).bc) 
     # Compute the base toInverse result
-    to_inverse_base = toInverse(
+    to_inverse_base = to_inverse(
         mp.matrix([[mp.mpc(1)], [my_a_of_size_3[0]], [my_a_of_size_3[1]], [my_a_of_size_3[2]]]),
         mp.matrix([[mp.mpc(1)], [my_b_of_size_3[0]], [my_b_of_size_3[1]], [my_b_of_size_3[2]]]),
         z,
@@ -373,7 +375,7 @@ def diff_finies_one_step(a, b, z, t, lambda_iwant, det_iwant):
     
     # Perturbations and their toInverse results
     perturb.append(
-        toInverse(
+        to_inverse(
             mp.matrix([[mp.mpc(1)], [my_a_of_size_3[0] + epsilon], [my_a_of_size_3[1]], [my_a_of_size_3[2]]]),
             mp.matrix([[mp.mpc(1)], [my_b_of_size_3[0]], [my_b_of_size_3[1]], [my_b_of_size_3[2]]]),
             z,
@@ -381,7 +383,7 @@ def diff_finies_one_step(a, b, z, t, lambda_iwant, det_iwant):
         )
     )
     perturb.append(
-        toInverse(
+        to_inverse(
             mp.matrix([[mp.mpc(1)], [my_a_of_size_3[0]], [my_a_of_size_3[1] + epsilon], [my_a_of_size_3[2]]]),
             mp.matrix([[mp.mpc(1)], [my_b_of_size_3[0]], [my_b_of_size_3[1]], [my_b_of_size_3[2]]]),
             z,
@@ -389,7 +391,7 @@ def diff_finies_one_step(a, b, z, t, lambda_iwant, det_iwant):
         )
     )
     perturb.append(
-        toInverse(
+        to_inverse(
             mp.matrix([[mp.mpc(1)], [my_a_of_size_3[0]], [my_a_of_size_3[1]], [my_a_of_size_3[2] + epsilon]]),
             mp.matrix([[mp.mpc(1)], [my_b_of_size_3[0]], [my_b_of_size_3[1]], [my_b_of_size_3[2]]]),
             z,
@@ -397,7 +399,7 @@ def diff_finies_one_step(a, b, z, t, lambda_iwant, det_iwant):
         )
     )
     perturb.append(
-        toInverse(
+        to_inverse(
             mp.matrix([[mp.mpc(1)], [my_a_of_size_3[0]], [my_a_of_size_3[1]], [my_a_of_size_3[2]]]),
             mp.matrix([[mp.mpc(1)], [my_b_of_size_3[0] + epsilon], [my_b_of_size_3[1]], [my_b_of_size_3[2]]]),
             z,
@@ -405,7 +407,7 @@ def diff_finies_one_step(a, b, z, t, lambda_iwant, det_iwant):
         )
     )
     perturb.append(
-        toInverse(
+        to_inverse(
             mp.matrix([[mp.mpc(1)], [my_a_of_size_3[0]], [my_a_of_size_3[1]], [my_a_of_size_3[2]]]),
             mp.matrix([[mp.mpc(1)], [my_b_of_size_3[0]], [my_b_of_size_3[1] + epsilon], [my_b_of_size_3[2]]]),
             z,
@@ -413,7 +415,7 @@ def diff_finies_one_step(a, b, z, t, lambda_iwant, det_iwant):
         )
     )
     perturb.append(
-        toInverse(
+        to_inverse(
             mp.matrix([[mp.mpc(1)], [my_a_of_size_3[0]], [my_a_of_size_3[1]], [my_a_of_size_3[2]]]),
             mp.matrix([[mp.mpc(1)], [my_b_of_size_3[0]], [my_b_of_size_3[1]], [my_b_of_size_3[2] + epsilon]]),
             z,

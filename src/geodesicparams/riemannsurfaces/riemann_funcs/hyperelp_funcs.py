@@ -6,7 +6,7 @@
 
 from mpmath import exp, sin, cos, pi, re, im, mp
 
-from theta_helper import AGMPrime, theta_char, theta_genus2, diff_finies_one_step, sign_theta
+from theta_helper import agm_prime, theta_char, theta_genus2, diff_finies_one_step, sign_theta
 
 def hyp_theta(z, riemannM, derivatives = [], minMax = 5):
 
@@ -142,7 +142,7 @@ def hyp_theta_genus2(z, tau, char, precision = 53):
             lambda_iwant, det_iwant
         )
     # Apply AGMPrime to unstick the thetas
-    theta00z = AGMPrime(a, b, z, mp.matrix(tau))[0]
+    theta00z = agm_prime(a, b, z, mp.matrix(tau))[0]
     
     a = [mp.sqrt(a[i] / theta00z) * sign_theta(2, z, mp.matrix(tau)) for i in range(4)]
    # b = [mp.sqrt(b[i] / theta000) * sign_theta(2, zerolow, tau) for i in range(4)]
