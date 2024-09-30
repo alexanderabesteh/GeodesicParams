@@ -1,84 +1,102 @@
 #!/usr/bin/env python3
 """
+A collection of procedures for computing hyperelliptic functions for genus a genus 2 Riemann
+surface.
 
+In particular, the functions implemented are the hyperelliptic theta function (with various 
+algorithms), Kleinian sigma function, Kleinian zeta function, Kleinian P function, and the 
+derivatives of the theta function and sigma functions.
 
 """
 
 from mpmath import exp, sin, cos, pi, re, im, mp
 
-from theta_helper import agm_prime, theta_char, theta_genus2, diff_finies_one_step, sign_theta
+from theta_helper import agm_prime, theta_char, theta_genus2, diff_finies_one_step, sign_theta, derivative_factor
 
-def hyp_theta(z, riemannM, derivatives = [], minMax = 5):
+def hyp_theta_fourier(z, riemannM, char, derivatives = [], minMax = 5):
+    """
 
 
-    g = [1/2, 1/2]; h = [0, 1/2]
-    g = [0, 0]; h = [0, 0]
+    Parameters
+    ----------
+    z : list
+
+    riemannM : matrix
+
+    derivatives : list, optional
+
+    minMax : natural, optional
+        
+
+    Returns
+    -------
+    result : complex
+
+    """
+
+    g, h = char
+    #g = [1/2, 1/2]; h = [0, 1/2]
+    #g = [0, 0]; h = [0, 0]
+    derivs_product = 1
     result = 0
 
     for m1 in range(-minMax, minMax + 1):
         for m2 in range(-minMax, minMax + 1):
             m = [m1, m2]
             char_sum = 0
+            derivs_product = 1
 
+            # Compute characteristics and Riemann matrix contribution
             for i in range(2):
                 tau_sum = 0
                 for j in range(2):
                     tau_sum += riemannM[i, j] * (m[j] + g[j])# + 2 * z[i] + 2 * h[i]
                 char_sum += (m[i] + g[i]) * (tau_sum + 2 * z[i] + 2 * h[i])
                 
-            if len(derivatives) == 0:
-                result += exp(1j * pi * char_sum)
-            elif derivatives[0] != 0 and derivatives[1] != 0:
-                result += exp(1j * pi * char_sum) * (m1 + g[0])**(derivatives[0]) * (m2 + g[1])**(derivatives[1])
-            elif derivatives[0] != 0:
-                result += exp(1j * pi * char_sum) * (m1 + g[0])**(derivatives[0])
-            elif derivatives[1] != 0:
-                result += exp(1j * pi * char_sum) * (m2 + g[1])**(derivatives[1])
+            #if len(derivatives) == 0:
+             #   result += exp(1j * pi * char_sum)
+            #elif derivatives[0] != 0 and derivatives[1] != 0:
+            for i in derivatives:
+                if i == 1:
+                    derivs_product *= (m1 + g[0])
+                elif i == 2:
+                    derivs_product *= (m2 + g[1])
 
-    if len(derivatives) != 0:
-        return (2 * pi * 1j)**(derivatives[0] + derivatives[1]) * result
-    else:
-        return result
+            result += exp(1j * pi * char_sum) * derivs_product 
+                # result += exp(1j * pi * char_sum) * (m1 + g[0])**(derivatives[0]) * (m2 + g[1])**(derivatives[1])
+           # elif derivatives[0] != 0:
+                # result += exp(1j * pi * char_sum) * (m1 + g[0])**(derivatives[0])
+           # elif derivatives[1] != 0:
+                # result += exp(1j * pi * char_sum) * (m2 + g[1])**(derivatives[1])
 
-def kleinian_sigma(z, omega, eta, char, riemannM):
-
-
-    omega_inv = omega**(-1)
-    exp_part = exp(-1/2 * z.T * eta * omega_inv * z)
-    theta_part = hyp_theta_genus2(omega_inv * z, riemannM, char)
-
-    return exp_part * theta_part
-
-def kleinian_zeta(z, omega, eta, char, riemannM, derivatives = [], minMax = 5):
-
-
-    sigma = kleinian_sigma(z, omega, eta, char, riemannM)
-    g = char[0]; h = char[1]
-
-    for m1 in range(-minMax, minMax + 1):
-        for m2 in range(-minMax, minMax + 1):
-            m = [m1, m2]
-            char_sum = 0
-
-            for i in range(2):
-                tau_sum = 0
-                for j in range(2):
-                    tau_sum += riemannM[i, j] * (m[j] + g[j]) 
-                char_sum += (m[i] + g[i]) * (tau_sum + 2 * z[i] + 2 * h[i])
-
-            result += exp(1j * pi * char_sum) * 2 * pi * 1j * (m1 + g[0])
-
-    return result / sigma
-
-def kleinian_P(z, riemannM, derivatives = []):
-
-
-
-    result = 1
-
-    return result
+        # Compute 2*pi*1j factor
+        derivs_factor = derivative_factor(derivatives) 
+    #if len(derivatives) != 0:
+        return derivs_factor * result
+        # return (2 * pi * 1j)**(derivatives[0] + derivatives[1]) * result
+    #else:
+     #   return result
 
 def hyp_theta_genus2(z, tau, char, precision = 53):
+    """
+
+
+    Parameters
+    ----------
+    z : list
+
+    riemannM : matrix
+
+    derivatives : list, optional
+
+    minMax : natural, optional
+        
+
+    Returns
+    -------
+    result : complex
+
+    """
     
 
     LOW_PRECISION = 3000
@@ -155,6 +173,25 @@ def hyp_theta_genus2(z, tau, char, precision = 53):
     return result
 
 def hyp_theta_RR(xR, xI, wR, wI, l, riemannM, minMax = 5):
+    """
+
+
+    Parameters
+    ----------
+    z : list
+
+    riemannM : matrix
+
+    derivatives : list, optional
+
+    minMax : natural, optional
+        
+
+    Returns
+    -------
+    result : complex
+
+    """
 
 
     g = [1/2, 1/2]
@@ -186,7 +223,25 @@ def hyp_theta_RR(xR, xI, wR, wI, l, riemannM, minMax = 5):
     return result
  
 def hyp_theta_IR(xR, xI, wR, wI, l, riemannM, minMax = 5):
+    """
 
+
+    Parameters
+    ----------
+    z : list
+
+    riemannM : matrix
+
+    derivatives : list, optional
+
+    minMax : natural, optional
+        
+
+    Returns
+    -------
+    result : complex
+
+    """
 
     g = [1/2, 1/2]; h = [0, 1/2]
     result = 0
@@ -215,6 +270,94 @@ def hyp_theta_IR(xR, xI, wR, wI, l, riemannM, minMax = 5):
             result += exp(pi * char_sumExp) * cos(pi * char_sumCos) * 2 * pi * (m[l] + g[l])
     return result
 
+def kleinian_sigma(z, omega, eta, char, riemannM):
+    """
+
+
+    Parameters
+    ----------
+    z : list
+
+    riemannM : matrix
+
+        
+
+    Returns
+    -------
+    result : complex
+
+    """
+
+    omega_inv = omega**(-1)
+    exp_part = exp(-1/2 * z.T * eta * omega_inv * z)
+    theta_part = hyp_theta_genus2(omega_inv * z, riemannM, char)
+
+    return exp_part * theta_part
+
+def kleinian_zeta(z, omega, eta, char, riemannM, derivatives, minMax = 5):
+    """
+
+
+    Parameters
+    ----------
+    z : list
+
+    riemannM : matrix
+
+    derivatives : list
+
+    minMax : natural, optional
+        
+
+    Returns
+    -------
+    result : complex
+
+    """
+
+    sigma = kleinian_sigma(z, omega, eta, char, riemannM)
+    result = hyp_theta_fourier(z, riemannM, char, derivatives, minMax) 
+
+    return result / sigma
+
+def kleinian_P(z, omega, eta, char, riemannM, derivatives, minMax = 5):
+    """
+
+
+    Parameters
+    ----------
+    z : list
+
+    riemannM : matrix
+
+    derivatives : list
+
+    minMax : natural, optional
+        
+
+    Returns
+    -------
+    result : complex
+
+    """
+
+    sigma = kleinian_sigma(z, omega, eta, char, riemannM)
+
+    sigmai = hyp_theta_fourier(z, riemannM, char, [derivatives[0], 0, 0], minMax)  
+    sigmaj = hyp_theta_fourier(z, riemannM, char, [0, derivatives[1], 0], minMax)  
+    sigmak = hyp_theta_fourier(z, riemannM, char, [0, 0, derivatives[2]], minMax)  
+
+    sigmaij = hyp_theta_fourier(z, riemannM, char, [derivatives[0], derivatives[1]], minMax) 
+    sigmaik = hyp_theta_fourier(z, riemannM, char, [derivatives[0], 0, derivatives[2]], minMax)  
+    sigmajk = hyp_theta_fourier(z, riemannM, char, [0, derivatives[1], derivatives[2]], minMax)
+
+    sigmaijk = hyp_theta_fourier(z, riemannM, char, derivatives, minMax)
+
+    result = (sigmai * sigmaj * sigmak) - (sigmaij * sigmak * sigma) - (sigmaik * sigmaj * sigma) - (sigmajk * sigmai * sigma) + (sigmaijk * sigma)
+
+    return result / sigma**3
+
+"""
 def sigma1(z, riemannM, minMax = 5):
 
 
@@ -257,3 +400,5 @@ def sigma2(z, riemannM, minMax = 5):
             result += exp(1j * pi * char_sum) * 2 * pi * 1j * (m2 + g[1])
 
     return result
+
+"""

@@ -8,6 +8,26 @@ from mpmath import mp
 from numpy import matrix, kron, array
 
 def naive_theta_genus2(z, tau, precision = 53):
+    """
+
+
+    Parameters
+    ----------
+    z : list
+
+    riemannM : matrix
+
+    derivatives : list, optional
+
+    minMax : natural, optional
+        
+
+    Returns
+    -------
+    result : complex
+
+    """
+
     mp.prec = precision
    
     # Assume 2 Im(tau_3) <= Im(tau_1) <= Im(tau_2) (Minkowski-reduced)
@@ -109,7 +129,25 @@ def naive_theta_genus2(z, tau, precision = 53):
     return result
 
 def theta_char(z, tau, char, precision = 53):
+    """
 
+
+    Parameters
+    ----------
+    z : list
+
+    riemannM : matrix
+
+    derivatives : list, optional
+
+    minMax : natural, optional
+        
+
+    Returns
+    -------
+    result : complex
+
+    """
 
     mp.prec = precision
 
@@ -122,7 +160,25 @@ def theta_char(z, tau, char, precision = 53):
     return result
 
 def theta_genus2(n, z, t, precision = 53):
+    """
 
+
+    Parameters
+    ----------
+    z : list
+
+    riemannM : matrix
+
+    derivatives : list, optional
+
+    minMax : natural, optional
+        
+
+    Returns
+    -------
+    result : complex
+
+    """
 
     vec = [mp.mpf(0/2), mp.mpf(0/2), mp.mpf(0/2), mp.mpf(0/2)]
     vec[3] = mp.mpf(f"{round(n % 2)}") / 2
@@ -137,7 +193,25 @@ def theta_genus2(n, z, t, precision = 53):
     return theta_char(z, t, char, precision)
 
 def sign_theta(n, z, t):
+    """
 
+
+    Parameters
+    ----------
+    z : list
+
+    riemannM : matrix
+
+    derivatives : list, optional
+
+    minMax : natural, optional
+        
+
+    Returns
+    -------
+    result : complex
+
+    """
 
     prec = mp.prec
     mp.dps = 20
@@ -156,7 +230,25 @@ def sign_theta(n, z, t):
         return 1
 
 def hadamard_matrix(fi, n):
+    """
 
+
+    Parameters
+    ----------
+    z : list
+
+    riemannM : matrix
+
+    derivatives : list, optional
+
+    minMax : natural, optional
+        
+
+    Returns
+    -------
+    result : complex
+
+    """
 
     # Define the base 2x2 Hadamard matrix
     prec = mp.prec
@@ -173,7 +265,25 @@ def hadamard_matrix(fi, n):
     return res
 
 def f(a, b, z, t):
+    """
 
+
+    Parameters
+    ----------
+    z : list
+
+    riemannM : matrix
+
+    derivatives : list, optional
+
+    minMax : natural, optional
+        
+
+    Returns
+    -------
+    result : complex
+
+    """
 
     n = len(a)
 
@@ -195,7 +305,25 @@ def f(a, b, z, t):
     return result_mults, result_squares
 
 def f_infinity(a, b, z, t):
+    """
 
+
+    Parameters
+    ----------
+    z : list
+
+    riemannM : matrix
+
+    derivatives : list, optional
+
+    minMax : natural, optional
+        
+
+    Returns
+    -------
+    result : complex
+
+    """
 
     p = mp.prec
     myt = t
@@ -214,7 +342,25 @@ def f_infinity(a, b, z, t):
     return res
 
 def Pow2PowN(x, n):
-    
+    """
+
+
+    Parameters
+    ----------
+    z : list
+
+    riemannM : matrix
+
+    derivatives : list, optional
+
+    minMax : natural, optional
+        
+
+    Returns
+    -------
+    result : complex
+
+    """
 
     r = x
     for _ in range(n):
@@ -222,7 +368,25 @@ def Pow2PowN(x, n):
     return r
 
 def agm_prime(a, b, z, t):
+    """
 
+
+    Parameters
+    ----------
+    z : list
+
+    riemannM : matrix
+
+    derivatives : list, optional
+
+    minMax : natural, optional
+        
+
+    Returns
+    -------
+    result : complex
+
+    """
 
 
     R = f_infinity(a, b, z, t)
@@ -232,8 +396,25 @@ def agm_prime(a, b, z, t):
     return lambda_, mu
 
 def all_duplication(a, b):
+    """
 
 
+    Parameters
+    ----------
+    z : list
+
+    riemannM : matrix
+
+    derivatives : list, optional
+
+    minMax : natural, optional
+        
+
+    Returns
+    -------
+    result : complex
+
+    """
 
     # Given theta_{0,b}(z,t) and theta_{0,b}(0,t) compute theta_{a,b}(z,t)
     # Explicit formulas for genus 2 are found in Cosset
@@ -258,7 +439,25 @@ def all_duplication(a, b):
     return thetaProducts
 
 def to_inverse(a, b, z, t):
+    """
 
+
+    Parameters
+    ----------
+    z : list
+
+    riemannM : matrix
+
+    derivatives : list, optional
+
+    minMax : natural, optional
+        
+
+    Returns
+    -------
+    result : complex
+
+    """
 
     # Given theta_i/theta_0 (z and 0), compute lambda1, lambda2, lambda3, mu1, mu2, mu3
     n = len(a)
@@ -329,7 +528,25 @@ def to_inverse(a, b, z, t):
     return [1 / computedz1, 1 / computedz2, 1 / thirdformula, computedtau1, computedtau2, computedtau3]
 
 def diff_finies_one_step(a, b, z, t, lambda_iwant, det_iwant):
+    """
 
+
+    Parameters
+    ----------
+    z : list
+
+    riemannM : matrix
+
+    derivatives : list, optional
+
+    minMax : natural, optional
+        
+
+    Returns
+    -------
+    result : complex
+
+    """
 
     # Set the precision
     prec = mp.prec
@@ -437,3 +654,12 @@ def diff_finies_one_step(a, b, z, t, lambda_iwant, det_iwant):
     
     mp.prec = prec  # Reset precision
     return new_a, new_b
+
+def derivative_factor(derivatives):
+    count = 0
+
+    for i in derivatives:
+        if i != 0:
+            count += 1
+
+    return (2 * mp.pi * mp.j)**count
