@@ -1,0 +1,332 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.guaranteed_ellipse_fit &mdash; GeodesicParams 0.2.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=66b59bf7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=37f418d5"></script>
+      <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            GeodesicParams
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">GeodesicParams</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.guaranteed_ellipse_fit</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.guaranteed_ellipse_fit</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Computations for computing the coefficents of an ellipse within the Sampson Distance that</span>
+<span class="sd">fits a set of data.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">mpmath</span> <span class="kn">import</span> <span class="n">matrix</span><span class="p">,</span> <span class="n">fabs</span><span class="p">,</span> <span class="n">norm</span><span class="p">,</span> <span class="n">eye</span><span class="p">,</span> <span class="n">ones</span><span class="p">,</span> <span class="n">zeros</span><span class="p">,</span> <span class="n">sqrt</span>
+
+<span class="kn">from</span> <span class="nn">.levenberg_marquardt</span> <span class="kn">import</span> <span class="n">levenbergMarquardtStep</span> 
+<span class="kn">from</span> <span class="nn">.line_search_step</span> <span class="kn">import</span> <span class="n">lineSearchStep</span>
+
+<div class="viewcode-block" id="EllipseData">
+<a class="viewcode-back" href="../../../../geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.html#geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.guaranteed_ellipse_fit.EllipseData">[docs]</a>
+<span class="k">class</span> <span class="nc">EllipseData</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A data structure that contains all information used throughout the iteration process. </span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    use_pseudoinverse : bool</span>
+<span class="sd">        Determines whether LineSearchStep or LevenbergMarquadtStep or used (True = LineSearchStep, </span>
+<span class="sd">        False = LevenbergMarquadtStep).</span>
+<span class="sd">    theta_updated : bool</span>
+<span class="sd">        Determines if theta was updated (True for yes, False for no) since in some cases a </span>
+<span class="sd">        LevenbergMarquardtStep does not decrease the cost function.</span>
+<span class="sd">    lbd : float</span>
+<span class="sd">        Damping parameter in LevenbergMarquadtStep.</span>
+<span class="sd">    k : int</span>
+<span class="sd">        loop counter index.</span>
+<span class="sd">    damping_multiplier : float</span>
+<span class="sd">        Used to modify the tradeoff between gradient descent and hessian based descent in </span>
+<span class="sd">        LevenbergMarquadtStep.</span>
+<span class="sd">    gamma : float</span>
+<span class="sd">        Used in LineSearchStep.</span>
+<span class="sd">    numberOfPoints : int</span>
+<span class="sd">        The number of data points.</span>
+<span class="sd">    f : matrix</span>
+<span class="sd">        A barrier term that forces the parameters to stay in the elliptic region.</span>
+<span class="sd">    I : matrix</span>
+<span class="sd">        A barrier term that forces the parameters to stay in the elliptic region.</span>
+<span class="sd">    alpha : float</span>
+<span class="sd">        Homotopy parameter that weighs contribution of barrier term.</span>
+<span class="sd">    data_points : matrix </span>
+<span class="sd">        The data points that are going to be fitted to the ellipse.</span>
+<span class="sd">    tolDelta : float</span>
+<span class="sd">        The step-size tolerance.</span>
+<span class="sd">    tolCost : float</span>
+<span class="sd">        The cost tolerance.</span>
+<span class="sd">    tolTheta : float</span>
+<span class="sd">        The coefficients tolerance.</span>
+<span class="sd">    cost : list</span>
+<span class="sd">        The list containing the cost of each iteration.</span>
+<span class="sd">    t : matrix</span>
+<span class="sd">        The current coefficients estimate.</span>
+<span class="sd">    delta : matrix </span>
+<span class="sd">        A 6xK mpmath matrix (where K is the max number of iterations) that stores the </span>
+<span class="sd">        parameter direction of each iteration.</span>
+<span class="sd">    r : matrix</span>
+<span class="sd">        An N+1x1 mpmath matrix representing the residuals of each step (+1 to store the barrier</span>
+<span class="sd">        term).</span>
+<span class="sd">    jacobian_matrix : matrix </span>
+<span class="sd">        An Nx6 mpmath matrix representing the jacobian matrix for each iteration.</span>
+<span class="sd">    jacobian_matrix_barrier : matrix</span>
+<span class="sd">        A 1x6 mpmath matrix representing the jacobian matrix for the barrier term.</span>
+<span class="sd">    jacobian_matrix_full : matrix</span>
+<span class="sd">        A combination of &lt;jacobian_matrix&gt; and &lt;jacobian_matrix_barrier&gt;.</span>
+<span class="sd">    hessian : matrix</span>
+<span class="sd">        The hessian matrix.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">use_pseudoinverse</span><span class="p">,</span> <span class="n">theta_updated</span><span class="p">,</span> <span class="n">lbd</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">damping_multiplier</span><span class="p">,</span> <span class="n">gamma</span><span class="p">,</span> <span class="n">numberOfPoints</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">I</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">data_points</span><span class="p">,</span> <span class="n">tolDelta</span><span class="p">,</span> <span class="n">tolCost</span><span class="p">,</span> <span class="n">tolTheta</span><span class="p">,</span>
+               <span class="n">cost</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">delta</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">jacobian_matrix</span><span class="p">,</span> <span class="n">jacobian_matrix_barrier</span><span class="p">,</span> <span class="n">jacobian_matrix_full</span><span class="p">,</span> <span class="n">hessian</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_pseudoinverse</span> <span class="o">=</span> <span class="n">use_pseudoinverse</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">theta_updated</span> <span class="o">=</span> <span class="n">theta_updated</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lbd</span> <span class="o">=</span> <span class="n">lbd</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">k</span> <span class="o">=</span> <span class="n">k</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">damping_multiplier</span> <span class="o">=</span> <span class="n">damping_multiplier</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gamma</span> <span class="o">=</span> <span class="n">gamma</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">numberOfPoints</span> <span class="o">=</span> <span class="n">numberOfPoints</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">f</span> <span class="o">=</span> <span class="n">f</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">I</span> <span class="o">=</span> <span class="n">I</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_points</span> <span class="o">=</span> <span class="n">data_points</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tolDelta</span> <span class="o">=</span> <span class="n">tolDelta</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tolCost</span> <span class="o">=</span> <span class="n">tolCost</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tolTheta</span> <span class="o">=</span> <span class="n">tolTheta</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cost</span> <span class="o">=</span> <span class="n">cost</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">=</span> <span class="n">t</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delta</span> <span class="o">=</span> <span class="n">delta</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">r</span> <span class="o">=</span> <span class="n">r</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">jacobian_matrix</span> <span class="o">=</span> <span class="n">jacobian_matrix</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">jacobian_matrix_barrier</span> <span class="o">=</span> <span class="n">jacobian_matrix_barrier</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">jacobian_matrix_full</span> <span class="o">=</span> <span class="n">jacobian_matrix_full</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hessian</span> <span class="o">=</span> <span class="n">hessian</span></div>
+
+
+<div class="viewcode-block" id="guaranteedEllipseFit">
+<a class="viewcode-back" href="../../../../geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.html#geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.guaranteed_ellipse_fit.guaranteedEllipseFit">[docs]</a>
+<span class="k">def</span> <span class="nf">guaranteedEllipseFit</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">data_points</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the coefficients of a general ellipse within the Sampson Distance that fits</span>
+<span class="sd">    a set of ellipse data (i.e. Ax**2 + Bxy + Cy**2 + Dx + Ey + F = 0, provided that </span>
+<span class="sd">    B**2 - 4ac &lt; 0). </span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    t : matrix</span>
+<span class="sd">        A 1x6 mpmath matrix containing initial estimates of the coefficients.</span>
+<span class="sd">    data_points : matrix</span>
+<span class="sd">         A 3xN mpmath matrix, where the first row represents the x coordinates of the data</span>
+<span class="sd">         points, the second represents the y coordinates of the data points, and the third</span>
+<span class="sd">         is a list of one&#39;s generated by the coordinate transformation in &lt;ellipse_estiamtes&gt;.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    result : matrix</span>
+<span class="sd">        A 1x6 matrix representing the coefficients of the ellipse [A, B, C, D, E, F] that</span>
+<span class="sd">        fits the data points within the Sampson Distance.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Initialize data structure and initial values</span>
+    <span class="n">keep_going</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">fprim</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+    <span class="n">maxIter</span> <span class="o">=</span> <span class="mi">200</span>
+    <span class="n">elp_data</span> <span class="o">=</span> <span class="n">EllipseData</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">,</span> <span class="mf">0.00005</span><span class="p">,</span> <span class="n">data_points</span><span class="o">.</span><span class="n">cols</span><span class="p">,</span> <span class="n">zeros</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="n">eye</span><span class="p">(</span><span class="mi">6</span><span class="p">),</span> <span class="mf">1e-3</span><span class="p">,</span> 
+                           <span class="n">data_points</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span> <span class="p">:],</span> <span class="mf">1e-7</span><span class="p">,</span> <span class="mf">1e-7</span><span class="p">,</span> <span class="mf">1e-7</span><span class="p">,</span> <span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">maxIter</span><span class="p">),</span> <span class="n">zeros</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="n">maxIter</span><span class="p">),</span> <span class="n">zeros</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="n">maxIter</span><span class="p">),</span> <span class="n">zeros</span><span class="p">(</span><span class="n">data_points</span><span class="o">.</span><span class="n">cols</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">zeros</span><span class="p">(</span><span class="n">data_points</span><span class="o">.</span><span class="n">cols</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
+                         <span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="n">matrix</span><span class="p">(</span><span class="n">data_points</span><span class="o">.</span><span class="n">cols</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">elp_data</span><span class="o">.</span><span class="n">f</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">fprim</span>
+
+    <span class="n">t</span> <span class="o">=</span> <span class="n">t</span> <span class="o">/</span> <span class="n">norm</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+    <span class="n">elp_data</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="n">elp_data</span><span class="o">.</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">elp_data</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">,</span> <span class="n">elp_data</span><span class="o">.</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">elp_data</span><span class="o">.</span><span class="n">delta</span><span class="p">[:,</span> <span class="n">elp_data</span><span class="o">.</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">ones</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Main estimation loop</span>
+    <span class="k">while</span> <span class="n">keep_going</span> <span class="ow">and</span> <span class="n">elp_data</span><span class="o">.</span><span class="n">k</span> <span class="o">&lt;</span> <span class="n">maxIter</span><span class="p">:</span>
+        <span class="c1"># allocate space for residuals (+1 to store barrier term) </span>
+        <span class="n">elp_data</span><span class="o">.</span><span class="n">r</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">elp_data</span><span class="o">.</span><span class="n">numberOfPoints</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># allocate space for the jacobian matrix based on AML component</span>
+        <span class="n">elp_data</span><span class="o">.</span><span class="n">jacobian_matrix</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">elp_data</span><span class="o">.</span><span class="n">numberOfPoints</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+        <span class="c1"># allocate space for the jacobian matrix based on Barrier component</span>
+        <span class="n">elp_data</span><span class="o">.</span><span class="n">jacobian_matrix_barrier</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+        <span class="c1"># grab the current parameter estimates</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">elp_data</span><span class="o">.</span><span class="n">t</span><span class="p">[:,</span> <span class="n">elp_data</span><span class="o">.</span><span class="n">k</span><span class="p">]</span>
+        
+        <span class="c1"># residuals computed on data points</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">elp_data</span><span class="o">.</span><span class="n">numberOfPoints</span><span class="p">):</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="n">data_points</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span>
+            <span class="c1"># Transformed data point</span>
+            <span class="n">ux_j</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">([[</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">1</span><span class="p">]])</span><span class="o">.</span><span class="n">T</span>
+
+            <span class="c1"># Derivative of transformed data point</span>
+            <span class="n">dux_j</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">([[</span><span class="mi">2</span> <span class="o">*</span> <span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span><span class="o">.</span><span class="n">T</span>
+
+            <span class="c1"># Outer product</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="n">ux_j</span> <span class="o">*</span> <span class="n">ux_j</span><span class="o">.</span><span class="n">T</span>
+
+            <span class="c1"># Use identity covs</span>
+            <span class="n">b</span> <span class="o">=</span> <span class="n">dux_j</span> <span class="o">*</span> <span class="n">dux_j</span><span class="o">.</span><span class="n">T</span>
+           
+            <span class="n">tBt</span> <span class="o">=</span> <span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">b</span> <span class="o">*</span> <span class="n">t</span><span class="p">)[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">tAt</span> <span class="o">=</span> <span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">a</span> <span class="o">*</span> <span class="n">t</span><span class="p">)[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+
+            <span class="c1"># AML cost for i&#39;th data point</span>
+            <span class="n">elp_data</span><span class="o">.</span><span class="n">r</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">tAt</span> <span class="o">/</span> <span class="n">tBt</span><span class="p">)</span>
+
+            <span class="c1"># Derivative AML component</span>
+            <span class="n">M</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span> <span class="o">/</span> <span class="n">tBt</span><span class="p">)</span>
+            <span class="n">xbits</span> <span class="o">=</span> <span class="n">b</span> <span class="o">*</span> <span class="p">(</span><span class="n">tAt</span> <span class="o">/</span> <span class="n">tBt</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">M</span> <span class="o">-</span> <span class="n">xbits</span>
+           
+            <span class="c1"># Gradient for AML cost function </span>
+            <span class="n">grad</span> <span class="o">=</span> <span class="n">x</span><span class="o">*</span><span class="n">t</span> <span class="o">/</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">tAt</span><span class="o">/</span><span class="n">tBt</span><span class="p">)</span>
+            <span class="c1"># Build up jacobian matrix</span>
+            <span class="n">elp_data</span><span class="o">.</span><span class="n">jacobian_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">grad</span><span class="o">.</span><span class="n">T</span>
+      
+        <span class="c1"># Barrier term</span>
+        <span class="n">tIt</span> <span class="o">=</span> <span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">elp_data</span><span class="o">.</span><span class="n">I</span> <span class="o">*</span> <span class="n">t</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">tFt</span> <span class="o">=</span> <span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">elp_data</span><span class="o">.</span><span class="n">f</span> <span class="o">*</span> <span class="n">t</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># Add the penalty term </span>
+        <span class="n">elp_data</span><span class="o">.</span><span class="n">r</span><span class="p">[</span><span class="n">elp_data</span><span class="o">.</span><span class="n">numberOfPoints</span><span class="p">]</span> <span class="o">=</span> <span class="n">elp_data</span><span class="o">.</span><span class="n">alpha</span> <span class="o">*</span> <span class="p">(</span><span class="n">tIt</span> <span class="o">/</span> <span class="n">tFt</span><span class="p">)</span>
+
+        <span class="c1"># Derivative barrier component</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="n">elp_data</span><span class="o">.</span><span class="n">I</span> <span class="o">/</span> <span class="n">tFt</span>
+        <span class="n">ybits</span> <span class="o">=</span> <span class="n">elp_data</span><span class="o">.</span><span class="n">f</span> <span class="o">*</span> <span class="p">(</span><span class="n">tIt</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">tFt</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">N</span> <span class="o">-</span> <span class="n">ybits</span>
+        <span class="n">grad_penalty</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">elp_data</span><span class="o">.</span><span class="n">alpha</span> <span class="o">*</span> <span class="n">y</span> <span class="o">*</span> <span class="n">t</span>
+        <span class="n">elp_data</span><span class="o">.</span><span class="n">jacobian_matrix_barrier</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">grad_penalty</span><span class="o">.</span><span class="n">T</span>
+       
+        <span class="c1"># Jacobian matrix after combining AML and barrier terms</span>
+        <span class="n">elp_data</span><span class="o">.</span><span class="n">jacobian_matrix_full</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">elp_data</span><span class="o">.</span><span class="n">numberOfPoints</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">elp_data</span><span class="o">.</span><span class="n">jacobian_matrix</span> 
+        <span class="n">elp_data</span><span class="o">.</span><span class="n">jacobian_matrix_full</span><span class="p">[</span><span class="n">elp_data</span><span class="o">.</span><span class="n">numberOfPoints</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">elp_data</span><span class="o">.</span><span class="n">jacobian_matrix_barrier</span>
+
+        <span class="c1"># Approximate Hessian matrix</span>
+        <span class="n">elp_data</span><span class="o">.</span><span class="n">hessian</span> <span class="o">=</span> <span class="n">elp_data</span><span class="o">.</span><span class="n">jacobian_matrix_full</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">elp_data</span><span class="o">.</span><span class="n">jacobian_matrix_full</span>
+        
+        <span class="c1"># Sum of squares cost for the current iteration</span>
+        <span class="n">elp_data</span><span class="o">.</span><span class="n">cost</span><span class="p">[</span><span class="n">elp_data</span><span class="o">.</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">elp_data</span><span class="o">.</span><span class="n">r</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">elp_data</span><span class="o">.</span><span class="n">r</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># If the barrier term hasn&#39;t been overshot, then use LevenbergMarquadt</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">elp_data</span><span class="o">.</span><span class="n">use_pseudoinverse</span><span class="p">:</span>
+            <span class="n">elp_data</span> <span class="o">=</span> <span class="n">levenbergMarquardtStep</span><span class="p">(</span><span class="n">elp_data</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">elp_data</span> <span class="o">=</span> <span class="n">lineSearchStep</span><span class="p">(</span><span class="n">elp_data</span><span class="p">)</span>
+      
+        <span class="c1"># Check if the latest update overshot the barrier term</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">elp_data</span><span class="o">.</span><span class="n">t</span><span class="p">[:,</span> <span class="n">elp_data</span><span class="o">.</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">elp_data</span><span class="o">.</span><span class="n">f</span> <span class="o">*</span> <span class="n">elp_data</span><span class="o">.</span><span class="n">t</span><span class="p">[:,</span> <span class="n">elp_data</span><span class="o">.</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># From now onwards we will only use lineSearchStep to ensure</span>
+            <span class="c1"># That we do not overshoot the barrier </span>
+            <span class="n">elp_data</span><span class="o">.</span><span class="n">use_pseudoinverse</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">elp_data</span><span class="o">.</span><span class="n">lbd</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">elp_data</span><span class="o">.</span><span class="n">t</span><span class="p">[:,</span> <span class="n">elp_data</span><span class="o">.</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">elp_data</span><span class="o">.</span><span class="n">t</span><span class="p">[:,</span> <span class="n">elp_data</span><span class="o">.</span><span class="n">k</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="n">elp_data</span><span class="o">.</span><span class="n">k</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="n">elp_data</span><span class="o">.</span><span class="n">t</span><span class="p">[:,</span> <span class="n">elp_data</span><span class="o">.</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">elp_data</span><span class="o">.</span><span class="n">t</span><span class="p">[:,</span> <span class="n">elp_data</span><span class="o">.</span><span class="n">k</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="c1"># Check for various stopping criteria to end the main loop</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">norm</span><span class="p">(</span><span class="n">elp_data</span><span class="o">.</span><span class="n">t</span><span class="p">[:,</span> <span class="n">elp_data</span><span class="o">.</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">elp_data</span><span class="o">.</span><span class="n">t</span><span class="p">[:,</span> <span class="n">elp_data</span><span class="o">.</span><span class="n">k</span><span class="p">]),</span> <span class="n">norm</span><span class="p">(</span><span class="n">elp_data</span><span class="o">.</span><span class="n">t</span><span class="p">[:,</span> <span class="n">elp_data</span><span class="o">.</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">elp_data</span><span class="o">.</span><span class="n">t</span><span class="p">[:,</span> <span class="n">elp_data</span><span class="o">.</span><span class="n">k</span><span class="p">]))</span> 
+                <span class="o">&lt;</span> <span class="n">elp_data</span><span class="o">.</span><span class="n">tolTheta</span> <span class="ow">and</span> <span class="n">elp_data</span><span class="o">.</span><span class="n">theta_updated</span><span class="p">):</span>
+            <span class="n">keep_going</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">fabs</span><span class="p">(</span><span class="n">elp_data</span><span class="o">.</span><span class="n">cost</span><span class="p">[</span><span class="n">elp_data</span><span class="o">.</span><span class="n">k</span><span class="p">]</span> <span class="o">-</span> <span class="n">elp_data</span><span class="o">.</span><span class="n">cost</span><span class="p">[</span><span class="n">elp_data</span><span class="o">.</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span> <span class="o">&lt;</span> <span class="n">elp_data</span><span class="o">.</span><span class="n">tolCost</span> <span class="ow">and</span> <span class="n">elp_data</span><span class="o">.</span><span class="n">theta_updated</span><span class="p">):</span>
+            <span class="n">keep_going</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">norm</span><span class="p">(</span><span class="n">elp_data</span><span class="o">.</span><span class="n">delta</span><span class="p">[:,</span> <span class="n">elp_data</span><span class="o">.</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span> <span class="o">&lt;</span> <span class="n">elp_data</span><span class="o">.</span><span class="n">tolDelta</span> <span class="ow">and</span> <span class="n">elp_data</span><span class="o">.</span><span class="n">theta_updated</span><span class="p">):</span>
+            <span class="n">keep_going</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="n">elp_data</span><span class="o">.</span><span class="n">k</span> <span class="o">=</span> <span class="n">elp_data</span><span class="o">.</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span>
+
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">elp_data</span><span class="o">.</span><span class="n">t</span><span class="p">[:,</span> <span class="n">elp_data</span><span class="o">.</span><span class="n">k</span><span class="p">]</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">theta</span> <span class="o">/</span> <span class="n">norm</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">theta</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Alexander Abesteh.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,236 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.levenberg_marquardt &mdash; GeodesicParams 0.2.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=66b59bf7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=37f418d5"></script>
+      <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            GeodesicParams
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">GeodesicParams</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.levenberg_marquardt</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.levenberg_marquardt</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This function is used in the main loop of guaranteedEllipseFit in the process of minimizing an </span>
+<span class="sd">approximate maximum likelihood cost function of an ellipse fit to data. </span>
+
+<span class="sd">It computes an update for the parameters representing the ellipse, using the method of </span>
+<span class="sd">Levenberg-Marquardt for non-linear optimisation. </span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">mpmath</span> <span class="kn">import</span> <span class="n">matrix</span><span class="p">,</span> <span class="n">norm</span><span class="p">,</span> <span class="n">lu_solve</span>
+
+<div class="viewcode-block" id="levenbergMarquardtStep">
+<a class="viewcode-back" href="../../../../geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.html#geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.levenberg_marquardt.levenbergMarquardtStep">[docs]</a>
+<span class="k">def</span> <span class="nf">levenbergMarquardtStep</span><span class="p">(</span><span class="n">struct</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function computes an update for the parameters representing the ellipse, using the method </span>
+<span class="sd">    of Levenberg-Marquardt for non-linear optimisation. </span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    struct : EllipseData</span>
+<span class="sd">        An EllipseData type object containing all the iteration information. </span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    struct : EllipseData</span>
+<span class="sd">        An EllipseData type object after applying the Levenberg-Marquardt method.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># Initialize variables to be updated from &lt;struct&gt;</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">t</span><span class="p">[:,</span> <span class="n">struct</span><span class="o">.</span><span class="n">k</span><span class="p">]</span>
+    <span class="n">jacobian_matrix</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">jacobian_matrix</span>
+    <span class="n">jacobian_matrix_barrier</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">jacobian_matrix_barrier</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">r</span>
+    <span class="n">I</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">I</span>
+    <span class="n">lbd</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">lbd</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">delta</span><span class="p">[:,</span> <span class="n">struct</span><span class="o">.</span><span class="n">k</span><span class="p">]</span>
+    <span class="n">damping_multiplier</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">damping_multiplier</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">f</span>
+    <span class="n">current_cost</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">cost</span><span class="p">[</span><span class="n">struct</span><span class="o">.</span><span class="n">k</span><span class="p">]</span>
+    <span class="n">data_points</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">data_points</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">alpha</span>
+    <span class="n">numOfPoints</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">numberOfPoints</span>
+   
+    <span class="c1"># Compute two potential updates for theta based on different weightings of the identity </span>
+    <span class="c1"># matrix.</span>
+
+    <span class="n">temp</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">(</span><span class="n">numOfPoints</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+    <span class="n">temp</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">numOfPoints</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">jacobian_matrix</span>
+    <span class="n">temp</span><span class="p">[</span><span class="n">numOfPoints</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">jacobian_matrix_barrier</span>
+    <span class="n">jacob</span> <span class="o">=</span> <span class="n">temp</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">r</span>
+   
+    <span class="c1"># Compute the new update direction</span>
+    <span class="n">update_a</span> <span class="o">=</span> <span class="n">lu_solve</span><span class="p">(</span> <span class="o">-</span> <span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">hessian</span> <span class="o">+</span> <span class="n">lbd</span> <span class="o">*</span> <span class="n">I</span><span class="p">),</span> <span class="n">jacob</span><span class="p">)</span>
+    <span class="n">update_b</span> <span class="o">=</span> <span class="n">lu_solve</span><span class="p">(</span> <span class="o">-</span> <span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">hessian</span> <span class="o">+</span> <span class="p">(</span><span class="n">lbd</span> <span class="o">/</span> <span class="n">damping_multiplier</span><span class="p">)</span> <span class="o">*</span> <span class="n">I</span><span class="p">),</span> <span class="n">jacob</span><span class="p">)</span>
+
+    <span class="c1"># The potential new parameters are then </span>
+    <span class="n">t_potential_a</span> <span class="o">=</span> <span class="n">t</span> <span class="o">+</span> <span class="n">update_a</span>
+    <span class="n">t_potential_b</span> <span class="o">=</span> <span class="n">t</span> <span class="o">+</span> <span class="n">update_b</span>
+       
+    <span class="c1"># Compute new residuals and costs based on these updates</span>
+    <span class="c1"># ------------------------------------------------------</span>
+
+    <span class="n">cost_a</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">cost_b</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">numOfPoints</span><span class="p">):</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">data_points</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span>
+        <span class="c1"># Transformed data point</span>
+        <span class="n">ux_j</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">([[</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">1</span><span class="p">]])</span><span class="o">.</span><span class="n">T</span>
+        <span class="c1"># Derivative of transformed data point</span>
+        <span class="n">dux_j</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">([[</span><span class="mi">2</span> <span class="o">*</span> <span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span><span class="o">.</span><span class="n">T</span>
+
+        <span class="c1"># Outer product</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">ux_j</span> <span class="o">*</span> <span class="n">ux_j</span><span class="o">.</span><span class="n">T</span>
+        <span class="c1"># Use identity covs</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="n">dux_j</span> <span class="o">*</span> <span class="n">dux_j</span><span class="o">.</span><span class="n">T</span>
+
+
+        <span class="n">t_aBt_a</span> <span class="o">=</span> <span class="p">(</span><span class="n">t_potential_a</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">b</span> <span class="o">*</span> <span class="n">t_potential_a</span><span class="p">)[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">t_aAt_a</span> <span class="o">=</span> <span class="p">(</span><span class="n">t_potential_a</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">a</span> <span class="o">*</span> <span class="n">t_potential_a</span><span class="p">)[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">t_bBt_b</span> <span class="o">=</span> <span class="p">(</span><span class="n">t_potential_b</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">b</span> <span class="o">*</span> <span class="n">t_potential_b</span><span class="p">)[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">t_bAt_b</span> <span class="o">=</span> <span class="p">(</span><span class="n">t_potential_b</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">a</span> <span class="o">*</span> <span class="n">t_potential_b</span><span class="p">)[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># AML cost for i&#39;th data point</span>
+        <span class="n">cost_a</span> <span class="o">+=</span> <span class="n">t_aAt_a</span> <span class="o">/</span> <span class="n">t_aBt_a</span>
+        <span class="n">cost_b</span> <span class="o">+=</span> <span class="n">t_bAt_b</span> <span class="o">/</span> <span class="n">t_bBt_b</span>
+
+    <span class="c1"># Barrier term</span>
+    <span class="n">t_aIt_a</span> <span class="o">=</span> <span class="p">(</span><span class="n">t_potential_a</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">I</span> <span class="o">*</span> <span class="n">t_potential_a</span><span class="p">)[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">t_aFt_a</span> <span class="o">=</span> <span class="p">(</span><span class="n">t_potential_a</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">f</span> <span class="o">*</span> <span class="n">t_potential_a</span><span class="p">)[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    
+    <span class="n">t_bIt_b</span> <span class="o">=</span> <span class="p">(</span><span class="n">t_potential_b</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">I</span> <span class="o">*</span> <span class="n">t_potential_b</span><span class="p">)[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">t_bFt_b</span> <span class="o">=</span> <span class="p">(</span><span class="n">t_potential_b</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">f</span> <span class="o">*</span> <span class="n">t_potential_b</span><span class="p">)[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    
+    <span class="c1"># Add the barrier term</span>
+    <span class="n">cost_a</span> <span class="o">+=</span> <span class="p">(</span><span class="n">alpha</span> <span class="o">*</span> <span class="p">(</span><span class="n">t_aIt_a</span> <span class="o">/</span> <span class="n">t_aFt_a</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span><span class="p">;</span>
+    <span class="n">cost_b</span> <span class="o">+=</span> <span class="p">(</span><span class="n">alpha</span> <span class="o">*</span> <span class="p">(</span><span class="n">t_bIt_b</span> <span class="o">/</span> <span class="n">t_bFt_b</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span><span class="p">;</span>
+   
+    <span class="c1"># Determine appropriate damping and if possible select an update</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">cost_a</span> <span class="o">&gt;=</span> <span class="n">current_cost</span> <span class="ow">and</span> <span class="n">cost_b</span> <span class="o">&gt;=</span> <span class="n">current_cost</span><span class="p">):</span>
+        <span class="c1"># Neither update reduced the cost</span>
+        <span class="n">struct</span><span class="o">.</span><span class="n">theta_updated</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="c1"># No change in the cost</span>
+        <span class="n">struct</span><span class="o">.</span><span class="n">cost</span><span class="p">[</span><span class="n">struct</span><span class="o">.</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_cost</span>
+        <span class="c1"># No change in parameters</span>
+        <span class="n">struct</span><span class="o">.</span><span class="n">t</span><span class="p">[:,</span> <span class="n">struct</span><span class="o">.</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">t</span>
+        <span class="c1"># No changes in step direction</span>
+        <span class="n">struct</span><span class="o">.</span><span class="n">delta</span><span class="p">[:,</span> <span class="n">struct</span><span class="o">.</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">delta</span>
+        <span class="c1"># Next iteration add more Identity matrix</span>
+        <span class="n">struct</span><span class="o">.</span><span class="n">lbd</span> <span class="o">=</span> <span class="n">lbd</span> <span class="o">*</span> <span class="n">damping_multiplier</span>
+    <span class="k">elif</span> <span class="p">(</span><span class="n">cost_b</span> <span class="o">&lt;</span> <span class="n">current_cost</span><span class="p">):</span>
+        <span class="c1"># Update &#39;b&#39; reduced the cost function</span>
+        <span class="n">struct</span><span class="o">.</span><span class="n">theta_updated</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="c1"># Store the new cost</span>
+        <span class="n">struct</span><span class="o">.</span><span class="n">cost</span><span class="p">[</span><span class="n">struct</span><span class="o">.</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">cost_b</span>
+        <span class="c1"># Choose update &#39;b&#39;</span>
+        <span class="n">struct</span><span class="o">.</span><span class="n">t</span><span class="p">[:,</span> <span class="n">struct</span><span class="o">.</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">t_potential_b</span> <span class="o">/</span> <span class="n">norm</span><span class="p">(</span><span class="n">t_potential_b</span><span class="p">)</span>
+        <span class="c1"># Store the step direction</span>
+        <span class="n">struct</span><span class="o">.</span><span class="n">delta</span><span class="p">[:,</span> <span class="n">struct</span><span class="o">.</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">update_b</span>
+        <span class="c1"># Next iteration add less Identity matrix</span>
+        <span class="n">struct</span><span class="o">.</span><span class="n">lbd</span> <span class="o">=</span> <span class="n">lbd</span> <span class="o">/</span> <span class="n">damping_multiplier</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Update &#39;a&#39; reduced the cost function</span>
+        <span class="n">struct</span><span class="o">.</span><span class="n">theta_updated</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="c1"># Store the new cost</span>
+        <span class="n">struct</span><span class="o">.</span><span class="n">cost</span><span class="p">[</span><span class="n">struct</span><span class="o">.</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">cost_a</span>
+        <span class="c1"># Choose update &#39;a&#39;</span>
+        <span class="n">struct</span><span class="o">.</span><span class="n">t</span><span class="p">[:,</span> <span class="n">struct</span><span class="o">.</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">t_potential_a</span> <span class="o">/</span> <span class="n">norm</span><span class="p">(</span><span class="n">t_potential_a</span><span class="p">)</span>
+        <span class="c1"># Store the step direction</span>
+        <span class="n">struct</span><span class="o">.</span><span class="n">delta</span><span class="p">[:,</span> <span class="n">struct</span><span class="o">.</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">update_a</span>
+        <span class="c1"># Keep the same damping for the next iteration</span>
+        <span class="n">struct</span><span class="o">.</span><span class="n">lbd</span> <span class="o">=</span> <span class="n">lbd</span>
+
+    <span class="k">return</span> <span class="n">struct</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Alexander Abesteh.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,437 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>geodesicparams package &mdash; GeodesicParams 0.2.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=66b59bf7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=37f418d5"></script>
+      <script src="_static/doctools.js?v=9a2dae69"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            GeodesicParams
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">geodesicparams package</a><ul>
+<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-geodesicparams.fit_geodesic">geodesicparams.fit_geodesic module</a><ul>
+<li><a class="reference internal" href="#geodesicparams.fit_geodesic.check_r_theta"><code class="docutils literal notranslate"><span class="pre">check_r_theta()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.fit_geodesic.compute_initials"><code class="docutils literal notranslate"><span class="pre">compute_initials()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.fit_geodesic.conv_celestial_to_cartesian"><code class="docutils literal notranslate"><span class="pre">conv_celestial_to_cartesian()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.fit_geodesic.conv_real_to_apparent"><code class="docutils literal notranslate"><span class="pre">conv_real_to_apparent()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.fit_geodesic.conv_schwarzs_cart"><code class="docutils literal notranslate"><span class="pre">conv_schwarzs_cart()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.fit_geodesic.fit_geodesic_orbit"><code class="docutils literal notranslate"><span class="pre">fit_geodesic_orbit()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.fit_geodesic.log_likelihood_emcee"><code class="docutils literal notranslate"><span class="pre">log_likelihood_emcee()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.fit_geodesic.log_likelihood_scipy"><code class="docutils literal notranslate"><span class="pre">log_likelihood_scipy()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.fit_geodesic.log_priors"><code class="docutils literal notranslate"><span class="pre">log_priors()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.fit_geodesic.log_probability"><code class="docutils literal notranslate"><span class="pre">log_probability()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-geodesicparams.utilities">geodesicparams.utilities module</a><ul>
+<li><a class="reference internal" href="#geodesicparams.utilities.clear_directory"><code class="docutils literal notranslate"><span class="pre">clear_directory()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.utilities.eval_roots"><code class="docutils literal notranslate"><span class="pre">eval_roots()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.utilities.extract_multiple_elems"><code class="docutils literal notranslate"><span class="pre">extract_multiple_elems()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.utilities.find_next"><code class="docutils literal notranslate"><span class="pre">find_next()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.utilities.inlist"><code class="docutils literal notranslate"><span class="pre">inlist()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.utilities.separate_zeros"><code class="docutils literal notranslate"><span class="pre">separate_zeros()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-geodesicparams">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">GeodesicParams</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">geodesicparams package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/geodesicparams.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="geodesicparams-package">
+<h1>geodesicparams package<a class="headerlink" href="#geodesicparams-package" title="Link to this heading"></a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="geodesicparams.ellipsefitting.html">geodesicparams.ellipsefitting package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="geodesicparams.ellipsefitting.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.ellipsefitting.direct_ellipse_fitting.html">geodesicparams.ellipsefitting.direct_ellipse_fitting package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geodesicparams.ellipsefitting.direct_ellipse_fitting.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="geodesicparams.ellipsefitting.direct_ellipse_fitting.html#module-geodesicparams.ellipsefitting.direct_ellipse_fitting.direct_ellipse_estimates">geodesicparams.ellipsefitting.direct_ellipse_fitting.direct_ellipse_estimates module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="geodesicparams.ellipsefitting.direct_ellipse_fitting.html#module-geodesicparams.ellipsefitting.direct_ellipse_fitting.ellipse_fit">geodesicparams.ellipsefitting.direct_ellipse_fitting.ellipse_fit module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="geodesicparams.ellipsefitting.direct_ellipse_fitting.html#module-geodesicparams.ellipsefitting.direct_ellipse_fitting">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.ellipsefitting.ellipse_3d.html">geodesicparams.ellipsefitting.ellipse_3d package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geodesicparams.ellipsefitting.ellipse_3d.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="geodesicparams.ellipsefitting.ellipse_3d.html#module-geodesicparams.ellipsefitting.ellipse_3d.fit_3d_ellipse">geodesicparams.ellipsefitting.ellipse_3d.fit_3d_ellipse module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="geodesicparams.ellipsefitting.ellipse_3d.html#module-geodesicparams.ellipsefitting.ellipse_3d">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.html">geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.html#module-geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.ellipse_estimates">geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.ellipse_estimates module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.html#module-geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.guaranteed_ellipse_fit">geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.guaranteed_ellipse_fit module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.html#module-geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.levenberg_marquardt">geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.levenberg_marquardt module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.html#module-geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.line_search_step">geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.line_search_step module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.html#module-geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.ellipsefitting.helper_functions.html">geodesicparams.ellipsefitting.helper_functions package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geodesicparams.ellipsefitting.helper_functions.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="geodesicparams.ellipsefitting.helper_functions.html#module-geodesicparams.ellipsefitting.helper_functions.normalise_2d_pts">geodesicparams.ellipsefitting.helper_functions.normalise_2d_pts module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="geodesicparams.ellipsefitting.helper_functions.html#module-geodesicparams.ellipsefitting.helper_functions">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="geodesicparams.ellipsefitting.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="geodesicparams.ellipsefitting.html#module-geodesicparams.ellipsefitting.matrix_functions">geodesicparams.ellipsefitting.matrix_functions module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.ellipsefitting.html#geodesicparams.ellipsefitting.matrix_functions.element_div"><code class="docutils literal notranslate"><span class="pre">element_div()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.ellipsefitting.html#geodesicparams.ellipsefitting.matrix_functions.element_mul"><code class="docutils literal notranslate"><span class="pre">element_mul()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.ellipsefitting.html#geodesicparams.ellipsefitting.matrix_functions.element_pow"><code class="docutils literal notranslate"><span class="pre">element_pow()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="geodesicparams.ellipsefitting.html#module-geodesicparams.ellipsefitting">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="geodesicparams.riemannsurfaces.html">geodesicparams.riemannsurfaces package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="geodesicparams.riemannsurfaces.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.riemannsurfaces.integrations.html">geodesicparams.riemannsurfaces.integrations package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geodesicparams.riemannsurfaces.integrations.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="geodesicparams.riemannsurfaces.integrations.html#module-geodesicparams.riemannsurfaces.integrations.integrate_hyperelliptic">geodesicparams.riemannsurfaces.integrations.integrate_hyperelliptic module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="geodesicparams.riemannsurfaces.integrations.html#module-geodesicparams.riemannsurfaces.integrations">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.riemannsurfaces.period_matrices.html">geodesicparams.riemannsurfaces.period_matrices package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geodesicparams.riemannsurfaces.period_matrices.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="geodesicparams.riemannsurfaces.period_matrices.html#module-geodesicparams.riemannsurfaces.period_matrices.periods_genus1_first">geodesicparams.riemannsurfaces.period_matrices.periods_genus1_first module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="geodesicparams.riemannsurfaces.period_matrices.html#module-geodesicparams.riemannsurfaces.period_matrices.periods_genus1_second">geodesicparams.riemannsurfaces.period_matrices.periods_genus1_second module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="geodesicparams.riemannsurfaces.period_matrices.html#module-geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first">geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="geodesicparams.riemannsurfaces.period_matrices.html#module-geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second">geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="geodesicparams.riemannsurfaces.period_matrices.html#module-geodesicparams.riemannsurfaces.period_matrices">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.riemannsurfaces.riemann_funcs.html">geodesicparams.riemannsurfaces.riemann_funcs package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geodesicparams.riemannsurfaces.riemann_funcs.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="geodesicparams.riemannsurfaces.riemann_funcs.html#module-geodesicparams.riemannsurfaces.riemann_funcs.abel_map">geodesicparams.riemannsurfaces.riemann_funcs.abel_map module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="geodesicparams.riemannsurfaces.riemann_funcs.html#module-geodesicparams.riemannsurfaces.riemann_funcs.elliptic_funcs">geodesicparams.riemannsurfaces.riemann_funcs.elliptic_funcs module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="geodesicparams.riemannsurfaces.riemann_funcs.html#module-geodesicparams.riemannsurfaces.riemann_funcs.hyperelp_funcs">geodesicparams.riemannsurfaces.riemann_funcs.hyperelp_funcs module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="geodesicparams.riemannsurfaces.riemann_funcs.html#geodesicparams-riemannsurfaces-riemann-funcs-new-module">geodesicparams.riemannsurfaces.riemann_funcs.new module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="geodesicparams.riemannsurfaces.riemann_funcs.html#module-geodesicparams.riemannsurfaces.riemann_funcs.theta_helper">geodesicparams.riemannsurfaces.riemann_funcs.theta_helper module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="geodesicparams.riemannsurfaces.riemann_funcs.html#module-geodesicparams.riemannsurfaces.riemann_funcs">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="geodesicparams.riemannsurfaces.html#module-geodesicparams.riemannsurfaces">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="geodesicparams.solvegeodesics.html">geodesicparams.solvegeodesics package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="geodesicparams.solvegeodesics.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="geodesicparams.solvegeodesics.html#module-geodesicparams.solvegeodesics.general_relativity">geodesicparams.solvegeodesics.general_relativity module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.solvegeodesics.html#geodesicparams.solvegeodesics.general_relativity.check_orbit_types"><code class="docutils literal notranslate"><span class="pre">check_orbit_types()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.solvegeodesics.html#geodesicparams.solvegeodesics.general_relativity.check_rinitials"><code class="docutils literal notranslate"><span class="pre">check_rinitials()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.solvegeodesics.html#geodesicparams.solvegeodesics.general_relativity.check_thetainitials"><code class="docutils literal notranslate"><span class="pre">check_thetainitials()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.solvegeodesics.html#geodesicparams.solvegeodesics.general_relativity.classify_spacetime"><code class="docutils literal notranslate"><span class="pre">classify_spacetime()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.solvegeodesics.html#geodesicparams.solvegeodesics.general_relativity.convert_boundsinit"><code class="docutils literal notranslate"><span class="pre">convert_boundsinit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.solvegeodesics.html#geodesicparams.solvegeodesics.general_relativity.four_velocity"><code class="docutils literal notranslate"><span class="pre">four_velocity()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.solvegeodesics.html#geodesicparams.solvegeodesics.general_relativity.get_allowed_orbits"><code class="docutils literal notranslate"><span class="pre">get_allowed_orbits()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="geodesicparams.solvegeodesics.html#module-geodesicparams.solvegeodesics.solve_eom">geodesicparams.solvegeodesics.solve_eom module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.solvegeodesics.html#geodesicparams.solvegeodesics.solve_eom.check_initNewton"><code class="docutils literal notranslate"><span class="pre">check_initNewton()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.solvegeodesics.html#geodesicparams.solvegeodesics.solve_eom.compute_secondkind_periods"><code class="docutils literal notranslate"><span class="pre">compute_secondkind_periods()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.solvegeodesics.html#geodesicparams.solvegeodesics.solve_eom.integrate_elliptic_third"><code class="docutils literal notranslate"><span class="pre">integrate_elliptic_third()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.solvegeodesics.html#geodesicparams.solvegeodesics.solve_eom.integrate_eom"><code class="docutils literal notranslate"><span class="pre">integrate_eom()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.solvegeodesics.html#geodesicparams.solvegeodesics.solve_eom.integrate_hyperelliptic_first"><code class="docutils literal notranslate"><span class="pre">integrate_hyperelliptic_first()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.solvegeodesics.html#geodesicparams.solvegeodesics.solve_eom.integrate_hyperelliptic_third"><code class="docutils literal notranslate"><span class="pre">integrate_hyperelliptic_third()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.solvegeodesics.html#geodesicparams.solvegeodesics.solve_eom.invert_elliptic_first"><code class="docutils literal notranslate"><span class="pre">invert_elliptic_first()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.solvegeodesics.html#geodesicparams.solvegeodesics.solve_eom.invert_eom"><code class="docutils literal notranslate"><span class="pre">invert_eom()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.solvegeodesics.html#geodesicparams.solvegeodesics.solve_eom.invert_hyperelliptic_first"><code class="docutils literal notranslate"><span class="pre">invert_hyperelliptic_first()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.solvegeodesics.html#geodesicparams.solvegeodesics.solve_eom.invert_trigonometric_first"><code class="docutils literal notranslate"><span class="pre">invert_trigonometric_first()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.solvegeodesics.html#geodesicparams.solvegeodesics.solve_eom.orbitdata"><code class="docutils literal notranslate"><span class="pre">orbitdata()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.solvegeodesics.html#geodesicparams.solvegeodesics.solve_eom.sigma_ln"><code class="docutils literal notranslate"><span class="pre">sigma_ln()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.solvegeodesics.html#geodesicparams.solvegeodesics.solve_eom.sigma_ln_numerical"><code class="docutils literal notranslate"><span class="pre">sigma_ln_numerical()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.solvegeodesics.html#geodesicparams.solvegeodesics.solve_eom.solution"><code class="docutils literal notranslate"><span class="pre">solution()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.solvegeodesics.html#geodesicparams.solvegeodesics.solve_eom.solution_first"><code class="docutils literal notranslate"><span class="pre">solution_first()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.solvegeodesics.html#geodesicparams.solvegeodesics.solve_eom.solution_second"><code class="docutils literal notranslate"><span class="pre">solution_second()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="geodesicparams.solvegeodesics.html#module-geodesicparams.solvegeodesics.solve_geodesics">geodesicparams.solvegeodesics.solve_geodesics module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.solvegeodesics.html#geodesicparams.solvegeodesics.solve_geodesics.solve_geodesic_orbit"><code class="docutils literal notranslate"><span class="pre">solve_geodesic_orbit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.solvegeodesics.html#geodesicparams.solvegeodesics.solve_geodesics.solve_geodesic_time"><code class="docutils literal notranslate"><span class="pre">solve_geodesic_time()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.solvegeodesics.html#geodesicparams.solvegeodesics.solve_geodesics.solve_geodesic_worldline"><code class="docutils literal notranslate"><span class="pre">solve_geodesic_worldline()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="geodesicparams.solvegeodesics.html#module-geodesicparams.solvegeodesics.substitution">geodesicparams.solvegeodesics.substitution module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.solvegeodesics.html#geodesicparams.solvegeodesics.substitution.convert_deg3"><code class="docutils literal notranslate"><span class="pre">convert_deg3()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.solvegeodesics.html#geodesicparams.solvegeodesics.substitution.convert_deg5"><code class="docutils literal notranslate"><span class="pre">convert_deg5()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.solvegeodesics.html#geodesicparams.solvegeodesics.substitution.convert_degeven"><code class="docutils literal notranslate"><span class="pre">convert_degeven()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.solvegeodesics.html#geodesicparams.solvegeodesics.substitution.convert_polynomial"><code class="docutils literal notranslate"><span class="pre">convert_polynomial()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="geodesicparams.solvegeodesics.html#module-geodesicparams.solvegeodesics">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-geodesicparams.fit_geodesic">
+<span id="geodesicparams-fit-geodesic-module"></span><h2>geodesicparams.fit_geodesic module<a class="headerlink" href="#module-geodesicparams.fit_geodesic" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.fit_geodesic.check_r_theta">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.fit_geodesic.</span></span><span class="sig-name descname"><span class="pre">check_r_theta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/fit_geodesic.html#check_r_theta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.fit_geodesic.check_r_theta" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.fit_geodesic.compute_initials">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.fit_geodesic.</span></span><span class="sig-name descname"><span class="pre">compute_initials</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_init</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_init</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_init</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/fit_geodesic.html#compute_initials"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.fit_geodesic.compute_initials" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.fit_geodesic.conv_celestial_to_cartesian">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.fit_geodesic.</span></span><span class="sig-name descname"><span class="pre">conv_celestial_to_cartesian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">distance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ra</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dec</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/fit_geodesic.html#conv_celestial_to_cartesian"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.fit_geodesic.conv_celestial_to_cartesian" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.fit_geodesic.conv_real_to_apparent">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.fit_geodesic.</span></span><span class="sig-name descname"><span class="pre">conv_real_to_apparent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orbit_elements</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/fit_geodesic.html#conv_real_to_apparent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.fit_geodesic.conv_real_to_apparent" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.fit_geodesic.conv_schwarzs_cart">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.fit_geodesic.</span></span><span class="sig-name descname"><span class="pre">conv_schwarzs_cart</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digits</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/fit_geodesic.html#conv_schwarzs_cart"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.fit_geodesic.conv_schwarzs_cart" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.fit_geodesic.fit_geodesic_orbit">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.fit_geodesic.</span></span><span class="sig-name descname"><span class="pre">fit_geodesic_orbit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/fit_geodesic.html#fit_geodesic_orbit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.fit_geodesic.fit_geodesic_orbit" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.fit_geodesic.log_likelihood_emcee">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.fit_geodesic.</span></span><span class="sig-name descname"><span class="pre">log_likelihood_emcee</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_real</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_real</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_real</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">E</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">L</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/fit_geodesic.html#log_likelihood_emcee"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.fit_geodesic.log_likelihood_emcee" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.fit_geodesic.log_likelihood_scipy">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.fit_geodesic.</span></span><span class="sig-name descname"><span class="pre">log_likelihood_scipy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_real</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_real</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_real</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ecc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">semi_maj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/fit_geodesic.html#log_likelihood_scipy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.fit_geodesic.log_likelihood_scipy" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.fit_geodesic.log_priors">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.fit_geodesic.</span></span><span class="sig-name descname"><span class="pre">log_priors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">E</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">L</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/fit_geodesic.html#log_priors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.fit_geodesic.log_priors" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.fit_geodesic.log_probability">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.fit_geodesic.</span></span><span class="sig-name descname"><span class="pre">log_probability</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ecc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">semi_maj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/fit_geodesic.html#log_probability"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.fit_geodesic.log_probability" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-geodesicparams.utilities">
+<span id="geodesicparams-utilities-module"></span><h2>geodesicparams.utilities module<a class="headerlink" href="#module-geodesicparams.utilities" title="Link to this heading"></a></h2>
+<p>Provides mini helper procedures utilized throughout various modules.</p>
+<p>Helper functions include sorting procedures for the roots of polynomials,
+clearing directories, checking if a number is in a list, and numerically
+evaluating symbolic numbers in a list.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.utilities.clear_directory">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.utilities.</span></span><span class="sig-name descname"><span class="pre">clear_directory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/utilities.html#clear_directory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.utilities.clear_directory" title="Link to this definition"></a></dt>
+<dd><p>Remove all files in a directory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dir</strong> (<em>string</em>) – A string representing the path to the directory to be cleared.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.utilities.eval_roots">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.utilities.</span></span><span class="sig-name descname"><span class="pre">eval_roots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lst</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/utilities.html#eval_roots"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.utilities.eval_roots" title="Link to this definition"></a></dt>
+<dd><p>Evaluate the symbolic roots of a polynomial numerically.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>lst</strong> (<em>list</em>) – A list of complex or real numbers representing the roots of a
+polynomial symbolically.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>lst</strong> – The original list of numbers evaluated numerically instead of symbolically.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.utilities.extract_multiple_elems">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.utilities.</span></span><span class="sig-name descname"><span class="pre">extract_multiple_elems</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lst</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/utilities.html#extract_multiple_elems"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.utilities.extract_multiple_elems" title="Link to this definition"></a></dt>
+<dd><p>Remove duplicate elements from &lt;lst&gt; and store them in a separate
+list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>lst</strong> (<em>list</em>) – A list of complex or real numbers.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>clean_list</strong> (<em>list</em>) – The original list, but with duplicate elements removed.</p></li>
+<li><p><strong>mult_elems</strong> (<em>list</em>) – A list of the duplicate elements removed from &lt;lst&gt;.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.utilities.find_next">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.utilities.</span></span><span class="sig-name descname"><span class="pre">find_next</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expression</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lst</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/utilities.html#find_next"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.utilities.find_next" title="Link to this definition"></a></dt>
+<dd><p>Find a number in &lt;lst&gt; that is closest to the value of &lt;expression&gt;.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>expression</strong> (<em>real</em>) – A real number.</p></li>
+<li><p><strong>lst</strong> (<em>list</em>) – A list of real numbers.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The number in &lt;lst&gt; closest to &lt;expression&gt;.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>real</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.utilities.inlist">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.utilities.</span></span><span class="sig-name descname"><span class="pre">inlist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lst</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/utilities.html#inlist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.utilities.inlist" title="Link to this definition"></a></dt>
+<dd><p>Given a complex number &lt;element&gt;, find what index the element is
+located at in &lt;lst&gt;. Return -1 if &lt;element&gt; is not in &lt;lst&gt;.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>element</strong> (<em>complex</em>) – A complex number.</p></li>
+<li><p><strong>lst</strong> (<em>list</em>) – A list of complex or real numbers.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>result</strong> – The index at which &lt;element&gt; is located in &lt;lst&gt;.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>integer</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.utilities.separate_zeros">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.utilities.</span></span><span class="sig-name descname"><span class="pre">separate_zeros</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zeros</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/utilities.html#separate_zeros"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.utilities.separate_zeros" title="Link to this definition"></a></dt>
+<dd><p>Seperate the zeros of a polynomial into its real roots
+and complex roots.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>zeros</strong> (<em>list</em>) – A list of complex and real numbers representing the roots
+of the polynomial.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>realNS</strong> (<em>list</em>) – A list of real numbers ordered from least to greatest.</p></li>
+<li><p><strong>complexNS</strong> (<em>list</em>) – A list of complex numbers ordered from least to greatest.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-geodesicparams">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-geodesicparams" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Alexander Abesteh.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

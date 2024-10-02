@@ -1,0 +1,1075 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first &mdash; GeodesicParams 0.2.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=66b59bf7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=37f418d5"></script>
+      <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            GeodesicParams
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">GeodesicParams</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Procedures for computing the periods of the first kind for a genus 2 Riemann surface.</span>
+
+<span class="sd">This is done by integrating the vector of canonical holomorphic differentials along the</span>
+<span class="sd">contours that connect the branch cuts and the contours that encircle the branch cuts.</span>
+
+<span class="sd">NOTE: fix some things here like the precision and documentation.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">mpmath</span> <span class="kn">import</span> <span class="n">quad</span><span class="p">,</span> <span class="n">matrix</span><span class="p">,</span> <span class="n">fabs</span><span class="p">,</span> <span class="n">eig</span><span class="p">,</span> <span class="n">exp</span><span class="p">,</span> <span class="n">pi</span><span class="p">,</span> <span class="n">mpc</span>
+<span class="kn">from</span> <span class="nn">sympy</span> <span class="kn">import</span> <span class="n">re</span><span class="p">,</span> <span class="n">im</span><span class="p">,</span> <span class="n">Symbol</span><span class="p">,</span> <span class="n">collect</span><span class="p">,</span> <span class="n">lambdify</span><span class="p">,</span> <span class="n">oo</span><span class="p">,</span> <span class="n">sqrt</span>
+
+<span class="kn">from</span> <span class="nn">...utilities</span> <span class="kn">import</span> <span class="n">inlist</span><span class="p">,</span> <span class="n">separate_zeros</span>
+<span class="kn">from</span> <span class="nn">..integrations.integrate_hyperelliptic</span> <span class="kn">import</span> <span class="n">myint_genus2</span><span class="p">,</span> <span class="n">int_genus2_complex</span>
+
+<div class="viewcode-block" id="periods">
+<a class="viewcode-back" href="../../../../geodesicparams.riemannsurfaces.period_matrices.html#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.periods">[docs]</a>
+<span class="k">def</span> <span class="nf">periods</span><span class="p">(</span><span class="n">realNS</span><span class="p">,</span> <span class="n">complexNS</span><span class="p">,</span> <span class="n">digits</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes the periods of the first kind for a genus 2 Riemann surface.</span>
+
+<span class="sd">    This is done by integrating the vector of canonical holomorphic differentials along the</span>
+<span class="sd">    contours that encircle the branch cuts and the contours connect the branch cuts.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    realNS : list</span>
+<span class="sd">        A list of real numbers, the real roots of the polynomial defining the Riemann</span>
+<span class="sd">        surface.</span>
+<span class="sd">    complexNS : list</span>
+<span class="sd">        A list of complex numbers, the complex roots of the polynomial defining the Riemann </span>
+<span class="sd">        surface.</span>
+<span class="sd">    digits : int</span>
+<span class="sd">        The number of digits to be used in the computation.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    matrix</span>
+<span class="sd">        A 2x4 matrix: the first 2x2 matrix represents the period matrix corresponding to the</span>
+<span class="sd">        integrations along the contours encircling the branch cuts. The second 2x2 matrix</span>
+<span class="sd">        represents the period matrix corresponding to the integrations along the contours</span>
+<span class="sd">        connecting the branch cuts.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">realNS</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">realNS</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">complexNS</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">reaPer</span><span class="p">(</span><span class="n">realNS</span><span class="p">,</span> <span class="n">digits</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">imaPer</span><span class="p">(</span><span class="n">realNS</span><span class="p">,</span> <span class="n">complexNS</span><span class="p">,</span> <span class="n">digits</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="reaPer">
+<a class="viewcode-back" href="../../../../geodesicparams.riemannsurfaces.period_matrices.html#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.reaPer">[docs]</a>
+<span class="k">def</span> <span class="nf">reaPer</span><span class="p">(</span><span class="n">realNS</span><span class="p">,</span> <span class="n">digits</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes the periods of the first kind for a genus 2 Riemann surface for the case that</span>
+<span class="sd">    all zeros of the polynomial defining the Riemann surface are real.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    realNS : list</span>
+<span class="sd">        A list of real numbers, the real roots of the polynomial defining the Riemann</span>
+<span class="sd">        surface.</span>
+<span class="sd">    digits : int</span>
+<span class="sd">        The number of digits to be used in the computation.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    matrix</span>
+<span class="sd">        A 2x4 matrix: the first 2x2 matrix represents the period matrix corresponding to the</span>
+<span class="sd">        integrations along the contours encircling the branch cuts. The second 2x2 matrix</span>
+<span class="sd">        represents the period matrix corresponding to the integrations along the contours</span>
+<span class="sd">        connecting the branch cuts.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">r</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+
+    <span class="c1"># Path A1: realNS[1]..realNS[2], negative branch</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">myint_genus2</span><span class="p">(</span><span class="n">realNS</span><span class="p">,</span> <span class="n">realNS</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">realNS</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">1</span><span class="p">,</span> <span class="n">digits</span><span class="p">)</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+   
+    <span class="c1"># Path A2: realNS[3]..realNS[4], positive branch</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">myint_genus2</span><span class="p">(</span><span class="n">realNS</span><span class="p">,</span> <span class="n">realNS</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">realNS</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">digits</span><span class="p">)</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># Path B2: realNS[4]..realNS[5], negative branch</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">myint_genus2</span><span class="p">(</span><span class="n">realNS</span><span class="p">,</span> <span class="n">realNS</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">realNS</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="mi">1</span><span class="p">,</span> <span class="n">digits</span><span class="p">)</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># Path B1 = B2 + B3, path B3: realNS[2]..realNS[3], positive branch</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">myint_genus2</span><span class="p">(</span><span class="n">realNS</span><span class="p">,</span> <span class="n">realNS</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">realNS</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">digits</span><span class="p">)</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">r</span></div>
+
+
+<div class="viewcode-block" id="imaPer">
+<a class="viewcode-back" href="../../../../geodesicparams.riemannsurfaces.period_matrices.html#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.imaPer">[docs]</a>
+<span class="k">def</span> <span class="nf">imaPer</span><span class="p">(</span><span class="n">realNS</span><span class="p">,</span> <span class="n">complexNS</span><span class="p">,</span> <span class="n">digits</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes the periods of the first kind for a genus 2 Riemann surface for the case that</span>
+<span class="sd">    the zeros of the polynomial defining the Riemann surface are complex. &lt;ima2Per&gt; is </span>
+<span class="sd">    called if there are two complex zeros, and &lt;ima4Per&gt; is called when there are 4 complex</span>
+<span class="sd">    zeros.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    realNS : list</span>
+<span class="sd">        A list of real numbers, the real roots of the polynomial defining the Riemann</span>
+<span class="sd">        surface.</span>
+<span class="sd">    complexNS : list</span>
+<span class="sd">        A list of complex numbers, the complex roots of the polynomial defining the Riemann </span>
+<span class="sd">        surface.</span>
+<span class="sd">    digits : int</span>
+<span class="sd">        The number of digits to be used in the computation.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    matrix</span>
+<span class="sd">        A 2x4 matrix: the first 2x2 matrix represents the period matrix corresponding to the</span>
+<span class="sd">        integrations along the contours encircling the branch cuts. The second 2x2 matrix</span>
+<span class="sd">        represents the period matrix corresponding to the integrations along the contours</span>
+<span class="sd">        connecting the branch cuts.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">complexNS</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ima2Per</span><span class="p">(</span><span class="n">realNS</span><span class="p">,</span> <span class="n">complexNS</span><span class="p">,</span> <span class="n">digits</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ima4Per</span><span class="p">(</span><span class="n">realNS</span><span class="p">,</span> <span class="n">complexNS</span><span class="p">,</span> <span class="n">digits</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ima2Per">
+<a class="viewcode-back" href="../../../../geodesicparams.riemannsurfaces.period_matrices.html#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.ima2Per">[docs]</a>
+<span class="k">def</span> <span class="nf">ima2Per</span><span class="p">(</span><span class="n">realNS</span><span class="p">,</span> <span class="n">complexNS</span><span class="p">,</span> <span class="n">digits</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes the periods of the first kind for a genus 2 Riemann surface for the case that</span>
+<span class="sd">    two zeros of the polynomial defining the Riemann surface are complex. There are 4 different</span>
+<span class="sd">    subcases, ima2Perk, where k is an integer related to the ordering of the zeros.</span>
+
+<span class="sd">    For all &lt;k&gt; subcases it is necessary to compute integrals along branch cuts perpendicular </span>
+<span class="sd">    to the real axis. For the calculation it has to be taken into account that the real part of </span>
+<span class="sd">    the integrals computed along such branch cuts is symmetrical with respect to the real axis </span>
+<span class="sd">    but that the imaginary part is antisymmetric. Therefore, the whole integral will be real.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    realNS : list</span>
+<span class="sd">        A list of real numbers, the real roots of the polynomial defining the Riemann</span>
+<span class="sd">        surface.</span>
+<span class="sd">    complexNS : list</span>
+<span class="sd">        A list of complex numbers, the complex roots of the polynomial defining the Riemann </span>
+<span class="sd">        surface.</span>
+<span class="sd">    digits : int</span>
+<span class="sd">        The number of digits to be used in the computation.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    matrix</span>
+<span class="sd">        A 2x4 matrix: the first 2x2 matrix represents the period matrix corresponding to the</span>
+<span class="sd">        integrations along the contours encircling the branch cuts. The second 2x2 matrix</span>
+<span class="sd">        represents the period matrix corresponding to the integrations along the contours</span>
+<span class="sd">        connecting the branch cuts.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">k</span> <span class="o">=</span> <span class="n">inlist</span><span class="p">(</span><span class="n">re</span><span class="p">(</span><span class="n">complexNS</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">realNS</span> <span class="o">+</span> <span class="p">[</span><span class="n">re</span><span class="p">(</span><span class="n">complexNS</span><span class="p">[</span><span class="mi">0</span><span class="p">])],</span> <span class="n">key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">re</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span>
+    <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ima2Per1</span><span class="p">(</span><span class="n">realNS</span><span class="p">,</span> <span class="n">complexNS</span><span class="p">,</span> <span class="n">digits</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ima2Per2</span><span class="p">(</span><span class="n">realNS</span><span class="p">,</span> <span class="n">complexNS</span><span class="p">,</span> <span class="n">digits</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ima2Per3</span><span class="p">(</span><span class="n">realNS</span><span class="p">,</span> <span class="n">complexNS</span><span class="p">,</span> <span class="n">digits</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ima2Per4</span><span class="p">(</span><span class="n">realNS</span><span class="p">,</span> <span class="n">complexNS</span><span class="p">,</span> <span class="n">digits</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ima4Per">
+<a class="viewcode-back" href="../../../../geodesicparams.riemannsurfaces.period_matrices.html#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.ima4Per">[docs]</a>
+<span class="k">def</span> <span class="nf">ima4Per</span><span class="p">(</span><span class="n">realNS</span><span class="p">,</span> <span class="n">complexNS</span><span class="p">,</span> <span class="n">digits</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes the periods of the first kind for a genus 2 Riemann surface for the case that</span>
+<span class="sd">    four zeros z1, z2, z3, z4 of the polynomial defining the Riemann surface are complex, where</span>
+<span class="sd">    Re(z1) = Re(z2), Re(z3) = Re(z4), and Re(z1) &lt; Re(z3). There are 3 different subcases, </span>
+<span class="sd">    ima4Perk, where k is an integer related to the ordering of the zeros.</span>
+
+<span class="sd">    For all &lt;k&gt; subcases it is necessary to compute integrals along branch cuts perpendicular </span>
+<span class="sd">    to the real axis. For the calculation it has to be taken into account that the real part </span>
+<span class="sd">    of the integrals computed along such branch cuts is symmetrical with respect to the real </span>
+<span class="sd">    axis but that the imaginary part is antisymmetric. Therefore, the whole integral will be </span>
+<span class="sd">    real.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    realNS : list</span>
+<span class="sd">        A list of real numbers, the real roots of the polynomial defining the Riemann</span>
+<span class="sd">        surface.</span>
+<span class="sd">    complexNS : list</span>
+<span class="sd">        A list of complex numbers, the complex roots of the polynomial defining the Riemann </span>
+<span class="sd">        surface.</span>
+<span class="sd">    digits : int</span>
+<span class="sd">        The number of digits to be used in the computation.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    matrix</span>
+<span class="sd">        A 2x4 matrix: the first 2x2 matrix represents the period matrix corresponding to the</span>
+<span class="sd">        integrations along the contours encircling the branch cuts. The second 2x2 matrix</span>
+<span class="sd">        represents the period matrix corresponding to the integrations along the contours</span>
+<span class="sd">        connecting the branch cuts.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">rea</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">([</span><span class="n">re</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">complexNS</span><span class="p">],</span> <span class="n">key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">re</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+
+    <span class="n">ima1</span> <span class="o">=</span> <span class="n">fabs</span><span class="p">(</span><span class="n">im</span><span class="p">(</span><span class="n">complexNS</span><span class="p">[</span><span class="n">inlist</span><span class="p">(</span><span class="n">rea</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="n">re</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">complexNS</span><span class="p">])]))</span>
+    <span class="n">ima2</span> <span class="o">=</span> <span class="n">fabs</span><span class="p">(</span><span class="n">im</span><span class="p">(</span><span class="n">complexNS</span><span class="p">[</span><span class="n">inlist</span><span class="p">(</span><span class="n">rea</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="n">re</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">complexNS</span><span class="p">])]))</span>
+
+    <span class="n">g</span> <span class="o">=</span> <span class="n">realNS</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">rea</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">g</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ima4Per1</span><span class="p">(</span><span class="n">realNS</span><span class="p">,</span> <span class="n">rea</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ima1</span><span class="p">,</span> <span class="n">rea</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">ima2</span><span class="p">,</span> <span class="n">digits</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">rea</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">g</span> <span class="ow">and</span> <span class="n">rea</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">g</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ima4Per3</span><span class="p">(</span><span class="n">realNS</span><span class="p">,</span> <span class="n">rea</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ima1</span><span class="p">,</span> <span class="n">rea</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">ima2</span><span class="p">,</span> <span class="n">digits</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">rea</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">g</span> <span class="ow">and</span> <span class="n">rea</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">g</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ima4Per2</span><span class="p">(</span><span class="n">realNS</span><span class="p">,</span> <span class="n">rea</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ima1</span><span class="p">,</span> <span class="n">rea</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">ima2</span><span class="p">,</span> <span class="n">digits</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ima2Per1">
+<a class="viewcode-back" href="../../../../geodesicparams.riemannsurfaces.period_matrices.html#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.ima2Per1">[docs]</a>
+<span class="k">def</span> <span class="nf">ima2Per1</span><span class="p">(</span><span class="n">realNS</span><span class="p">,</span> <span class="n">complexNS</span><span class="p">,</span> <span class="n">digits</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes the periods of the first kind for a genus 2 Riemann surface for the case that</span>
+<span class="sd">    two zeros of the polynomial defining the Riemann surface are complex, with subcase &lt;k&gt; = 1. There are 4 different</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    realNS : list</span>
+<span class="sd">        A list of real numbers, the real roots of the polynomial defining the Riemann</span>
+<span class="sd">        surface.</span>
+<span class="sd">    complexNS : list</span>
+<span class="sd">        A list of complex numbers, the complex roots of the polynomial defining the Riemann </span>
+<span class="sd">        surface.</span>
+<span class="sd">    digits : int</span>
+<span class="sd">        The number of digits to be used in the computation.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    matrix</span>
+<span class="sd">        A 2x4 matrix: the first 2x2 matrix represents the period matrix corresponding to the</span>
+<span class="sd">        integrations along the contours encircling the branch cuts. The second 2x2 matrix</span>
+<span class="sd">        represents the period matrix corresponding to the integrations along the contours</span>
+<span class="sd">        connecting the branch cuts.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">rea</span> <span class="o">=</span> <span class="n">re</span><span class="p">(</span><span class="n">complexNS</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">ima</span> <span class="o">=</span> <span class="n">fabs</span><span class="p">(</span><span class="n">im</span><span class="p">(</span><span class="n">complexNS</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    
+    <span class="n">zeros</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">realNS</span> <span class="o">+</span> <span class="n">complexNS</span><span class="p">,</span> <span class="n">key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">re</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+
+    <span class="n">r</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+
+    <span class="c1"># A2: zero3...zero4, pos. branch</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">myint_genus2</span><span class="p">(</span><span class="n">zeros</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">digits</span><span class="p">)</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+   
+    <span class="c1"># B2: zero4...zero5, neg. branch</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">myint_genus2</span><span class="p">(</span><span class="n">zeros</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="mi">1</span><span class="p">,</span> <span class="n">digits</span><span class="p">)</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># A1: zero2...zero1, neg. branch</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">int_genus2_complex</span><span class="p">(</span><span class="n">zeros</span><span class="p">,</span> <span class="n">rea</span><span class="p">,</span> <span class="n">ima</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">digits</span><span class="p">)</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">re</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">re</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="c1"># B1 = B2 + B3: B3: zero2...zero3, pos. branch</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">myint_genus2</span><span class="p">(</span><span class="n">zeros</span><span class="p">,</span> <span class="n">rea</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">digits</span><span class="p">)</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">r</span></div>
+
+
+<div class="viewcode-block" id="ima2Per2">
+<a class="viewcode-back" href="../../../../geodesicparams.riemannsurfaces.period_matrices.html#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.ima2Per2">[docs]</a>
+<span class="k">def</span> <span class="nf">ima2Per2</span><span class="p">(</span><span class="n">realNS</span><span class="p">,</span> <span class="n">complexNS</span><span class="p">,</span> <span class="n">digits</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes the periods of the first kind for a genus 2 Riemann surface for the case that</span>
+<span class="sd">    two zeros of the polynomial defining the Riemann surface are complex, with subcase &lt;k&gt; = 2. There are 4 different</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    realNS : list</span>
+<span class="sd">        A list of real numbers, the real roots of the polynomial defining the Riemann</span>
+<span class="sd">        surface.</span>
+<span class="sd">    complexNS : list</span>
+<span class="sd">        A list of complex numbers, the complex roots of the polynomial defining the Riemann </span>
+<span class="sd">        surface.</span>
+<span class="sd">    digits : int</span>
+<span class="sd">        The number of digits to be used in the computation.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    matrix</span>
+<span class="sd">        A 2x4 matrix: the first 2x2 matrix represents the period matrix corresponding to the</span>
+<span class="sd">        integrations along the contours encircling the branch cuts. The second 2x2 matrix</span>
+<span class="sd">        represents the period matrix corresponding to the integrations along the contours</span>
+<span class="sd">        connecting the branch cuts.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">rea</span> <span class="o">=</span> <span class="n">re</span><span class="p">(</span><span class="n">complexNS</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">ima</span> <span class="o">=</span> <span class="n">fabs</span><span class="p">(</span><span class="n">im</span><span class="p">(</span><span class="n">complexNS</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    
+    <span class="n">zeros</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">realNS</span> <span class="o">+</span> <span class="n">complexNS</span><span class="p">,</span> <span class="n">key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">re</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+
+    <span class="n">r</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+
+    <span class="c1"># B2: zero4...zero5, neg. branch</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">myint_genus2</span><span class="p">(</span><span class="n">zeros</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="mi">1</span><span class="p">,</span> <span class="n">digits</span><span class="p">)</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+   
+    <span class="c1"># A2: (zero1...rea)**+ + (rea...zero4)**+</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">myint_genus2</span><span class="p">(</span><span class="n">zeros</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">rea</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">digits</span><span class="p">)</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">myint_genus2</span><span class="p">(</span><span class="n">zeros</span><span class="p">,</span> <span class="n">rea</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">digits</span><span class="p">)</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">h</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">h</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># Computation of int_genus2_complex: neg. branch</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">int_genus2_complex</span><span class="p">(</span><span class="n">zeros</span><span class="p">,</span> <span class="n">rea</span><span class="p">,</span> <span class="n">ima</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">digits</span><span class="p">)</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">re</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">re</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">v</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># A1: (ima...0)**+ + (rea...zero1)**+ + (zero1...rea)**- + (0...-ima)**+</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">-</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">-</span> <span class="n">v</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">r</span></div>
+
+
+<div class="viewcode-block" id="ima2Per3">
+<a class="viewcode-back" href="../../../../geodesicparams.riemannsurfaces.period_matrices.html#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.ima2Per3">[docs]</a>
+<span class="k">def</span> <span class="nf">ima2Per3</span><span class="p">(</span><span class="n">realNS</span><span class="p">,</span> <span class="n">complexNS</span><span class="p">,</span> <span class="n">digits</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes the periods of the first kind for a genus 2 Riemann surface for the case that</span>
+<span class="sd">    two zeros of the polynomial defining the Riemann surface are complex, with subcase &lt;k&gt; = 3. There are 4 different</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    realNS : list</span>
+<span class="sd">        A list of real numbers, the real roots of the polynomial defining the Riemann</span>
+<span class="sd">        surface.</span>
+<span class="sd">    complexNS : list</span>
+<span class="sd">        A list of complex numbers, the complex roots of the polynomial defining the Riemann </span>
+<span class="sd">        surface.</span>
+<span class="sd">    digits : int</span>
+<span class="sd">        The number of digits to be used in the computation.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    matrix</span>
+<span class="sd">        A 2x4 matrix: the first 2x2 matrix represents the period matrix corresponding to the</span>
+<span class="sd">        integrations along the contours encircling the branch cuts. The second 2x2 matrix</span>
+<span class="sd">        represents the period matrix corresponding to the integrations along the contours</span>
+<span class="sd">        connecting the branch cuts.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">rea</span> <span class="o">=</span> <span class="n">re</span><span class="p">(</span><span class="n">complexNS</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">ima</span> <span class="o">=</span> <span class="n">fabs</span><span class="p">(</span><span class="n">im</span><span class="p">(</span><span class="n">complexNS</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    
+    <span class="n">zeros</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">realNS</span> <span class="o">+</span> <span class="n">complexNS</span><span class="p">,</span> <span class="n">key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">re</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+
+    <span class="c1"># For the calculation of the paths A2 and B2</span>
+    <span class="c1"># an integration rea...rea + I*ima is needed.</span>
+    <span class="c1"># The branch for this calculation depends on the following:</span>
+    <span class="k">if</span> <span class="p">((</span><span class="n">rea</span> <span class="o">-</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">rea</span> <span class="o">-</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="p">(</span><span class="n">rea</span> <span class="o">-</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">rea</span> <span class="o">-</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span> <span class="o">+</span> <span class="p">(</span><span class="n">rea</span> <span class="o">-</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">rea</span> <span class="o">-</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span><span class="o">.</span><span class="n">evalf</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">int_genus2_complex</span><span class="p">(</span><span class="n">zeros</span><span class="p">,</span> <span class="n">rea</span><span class="p">,</span> <span class="n">ima</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">digits</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">int_genus2_complex</span><span class="p">(</span><span class="n">zeros</span><span class="p">,</span> <span class="n">rea</span><span class="p">,</span> <span class="n">ima</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">digits</span><span class="p">)</span>
+
+    <span class="n">r</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+
+    <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">re</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">re</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+   
+    <span class="c1"># A1: zero1...zero2, neg. branch</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">myint_genus2</span><span class="p">(</span><span class="n">zeros</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">1</span><span class="p">,</span> <span class="n">digits</span><span class="p">)</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># B2: rea...zero5, neg. branch</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">myint_genus2</span><span class="p">(</span><span class="n">zeros</span><span class="p">,</span> <span class="n">rea</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="mi">1</span><span class="p">,</span> <span class="n">digits</span><span class="p">)</span>
+
+    <span class="c1"># Integration rea...rea + I*ima on &quot;back side&quot;</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># B1 = B3 + B2, B3: zero2...rea, pos. branch</span>
+    <span class="c1"># B3 = integration zeros[1]...rea + integration rea...rea - I*ima</span>
+    <span class="c1"># integration rea...rea - I*ima = - Re(a) + I*Im(a),</span>
+    <span class="c1"># as Re(int(rea...rea + I*ima)) = Re(int(rea...rea - I*ima)),</span>
+    <span class="c1"># Im(int(rea...rea + I*ima)) = -Im(int(rea...rea - I*ima))</span>
+    <span class="c1"># and the branch on rea - I*t is not the same as on rea + I*t</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">myint_genus2</span><span class="p">(</span><span class="n">zeros</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">rea</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">digits</span><span class="p">)</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="n">h</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">re</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">im</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="n">h</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">re</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">im</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">r</span></div>
+
+
+<div class="viewcode-block" id="ima2Per4">
+<a class="viewcode-back" href="../../../../geodesicparams.riemannsurfaces.period_matrices.html#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.ima2Per4">[docs]</a>
+<span class="k">def</span> <span class="nf">ima2Per4</span><span class="p">(</span><span class="n">realNS</span><span class="p">,</span> <span class="n">complexNS</span><span class="p">,</span> <span class="n">digits</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes the periods of the first kind for a genus 2 Riemann surface for the case that</span>
+<span class="sd">    two zeros of the polynomial defining the Riemann surface are complex, with subcase &lt;k&gt; = 4. There are 4 different</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    realNS : list</span>
+<span class="sd">        A list of real numbers, the real roots of the polynomial defining the Riemann</span>
+<span class="sd">        surface.</span>
+<span class="sd">    complexNS : list</span>
+<span class="sd">        A list of complex numbers, the complex roots of the polynomial defining the Riemann </span>
+<span class="sd">        surface.</span>
+<span class="sd">    digits : int</span>
+<span class="sd">        The number of digits to be used in the computation.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    matrix</span>
+<span class="sd">        A 2x4 matrix: the first 2x2 matrix represents the period matrix corresponding to the</span>
+<span class="sd">        integrations along the contours encircling the branch cuts. The second 2x2 matrix</span>
+<span class="sd">        represents the period matrix corresponding to the integrations along the contours</span>
+<span class="sd">        connecting the branch cuts.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">rea</span> <span class="o">=</span> <span class="n">re</span><span class="p">(</span><span class="n">complexNS</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">ima</span> <span class="o">=</span> <span class="n">fabs</span><span class="p">(</span><span class="n">im</span><span class="p">(</span><span class="n">complexNS</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    
+    <span class="n">zeros</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">realNS</span> <span class="o">+</span> <span class="n">complexNS</span><span class="p">,</span> <span class="n">key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">re</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+
+    <span class="n">r</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+
+    <span class="c1"># A1: zero1...zero2, neg branch</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">myint_genus2</span><span class="p">(</span><span class="n">zeros</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">1</span><span class="p">,</span> <span class="n">digits</span><span class="p">)</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+   
+    <span class="c1"># int_genus2_complex: pos. branch</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">int_genus2_complex</span><span class="p">(</span><span class="n">zeros</span><span class="p">,</span> <span class="n">rea</span><span class="p">,</span> <span class="n">ima</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">digits</span><span class="p">)</span>
+    
+    <span class="c1"># A2 (=zero4...zero5 on neg. side):</span>
+    <span class="c1"># (ima...0)**- + (rea...zero3)**- + (zero3...rea)**+ + (0...-ima)**-</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">myint_genus2</span><span class="p">(</span><span class="n">zeros</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">rea</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">digits</span><span class="p">)</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">re</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">v</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">re</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+ 
+    <span class="c1"># B2: (ima...0)**- + (rea...zero3)**-</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># B1 = B2 + B3: [(ima...0)**- + (rea...e3)**-]</span>
+    <span class="c1"># + [(e2...e3)**+ + (e3...rea)**+ + (0...-ima)**+]</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">myint_genus2</span><span class="p">(</span><span class="n">zeros</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">digits</span><span class="p">)</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">re</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">im</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">re</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">im</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">r</span></div>
+
+
+<div class="viewcode-block" id="ima4Per1">
+<a class="viewcode-back" href="../../../../geodesicparams.riemannsurfaces.period_matrices.html#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.ima4Per1">[docs]</a>
+<span class="k">def</span> <span class="nf">ima4Per1</span><span class="p">(</span><span class="n">realNS</span><span class="p">,</span> <span class="n">rea1</span><span class="p">,</span> <span class="n">ima1</span><span class="p">,</span> <span class="n">rea2</span><span class="p">,</span> <span class="n">ima2</span><span class="p">,</span> <span class="n">digits</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes the periods of the first kind for a genus 2 Riemann surface for the case that</span>
+<span class="sd">    four zeros z1, z2, z3, z4 of the polynomial defining the Riemann surface are complex, where</span>
+<span class="sd">    Re(z1) = Re(z2), Re(z3) = Re(z4), and Re(z1) &lt; Re(z3), with subcase &lt;k&gt; = 1.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    realNS : list</span>
+<span class="sd">        A list of real numbers, the real roots of the polynomial defining the Riemann</span>
+<span class="sd">        surface.</span>
+<span class="sd">    rea1 : float</span>
+<span class="sd">        The real part of the first complex zero.</span>
+<span class="sd">    ima1 : float</span>
+<span class="sd">        The absolute value of the imaginary part of the first complex zero. </span>
+<span class="sd">    rea2 : float</span>
+<span class="sd">        The real part of the third complex zero.</span>
+<span class="sd">    ima2 : float</span>
+<span class="sd">        The absolute value of the imaginary part of the third complex zero.</span>
+<span class="sd">    digits : int</span>
+<span class="sd">        The number of digits to be used in the computation.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    matrix</span>
+<span class="sd">        A 2x4 matrix: the first 2x2 matrix represents the period matrix corresponding to the</span>
+<span class="sd">        integrations along the contours encircling the branch cuts. The second 2x2 matrix</span>
+<span class="sd">        represents the period matrix corresponding to the integrations along the contours</span>
+<span class="sd">        connecting the branch cuts.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">r</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span>
+
+    <span class="n">zeros</span> <span class="o">=</span> <span class="p">[</span><span class="n">rea1</span> <span class="o">-</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">ima1</span><span class="p">,</span> <span class="n">rea1</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">ima1</span><span class="p">,</span> <span class="n">rea2</span> <span class="o">-</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">ima2</span><span class="p">,</span> <span class="n">rea2</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">ima2</span><span class="p">,</span> <span class="n">realNS</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+        <span class="n">t</span> <span class="o">*=</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">zeros</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">collect</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">expand</span><span class="p">(),</span> <span class="n">x</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">):</span>
+        <span class="n">p</span> <span class="o">+=</span> <span class="n">re</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">coeff</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">i</span><span class="p">))</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="n">i</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">lambdify</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+
+    <span class="c1"># A1: zero2...zero1 or -ima1...ima1, neg. branch</span>
+    <span class="n">h1</span> <span class="o">=</span> <span class="n">int_genus2_complex</span><span class="p">(</span><span class="n">zeros</span><span class="p">,</span> <span class="n">rea1</span><span class="p">,</span> <span class="n">ima1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">digits</span><span class="p">)</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">re</span><span class="p">(</span><span class="n">h1</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">re</span><span class="p">(</span><span class="n">h1</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="c1"># A2: zero4...zero3 or -ima2...ima2, branch depends</span>
+    <span class="k">if</span> <span class="p">((</span><span class="n">rea2</span> <span class="o">-</span> <span class="n">rea1</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">ima1</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">rea2</span> <span class="o">-</span> <span class="n">rea1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">rea2</span> <span class="o">-</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">4</span><span class="p">]))</span><span class="o">.</span><span class="n">evalf</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">h2</span> <span class="o">=</span> <span class="n">int_genus2_complex</span><span class="p">(</span><span class="n">zeros</span><span class="p">,</span> <span class="n">rea2</span><span class="p">,</span> <span class="n">ima2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">digits</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">h2</span> <span class="o">=</span> <span class="n">int_genus2_complex</span><span class="p">(</span><span class="n">zeros</span><span class="p">,</span> <span class="n">rea2</span><span class="p">,</span> <span class="n">ima2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">digits</span><span class="p">)</span>
+
+    <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">re</span><span class="p">(</span><span class="n">h2</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">re</span><span class="p">(</span><span class="n">h2</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+   
+    <span class="c1"># B2: zero3...rea2 (pos. branch) + rea2...zero5 (neg. branch)</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">myint_genus2</span><span class="p">(</span><span class="n">zeros</span><span class="p">,</span> <span class="n">rea2</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="mi">1</span><span class="p">,</span> <span class="n">digits</span><span class="p">)</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">h2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">h2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># B1 = B2 + B3, B3: zero1...rea1 (pos. branch) + rea1...rea2 (pos. branch)</span>
+    <span class="c1"># + rea2...zero4 (neg. branch)</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="n">h1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">quad</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">sqrt</span><span class="p">(</span><span class="o">-</span><span class="n">p</span><span class="p">(</span><span class="n">x</span><span class="p">)),</span> <span class="p">[</span><span class="n">rea1</span><span class="p">,</span> <span class="n">rea2</span><span class="p">])</span> <span class="o">-</span> <span class="n">re</span><span class="p">(</span><span class="n">h2</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">im</span><span class="p">(</span><span class="n">h2</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="n">h1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">quad</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">x</span> <span class="o">/</span> <span class="n">sqrt</span><span class="p">(</span><span class="o">-</span><span class="n">p</span><span class="p">(</span><span class="n">x</span><span class="p">)),</span> <span class="p">[</span><span class="n">rea1</span><span class="p">,</span> <span class="n">rea2</span><span class="p">])</span> <span class="o">-</span> <span class="n">re</span><span class="p">(</span><span class="n">h2</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">im</span><span class="p">(</span><span class="n">h2</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">r</span></div>
+
+
+<div class="viewcode-block" id="ima4Per2">
+<a class="viewcode-back" href="../../../../geodesicparams.riemannsurfaces.period_matrices.html#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.ima4Per2">[docs]</a>
+<span class="k">def</span> <span class="nf">ima4Per2</span><span class="p">(</span><span class="n">realNS</span><span class="p">,</span> <span class="n">rea1</span><span class="p">,</span> <span class="n">ima1</span><span class="p">,</span> <span class="n">rea2</span><span class="p">,</span> <span class="n">ima2</span><span class="p">,</span> <span class="n">digits</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes the periods of the first kind for a genus 2 Riemann surface for the case that</span>
+<span class="sd">    four zeros z1, z2, z3, z4 of the polynomial defining the Riemann surface are complex, where</span>
+<span class="sd">    Re(z1) = Re(z2), Re(z3) = Re(z4), and Re(z1) &lt; Re(z3), with subcase &lt;k&gt; = 2.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    realNS : list</span>
+<span class="sd">        A list of real numbers, the real roots of the polynomial defining the Riemann</span>
+<span class="sd">        surface.</span>
+<span class="sd">    rea1 : float</span>
+<span class="sd">        The real part of the first complex zero.</span>
+<span class="sd">    ima1 : float</span>
+<span class="sd">        The absolute value of the imaginary part of the first complex zero. </span>
+<span class="sd">    rea2 : float</span>
+<span class="sd">        The real part of the third complex zero.</span>
+<span class="sd">    ima2 : float</span>
+<span class="sd">        The absolute value of the imaginary part of the third complex zero.</span>
+<span class="sd">    digits : int</span>
+<span class="sd">        The number of digits to be used in the computation.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    matrix</span>
+<span class="sd">        A 2x4 matrix: the first 2x2 matrix represents the period matrix corresponding to the</span>
+<span class="sd">        integrations along the contours encircling the branch cuts. The second 2x2 matrix</span>
+<span class="sd">        represents the period matrix corresponding to the integrations along the contours</span>
+<span class="sd">        connecting the branch cuts.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">r</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="n">zeros</span> <span class="o">=</span> <span class="p">[</span><span class="n">realNS</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">rea1</span> <span class="o">-</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">ima1</span><span class="p">,</span> <span class="n">rea1</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">ima1</span><span class="p">,</span> <span class="n">rea2</span> <span class="o">-</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">ima2</span><span class="p">,</span> <span class="n">rea2</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">ima2</span><span class="p">]</span>
+
+    <span class="c1"># Path rea1...rea1 + I*ima1, neg. branch</span>
+    <span class="n">a1</span> <span class="o">=</span> <span class="n">int_genus2_complex</span><span class="p">(</span><span class="n">zeros</span><span class="p">,</span> <span class="n">rea1</span><span class="p">,</span> <span class="n">ima1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">digits</span><span class="p">)</span>
+    <span class="c1"># Path rea2...rea2 + I*ima2, pos. branch</span>
+    <span class="n">a2</span> <span class="o">=</span> <span class="n">int_genus2_complex</span><span class="p">(</span><span class="n">zeros</span><span class="p">,</span> <span class="n">rea2</span><span class="p">,</span> <span class="n">ima2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">digits</span><span class="p">)</span>
+
+    <span class="c1"># Path A1: zero2...rea1 + rea1...zero1, pos. branch</span>
+    <span class="c1"># + zero1...rea1, neg. branch + rea1...zero3</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">myint_genus2</span><span class="p">(</span><span class="n">zeros</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">rea1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">digits</span><span class="p">)</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">re</span><span class="p">(</span><span class="n">a1</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">w</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">re</span><span class="p">(</span><span class="n">a1</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">w</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># Path A2: zero4...rea2 + rea2...zero1, neg. branch</span>
+    <span class="c1"># + zero1...rea2, pos. branch + rea2...zero5</span>
+    <span class="n">u</span> <span class="o">=</span> <span class="n">myint_genus2</span><span class="p">(</span><span class="n">zeros</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">rea2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">digits</span><span class="p">)</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">re</span><span class="p">(</span><span class="n">a2</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">re</span><span class="p">(</span><span class="n">a2</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># Path B2:</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">a2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">a2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># Path B1 = B2 + B3, path B3:</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="n">a1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">w</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">re</span><span class="p">(</span><span class="n">a2</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span><span class="n">im</span><span class="p">(</span><span class="n">a2</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="n">a1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">w</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">re</span><span class="p">(</span><span class="n">a2</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span><span class="n">im</span><span class="p">(</span><span class="n">a2</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">r</span></div>
+
+
+<div class="viewcode-block" id="ima4Per3">
+<a class="viewcode-back" href="../../../../geodesicparams.riemannsurfaces.period_matrices.html#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.ima4Per3">[docs]</a>
+<span class="k">def</span> <span class="nf">ima4Per3</span><span class="p">(</span><span class="n">realNS</span><span class="p">,</span> <span class="n">rea1</span><span class="p">,</span> <span class="n">ima1</span><span class="p">,</span> <span class="n">rea2</span><span class="p">,</span> <span class="n">ima2</span><span class="p">,</span> <span class="n">digits</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes the periods of the first kind for a genus 2 Riemann surface for the case that</span>
+<span class="sd">    four zeros z1, z2, z3, z4 of the polynomial defining the Riemann surface are complex, where</span>
+<span class="sd">    Re(z1) = Re(z2), Re(z3) = Re(z4), and Re(z1) &lt; Re(z3), with subcase &lt;k&gt; = 3.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    realNS : list</span>
+<span class="sd">        A list of real numbers, the real roots of the polynomial defining the Riemann</span>
+<span class="sd">        surface.</span>
+<span class="sd">    rea1 : float</span>
+<span class="sd">        The real part of the first complex zero.</span>
+<span class="sd">    ima1 : float</span>
+<span class="sd">        The absolute value of the imaginary part of the first complex zero. </span>
+<span class="sd">    rea2 : float</span>
+<span class="sd">        The real part of the third complex zero.</span>
+<span class="sd">    ima2 : float</span>
+<span class="sd">        The absolute value of the imaginary part of the third complex zero.</span>
+<span class="sd">    digits : int</span>
+<span class="sd">        The number of digits to be used in the computation.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    matrix</span>
+<span class="sd">        A 2x4 matrix: the first 2x2 matrix represents the period matrix corresponding to the</span>
+<span class="sd">        integrations along the contours encircling the branch cuts. The second 2x2 matrix</span>
+<span class="sd">        represents the period matrix corresponding to the integrations along the contours</span>
+<span class="sd">        connecting the branch cuts.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">r</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="n">zeros</span> <span class="o">=</span> <span class="p">[</span><span class="n">rea1</span> <span class="o">-</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">ima1</span><span class="p">,</span> <span class="n">rea1</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">ima1</span><span class="p">,</span> <span class="n">realNS</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">rea2</span> <span class="o">-</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">ima2</span><span class="p">,</span> <span class="n">rea2</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">ima2</span><span class="p">]</span>
+
+    <span class="c1"># Vertical branch cut zero1...zero2, neg. branch:</span>
+    <span class="n">h1</span> <span class="o">=</span> <span class="n">int_genus2_complex</span><span class="p">(</span><span class="n">zeros</span><span class="p">,</span> <span class="n">rea1</span><span class="p">,</span> <span class="n">ima1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">digits</span><span class="p">)</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">re</span><span class="p">(</span><span class="n">h1</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> 
+    <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">re</span><span class="p">(</span><span class="n">h1</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="c1"># Vertical branch zero4...zero5, pos. branch</span>
+    <span class="n">h2</span> <span class="o">=</span> <span class="n">int_genus2_complex</span><span class="p">(</span><span class="n">zeros</span><span class="p">,</span> <span class="n">rea2</span><span class="p">,</span> <span class="n">ima2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">digits</span><span class="p">)</span>
+    
+    <span class="c1"># A2: zero3...rea2, pos + rea2...zero4</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">myint_genus2</span><span class="p">(</span><span class="n">zeros</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">rea2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">digits</span><span class="p">)</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">re</span><span class="p">(</span><span class="n">h2</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">re</span><span class="p">(</span><span class="n">h2</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">v</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># B2: zero4...zero3</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">h2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">h2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">v</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># B1 = B2 + B3, B3: zero1...rea1 + rea1...zero3</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">myint_genus2</span><span class="p">(</span><span class="n">zeros</span><span class="p">,</span> <span class="n">rea1</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">digits</span><span class="p">)</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="n">h1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">h</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">h2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="n">h1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">h</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">v</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">h2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">r</span></div>
+
+
+<div class="viewcode-block" id="set_period_globals_genus2">
+<a class="viewcode-back" href="../../../../geodesicparams.riemannsurfaces.period_matrices.html#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.set_period_globals_genus2">[docs]</a>
+<span class="k">def</span> <span class="nf">set_period_globals_genus2</span><span class="p">(</span><span class="n">period_matrix</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sets the global variables &lt;periods_inverse&gt; and &lt;riemannM&gt; based on &lt;period_matrix&gt;, where</span>
+<span class="sd">    &lt;period_matrix&gt; = [&lt;periods_first&gt;, &lt;periods_second] (&lt;periods_first&gt; and </span>
+<span class="sd">    &lt;periods_second&gt; are 2x2 matrices such that &lt;periods_first&gt; are the integrals of the </span>
+<span class="sd">    vector of canonical holomorphic differentials along the contours that encircle the branch </span>
+<span class="sd">    cuts while &lt;periods_second&gt; are the integrals along the contours connecting the branch </span>
+<span class="sd">    cuts).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    period_matrix : matrix</span>
+<span class="sd">        A 2x4 mpmath matrix such that period_matrix = [&lt;periods_first&gt;, &lt;periods_second&gt;] (see</span>
+<span class="sd">        above).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    periods_inverse : matrix</span>
+<span class="sd">        A 2x2 mpmath matrix representing the inverse of the matrix &lt;periods_first&gt;</span>
+<span class="sd">    riemannM : matrix</span>
+<span class="sd">        A 2x2 mpmath matrix representing the Riemann matrix tau (riemannM = &lt;periods_inverse&gt;</span>
+<span class="sd">        * &lt;periods_second).</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">periods_first</span> <span class="o">=</span> <span class="n">period_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">periods_second</span> <span class="o">=</span> <span class="n">period_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
+
+    <span class="n">periods_inverse</span> <span class="o">=</span> <span class="n">periods_first</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">riemannM</span> <span class="o">=</span> <span class="n">periods_inverse</span> <span class="o">*</span> <span class="n">periods_second</span>
+    <span class="n">riemannM</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">riemannM</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">riemannM</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">riemannM</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">riemannM</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># Check properties of riemann matrix (positive definite imaginary part)</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">eig</span><span class="p">(</span><span class="n">riemannM</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">im</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">im</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">im</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">re</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">re</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Imaginary part of Riemann matrix is not positive definite&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">periods_inverse</span><span class="p">,</span> <span class="n">riemannM</span></div>
+
+
+<div class="viewcode-block" id="eval_period">
+<a class="viewcode-back" href="../../../../geodesicparams.riemannsurfaces.period_matrices.html#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.eval_period">[docs]</a>
+<span class="k">def</span> <span class="nf">eval_period</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">realNS</span><span class="p">,</span> <span class="n">zeros</span><span class="p">,</span> <span class="n">omega</span><span class="p">,</span> <span class="n">component</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes the period from one real zero of the set of zeros defining a Riemann surface </span>
+<span class="sd">    of genus 2 to another or to infinity.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    m : int</span>
+<span class="sd">        The index of the zero to compute the period from (realNS[&lt;m&gt;]).</span>
+<span class="sd">    n : int, oo</span>
+<span class="sd">        The index of the zero to compute the period to (realNS[&lt;n&gt;]). If &lt;n&gt; is oo, then</span>
+<span class="sd">        the period if computed from realNS[&lt;m&gt;] to oo.</span>
+<span class="sd">    realNS : list</span>
+<span class="sd">        The real zeros of the polynomial defining the genus 2 Riemann surface.</span>
+<span class="sd">    zeros : list</span>
+<span class="sd">        The zeros of the polynomial defining the genus 2 Riemann surface.</span>
+<span class="sd">    omega : matrix</span>
+<span class="sd">        A 2x4 mpmath matrix such that period_matrix = [&lt;periods_first&gt;, &lt;periods_second&gt;] (see</span>
+<span class="sd">        above).</span>
+<span class="sd">    component : int, optional</span>
+<span class="sd">        The row of the period matrix &lt;omega&gt; that should be used for the computation of the </span>
+<span class="sd">        period (can either be 0 or 1, where the default value is 0). </span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    result : complex</span>
+<span class="sd">        The period from realNS[&lt;m&gt;] to realNS[&lt;n&gt;]. </span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+  
+    <span class="c1"># Sort &lt;zeros&gt; by periodloops</span>
+    <span class="n">lange</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">zeros</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">lange</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">realNS</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">im</span><span class="p">(</span><span class="n">zeros</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">im</span><span class="p">(</span><span class="n">zeros</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span> 
+                <span class="n">e</span> <span class="o">=</span> <span class="p">[</span><span class="n">zeros</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">4</span><span class="p">]]</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">im</span><span class="p">(</span><span class="n">zeros</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">im</span><span class="p">(</span><span class="n">zeros</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span> 
+                <span class="n">e</span> <span class="o">=</span> <span class="p">[</span><span class="n">zeros</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">e</span> <span class="o">=</span> <span class="n">zeros</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">realNS</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">im</span><span class="p">(</span><span class="n">zeros</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> 
+                <span class="n">e</span> <span class="o">=</span> <span class="p">[</span><span class="n">zeros</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="k">elif</span> <span class="n">im</span><span class="p">(</span><span class="n">zeros</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> 
+                <span class="n">e</span>  <span class="o">=</span> <span class="p">[</span><span class="n">zeros</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">e</span> <span class="o">=</span> <span class="n">zeros</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">e</span> <span class="o">=</span> <span class="n">zeros</span>
+
+    <span class="c1"># Sort by m &lt; n</span>
+    <span class="k">if</span> <span class="n">m</span> <span class="o">&gt;</span> <span class="n">n</span><span class="p">:</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">n</span>
+        <span class="n">l</span> <span class="o">=</span> <span class="n">m</span>
+        <span class="n">sign</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">m</span>
+        <span class="n">l</span> <span class="o">=</span> <span class="n">n</span>
+        <span class="n">sign</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="o">-</span><span class="n">oo</span><span class="p">:</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">l</span>
+        <span class="n">l</span> <span class="o">=</span> <span class="n">oo</span>
+        <span class="n">sign</span> <span class="o">=</span> <span class="o">-</span><span class="n">sign</span>
+
+    <span class="c1"># Location of m, n in e</span>
+    <span class="n">K</span> <span class="o">=</span> <span class="n">inlist</span><span class="p">(</span><span class="n">realNS</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">e</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">l</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">realNS</span><span class="p">):</span>
+        <span class="n">L</span> <span class="o">=</span> <span class="n">inlist</span><span class="p">(</span><span class="n">realNS</span><span class="p">[</span><span class="n">l</span><span class="p">],</span> <span class="n">e</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">L</span> <span class="o">=</span> <span class="n">lange</span>
+
+    <span class="k">if</span> <span class="n">component</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">component</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;WARNING in eval_period: illegal component </span><span class="si">{</span><span class="n">component</span><span class="si">}</span><span class="s2"> changed to 1&quot;</span><span class="p">)</span>
+        <span class="n">component</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">periodlist</span> <span class="o">=</span> <span class="p">[</span><span class="n">omega</span><span class="p">[</span><span class="n">component</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">omega</span><span class="p">[</span><span class="n">component</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">omega</span><span class="p">[</span><span class="n">component</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">omega</span><span class="p">[</span><span class="n">component</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">omega</span><span class="p">[</span><span class="n">component</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="o">-</span><span class="n">omega</span><span class="p">[</span><span class="n">component</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">omega</span><span class="p">[</span><span class="n">component</span><span class="p">,</span> <span class="mi">1</span><span class="p">]]</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># Compute period</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="n">L</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">+=</span> <span class="n">periodlist</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">sign</span> <span class="o">*</span> <span class="n">result</span>
+
+    <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="branch_list_genus2">
+<a class="viewcode-back" href="../../../../geodesicparams.riemannsurfaces.period_matrices.html#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.branch_list_genus2">[docs]</a>
+<span class="k">def</span> <span class="nf">branch_list_genus2</span><span class="p">(</span><span class="n">zeros</span><span class="p">,</span> <span class="n">num_realNS</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Determines the branch adjacent to any zero given a list of zeros. </span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    zeros : list</span>
+<span class="sd">        The 5 zeros of the polynomial defining the genus 2 Riemann surface.</span>
+<span class="sd">    num_realNS : list</span>
+<span class="sd">        The number of real zeros in &lt;zeros&gt;, which may be 1, 3, or 5.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    erg : list</span>
+<span class="sd">        A list containing 5 lists. Each element of the 5 lists consists of three parts: </span>
+<span class="sd">        The first is the branch left of the zero, the second is the zero, and the third is </span>
+<span class="sd">        the branch right of the zero. In the case that the second part is a complex zero, the </span>
+<span class="sd">        entries depend on the sign of the imaginary part. If it is negative, the first entry </span>
+<span class="sd">        is the branch left of the branch cut on the real axis and the third is the branch on </span>
+<span class="sd">        the branch cut. If it&#39;s positive, the first entry is the branch on the branch cut and </span>
+<span class="sd">        the third is the branch right of the branch cut on the real axis. </span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">num_realNS</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+        <span class="n">erg</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="mi">1</span><span class="p">]]</span>
+    <span class="k">elif</span> <span class="n">num_realNS</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="c1"># ima2Per1</span>
+        <span class="k">if</span> <span class="n">im</span><span class="p">(</span><span class="n">zeros</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">erg</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="mi">1</span><span class="p">]]</span>
+        <span class="c1"># ima2Per2</span>
+        <span class="k">elif</span> <span class="n">im</span><span class="p">(</span><span class="n">zeros</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">erg</span> <span class="o">=</span> <span class="p">[[</span><span class="s2">&quot;tbd&quot;</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s2">&quot;tbd&quot;</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;tbd&quot;</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="mi">1</span><span class="p">]]</span>
+        <span class="c1"># ima2Per3</span>
+        <span class="k">elif</span> <span class="n">im</span><span class="p">(</span><span class="n">zeros</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">rea1</span> <span class="o">=</span> <span class="n">re</span><span class="p">(</span><span class="n">zeros</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+            <span class="k">if</span> <span class="p">((</span><span class="n">rea1</span><span class="o">-</span><span class="n">zeros</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">rea1</span><span class="o">-</span><span class="n">zeros</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="p">(</span><span class="n">rea1</span><span class="o">-</span><span class="n">zeros</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">rea1</span><span class="o">-</span><span class="n">zeros</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span> <span class="o">+</span> <span class="p">(</span><span class="n">rea1</span><span class="o">-</span><span class="n">zeros</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">rea1</span><span class="o">-</span><span class="n">zeros</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span><span class="o">.</span><span class="n">evalf</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">erg</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="mi">1</span><span class="p">]]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">erg</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="mi">1</span><span class="p">]]</span>
+        <span class="c1"># ima2Per4</span>
+        <span class="k">elif</span> <span class="n">im</span><span class="p">(</span><span class="n">zeros</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">erg</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;tbd&quot;</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="s2">&quot;tbd&quot;</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;tbd&quot;</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="mi">1</span><span class="p">]]</span>
+    <span class="k">elif</span> <span class="n">num_realNS</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="c1"># ima4Per1</span>
+        <span class="k">if</span> <span class="n">im</span><span class="p">(</span><span class="n">zeros</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">rea1</span> <span class="o">=</span> <span class="n">re</span><span class="p">(</span><span class="n">zeros</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span> <span class="n">rea2</span> <span class="o">=</span> <span class="n">re</span><span class="p">(</span><span class="n">zeros</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+            <span class="n">ima1</span> <span class="o">=</span> <span class="n">fabs</span><span class="p">(</span><span class="n">im</span><span class="p">(</span><span class="n">zeros</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+            <span class="k">if</span> <span class="p">((</span><span class="n">rea2</span><span class="o">-</span><span class="n">rea1</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">ima1</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">rea2</span><span class="o">-</span><span class="n">rea1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">rea2</span><span class="o">-</span><span class="n">zeros</span><span class="p">[</span><span class="mi">4</span><span class="p">]))</span><span class="o">.</span><span class="n">evalf</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">erg</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="mi">1</span><span class="p">]]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">erg</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="mi">1</span><span class="p">]]</span>
+        <span class="c1"># ima4Per2</span>
+        <span class="k">elif</span> <span class="n">im</span><span class="p">(</span><span class="n">zeros</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">erg</span> <span class="o">=</span> <span class="p">[[</span><span class="s2">&quot;tbd&quot;</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s2">&quot;tbd&quot;</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;tbd&quot;</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="s2">&quot;tbd&quot;</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;tbd&quot;</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="mi">1</span><span class="p">]]</span>
+        <span class="c1"># ima4Per3</span>
+        <span class="k">elif</span> <span class="n">im</span><span class="p">(</span><span class="n">zeros</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">erg</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;tbd&quot;</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="s2">&quot;tbd&quot;</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;tbd&quot;</span><span class="p">,</span> <span class="n">zeros</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="mi">1</span><span class="p">]]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Wrong number of real zeros.&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">erg</span></div>
+
+
+<div class="viewcode-block" id="int_genus2_first">
+<a class="viewcode-back" href="../../../../geodesicparams.riemannsurfaces.period_matrices.html#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.int_genus2_first">[docs]</a>
+<span class="k">def</span> <span class="nf">int_genus2_first</span><span class="p">(</span><span class="n">zeros</span><span class="p">,</span> <span class="n">lower</span><span class="p">,</span> <span class="n">upper</span><span class="p">,</span> <span class="n">digits</span><span class="p">,</span> <span class="n">periodMatrix</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Integrates the vector of canonical holomorphic differentials dz = [1/sqrt(P(z)), </span>
+<span class="sd">    z/sqrt(P(z))] from &lt;lower&gt; to &lt;upper&gt;.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    zeros : list</span>
+<span class="sd">        The 5 zeros of the polynomial defining the genus 2 Riemann surface.</span>
+<span class="sd">    lower : real</span>
+<span class="sd">        The lower integration bound.</span>
+<span class="sd">    upper : real</span>
+<span class="sd">        The upper integration bound.</span>
+<span class="sd">    digits : int</span>
+<span class="sd">        The number of digits to use in the computation.</span>
+<span class="sd">    periodMatrix : matrix, optional</span>
+<span class="sd">        A 2x4 mpmath matrix such that periodMatrix = [&lt;periods_first&gt;, &lt;periods_second&gt;],</span>
+<span class="sd">        where &lt;periods_first&gt; is the period matrix of the integral of holomorphic differentals</span>
+<span class="sd">        taken along the contours around the branch cuts, while &lt;periods_first&gt; is the period</span>
+<span class="sd">        matrix integrated along the contours connecting branch cuts.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    result : list</span>
+<span class="sd">        The value of the two integrals as a list.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">zeros</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">5</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Invalid use; number of zeros has to be 5.&quot;</span><span class="p">)</span>
+
+    <span class="n">e</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">zeros</span><span class="p">,</span> <span class="n">key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">re</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+    <span class="n">realNS</span><span class="p">,</span> <span class="n">complexNS</span> <span class="o">=</span> <span class="n">separate_zeros</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">im</span><span class="p">(</span><span class="n">lower</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">im</span><span class="p">(</span><span class="n">upper</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid use; only real integration bounds are feasible&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">lower</span> <span class="o">==</span> <span class="n">upper</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span>
+    <span class="k">elif</span> <span class="n">lower</span> <span class="o">&gt;</span> <span class="n">upper</span><span class="p">:</span>
+        <span class="n">sign</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">lb</span> <span class="o">=</span> <span class="n">upper</span>
+        <span class="n">ub</span> <span class="o">=</span> <span class="n">lower</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">sign</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">lb</span> <span class="o">=</span> <span class="n">lower</span>
+        <span class="n">ub</span> <span class="o">=</span> <span class="n">upper</span>
+
+    <span class="c1"># ------------------ Case 1: lb and ub are adjacent real zeros</span>
+    <span class="k">if</span> <span class="n">inlist</span><span class="p">(</span><span class="n">lb</span><span class="p">,</span> <span class="n">realNS</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">==</span> <span class="n">inlist</span><span class="p">(</span><span class="n">ub</span><span class="p">,</span> <span class="n">realNS</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">inlist</span><span class="p">(</span><span class="n">lb</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">==</span> <span class="n">inlist</span><span class="p">(</span><span class="n">ub</span><span class="p">,</span> <span class="n">e</span><span class="p">):</span>
+            <span class="n">tags</span> <span class="o">=</span> <span class="p">(</span><span class="n">lb</span> <span class="o">+</span> <span class="n">ub</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">tags</span> <span class="o">=</span> <span class="n">re</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="n">inlist</span><span class="p">(</span><span class="n">lb</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">branch_list</span> <span class="o">=</span> <span class="n">branch_list_genus2</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">realNS</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">sign</span> <span class="o">*</span> <span class="p">(</span><span class="n">myint_genus2</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">lb</span><span class="p">,</span> <span class="n">tags</span><span class="p">,</span> <span class="n">branch_list</span><span class="p">[</span><span class="n">inlist</span><span class="p">(</span><span class="n">lb</span><span class="p">,</span> <span class="n">e</span><span class="p">)][</span><span class="mi">2</span><span class="p">],</span> <span class="n">digits</span><span class="p">)</span> <span class="o">+</span> <span class="n">myint_genus2</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">tags</span><span class="p">,</span> <span class="n">ub</span><span class="p">,</span> <span class="n">branch_list</span><span class="p">[</span><span class="n">inlist</span><span class="p">(</span><span class="n">ub</span><span class="p">,</span> <span class="n">e</span><span class="p">)][</span><span class="mi">0</span><span class="p">],</span> <span class="n">digits</span><span class="p">))</span>
+    <span class="c1"># ------------------ Case 2: only one of lb and ub is a real zero</span>
+    <span class="k">elif</span> <span class="n">inlist</span><span class="p">(</span><span class="n">lb</span><span class="p">,</span> <span class="n">realNS</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">inlist</span><span class="p">(</span><span class="n">ub</span><span class="p">,</span> <span class="n">realNS</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">inlist</span><span class="p">(</span><span class="n">lb</span><span class="p">,</span> <span class="n">realNS</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># No real zeros between lb and ub</span>
+            <span class="k">if</span> <span class="n">inlist</span><span class="p">(</span><span class="n">lb</span><span class="p">,</span> <span class="nb">sorted</span><span class="p">([</span><span class="n">lb</span><span class="p">]</span> <span class="o">+</span> <span class="n">realNS</span><span class="p">,</span> <span class="n">key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">re</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span> <span class="o">==</span> <span class="n">inlist</span><span class="p">(</span><span class="n">ub</span><span class="p">,</span> <span class="n">realNS</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">sign</span> <span class="o">*</span> <span class="n">myint_genus2</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">lb</span><span class="p">,</span> <span class="n">ub</span><span class="p">,</span> <span class="n">branch_list_genus2</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">realNS</span><span class="p">))[</span><span class="n">inlist</span><span class="p">(</span><span class="n">ub</span><span class="p">,</span> <span class="n">e</span><span class="p">)][</span><span class="mi">0</span><span class="p">],</span> <span class="n">digits</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid bounds&quot;</span><span class="p">)</span>
+        <span class="c1"># Case 2b: lb is a real zero</span>
+        <span class="k">elif</span> <span class="n">inlist</span><span class="p">(</span><span class="n">ub</span><span class="p">,</span> <span class="n">realNS</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># No real zeros between lb and ub</span>
+            <span class="k">if</span> <span class="n">inlist</span><span class="p">(</span><span class="n">ub</span><span class="p">,</span> <span class="nb">sorted</span><span class="p">([</span><span class="n">ub</span><span class="p">]</span> <span class="o">+</span> <span class="n">realNS</span><span class="p">,</span> <span class="n">key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">re</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span> <span class="o">==</span> <span class="n">inlist</span><span class="p">(</span><span class="n">lb</span><span class="p">,</span> <span class="n">realNS</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">sign</span> <span class="o">*</span> <span class="n">myint_genus2</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">lb</span><span class="p">,</span> <span class="n">ub</span><span class="p">,</span> <span class="n">branch_list_genus2</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">realNS</span><span class="p">))[</span><span class="n">inlist</span><span class="p">(</span><span class="n">lb</span><span class="p">,</span> <span class="n">e</span><span class="p">)][</span><span class="mi">2</span><span class="p">],</span> <span class="n">digits</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid bounds&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid bounds&quot;</span><span class="p">)</span>
+    <span class="c1"># ---------------- Case 3: none of lb or ub is a real zero</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">inlist</span><span class="p">(</span><span class="n">lb</span><span class="p">,</span> <span class="nb">sorted</span><span class="p">([</span><span class="n">lb</span><span class="p">]</span> <span class="o">+</span> <span class="n">realNS</span><span class="p">,</span> <span class="n">key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">re</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span> <span class="o">==</span> <span class="n">inlist</span><span class="p">(</span><span class="n">ub</span><span class="p">,</span> <span class="nb">sorted</span><span class="p">([</span><span class="n">ub</span><span class="p">]</span> <span class="o">+</span> <span class="n">realNS</span><span class="p">,</span> <span class="n">key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">re</span><span class="p">(</span><span class="n">x</span><span class="p">))):</span>
+            <span class="k">if</span> <span class="n">periodMatrix</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">periodMatrix</span> <span class="o">=</span> <span class="n">periods</span><span class="p">(</span><span class="n">realNS</span><span class="p">,</span> <span class="n">complexNS</span><span class="p">,</span> <span class="n">digits</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">ub</span> <span class="o">==</span> <span class="n">oo</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">sign</span> <span class="o">*</span> <span class="p">(</span><span class="n">myint_genus2</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">lb</span><span class="p">,</span> <span class="n">realNS</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">branch_list_genus2</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">realNS</span><span class="p">))[</span><span class="n">inlist</span><span class="p">(</span><span class="n">realNS</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">e</span><span class="p">)][</span><span class="mi">2</span><span class="p">],</span> <span class="n">digits</span><span class="p">)</span> <span class="o">+</span> 
+                <span class="n">matrix</span><span class="p">([</span><span class="n">eval_period</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">realNS</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span><span class="n">oo</span><span class="p">,</span><span class="n">realNS</span><span class="p">,</span><span class="n">e</span><span class="p">,</span><span class="n">periodMatrix</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">eval_period</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">realNS</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span><span class="n">oo</span><span class="p">,</span><span class="n">realNS</span><span class="p">,</span><span class="n">e</span><span class="p">,</span><span class="n">periodMatrix</span><span class="p">,</span><span class="mi">1</span><span class="p">)]))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">p</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">e</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+                <span class="n">sign</span> <span class="o">=</span> <span class="n">sign</span> <span class="o">*</span> <span class="n">exp</span><span class="p">(</span><span class="n">pi</span> <span class="o">*</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">branch_list_genus2</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">realNS</span><span class="p">))[</span><span class="n">inlist</span><span class="p">(</span><span class="n">lb</span><span class="p">,</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">e</span> <span class="o">+</span> <span class="p">[</span><span class="n">lb</span><span class="p">],</span> <span class="n">key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">re</span><span class="p">(</span><span class="n">x</span><span class="p">)))][</span><span class="mi">2</span><span class="p">])</span>
+                <span class="k">return</span> <span class="n">matrix</span><span class="p">([</span><span class="n">sign</span> <span class="o">*</span> <span class="n">quad</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">mpc</span><span class="p">(</span><span class="n">sqrt</span><span class="p">(</span><span class="n">p</span><span class="p">(</span><span class="n">x</span><span class="p">))),</span> <span class="p">[</span><span class="n">lb</span><span class="p">,</span> <span class="n">ub</span><span class="p">]),</span> <span class="n">sign</span> <span class="o">*</span> <span class="n">quad</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">x</span> <span class="o">/</span> <span class="n">mpc</span><span class="p">(</span><span class="n">sqrt</span><span class="p">(</span><span class="n">p</span><span class="p">(</span><span class="n">x</span><span class="p">))),</span> <span class="p">[</span><span class="n">lb</span><span class="p">,</span> <span class="n">ub</span><span class="p">])])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid bounds&quot;</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Alexander Abesteh.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,261 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>geodesicparams.ellipsefitting package &mdash; GeodesicParams 0.2.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=66b59bf7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=37f418d5"></script>
+      <script src="_static/doctools.js?v=9a2dae69"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            GeodesicParams
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">geodesicparams.ellipsefitting package</a><ul>
+<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-geodesicparams.ellipsefitting.matrix_functions">geodesicparams.ellipsefitting.matrix_functions module</a><ul>
+<li><a class="reference internal" href="#geodesicparams.ellipsefitting.matrix_functions.element_div"><code class="docutils literal notranslate"><span class="pre">element_div()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.ellipsefitting.matrix_functions.element_mul"><code class="docutils literal notranslate"><span class="pre">element_mul()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.ellipsefitting.matrix_functions.element_pow"><code class="docutils literal notranslate"><span class="pre">element_pow()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-geodesicparams.ellipsefitting">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">GeodesicParams</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">geodesicparams.ellipsefitting package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/geodesicparams.ellipsefitting.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="geodesicparams-ellipsefitting-package">
+<h1>geodesicparams.ellipsefitting package<a class="headerlink" href="#geodesicparams-ellipsefitting-package" title="Link to this heading"></a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="geodesicparams.ellipsefitting.direct_ellipse_fitting.html">geodesicparams.ellipsefitting.direct_ellipse_fitting package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="geodesicparams.ellipsefitting.direct_ellipse_fitting.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="geodesicparams.ellipsefitting.direct_ellipse_fitting.html#module-geodesicparams.ellipsefitting.direct_ellipse_fitting.direct_ellipse_estimates">geodesicparams.ellipsefitting.direct_ellipse_fitting.direct_ellipse_estimates module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.ellipsefitting.direct_ellipse_fitting.html#geodesicparams.ellipsefitting.direct_ellipse_fitting.direct_ellipse_estimates.compute_directellipse_estimate"><code class="docutils literal notranslate"><span class="pre">compute_directellipse_estimate()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="geodesicparams.ellipsefitting.direct_ellipse_fitting.html#module-geodesicparams.ellipsefitting.direct_ellipse_fitting.ellipse_fit">geodesicparams.ellipsefitting.direct_ellipse_fitting.ellipse_fit module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.ellipsefitting.direct_ellipse_fitting.html#geodesicparams.ellipsefitting.direct_ellipse_fitting.ellipse_fit.direct_ellipse_fit"><code class="docutils literal notranslate"><span class="pre">direct_ellipse_fit()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="geodesicparams.ellipsefitting.direct_ellipse_fitting.html#module-geodesicparams.ellipsefitting.direct_ellipse_fitting">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="geodesicparams.ellipsefitting.ellipse_3d.html">geodesicparams.ellipsefitting.ellipse_3d package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="geodesicparams.ellipsefitting.ellipse_3d.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="geodesicparams.ellipsefitting.ellipse_3d.html#module-geodesicparams.ellipsefitting.ellipse_3d.fit_3d_ellipse">geodesicparams.ellipsefitting.ellipse_3d.fit_3d_ellipse module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.ellipsefitting.ellipse_3d.html#geodesicparams.ellipsefitting.ellipse_3d.fit_3d_ellipse.fit_ellipse_3d"><code class="docutils literal notranslate"><span class="pre">fit_ellipse_3d()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.ellipsefitting.ellipse_3d.html#geodesicparams.ellipsefitting.ellipse_3d.fit_3d_ellipse.rodrigues_rot"><code class="docutils literal notranslate"><span class="pre">rodrigues_rot()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="geodesicparams.ellipsefitting.ellipse_3d.html#module-geodesicparams.ellipsefitting.ellipse_3d">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.html">geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.html#module-geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.ellipse_estimates">geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.ellipse_estimates module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.html#geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.ellipse_estimates.compute_guaranteedellipse_estimate"><code class="docutils literal notranslate"><span class="pre">compute_guaranteedellipse_estimate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.html#geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.ellipse_estimates.conv_coeffs_to_axis"><code class="docutils literal notranslate"><span class="pre">conv_coeffs_to_axis()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.html#geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.ellipse_estimates.conv_coeffs_to_init_pos"><code class="docutils literal notranslate"><span class="pre">conv_coeffs_to_init_pos()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.html#geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.ellipse_estimates.parametric_rep"><code class="docutils literal notranslate"><span class="pre">parametric_rep()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.html#module-geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.guaranteed_ellipse_fit">geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.guaranteed_ellipse_fit module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.html#geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.guaranteed_ellipse_fit.EllipseData"><code class="docutils literal notranslate"><span class="pre">EllipseData</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.html#geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.guaranteed_ellipse_fit.guaranteedEllipseFit"><code class="docutils literal notranslate"><span class="pre">guaranteedEllipseFit()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.html#module-geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.levenberg_marquardt">geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.levenberg_marquardt module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.html#geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.levenberg_marquardt.levenbergMarquardtStep"><code class="docutils literal notranslate"><span class="pre">levenbergMarquardtStep()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.html#module-geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.line_search_step">geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.line_search_step module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.html#geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.line_search_step.lineSearchStep"><code class="docutils literal notranslate"><span class="pre">lineSearchStep()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.html#module-geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="geodesicparams.ellipsefitting.helper_functions.html">geodesicparams.ellipsefitting.helper_functions package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="geodesicparams.ellipsefitting.helper_functions.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="geodesicparams.ellipsefitting.helper_functions.html#module-geodesicparams.ellipsefitting.helper_functions.normalise_2d_pts">geodesicparams.ellipsefitting.helper_functions.normalise_2d_pts module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="geodesicparams.ellipsefitting.helper_functions.html#geodesicparams.ellipsefitting.helper_functions.normalise_2d_pts.norm_2d_pts"><code class="docutils literal notranslate"><span class="pre">norm_2d_pts()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="geodesicparams.ellipsefitting.helper_functions.html#module-geodesicparams.ellipsefitting.helper_functions">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-geodesicparams.ellipsefitting.matrix_functions">
+<span id="geodesicparams-ellipsefitting-matrix-functions-module"></span><h2>geodesicparams.ellipsefitting.matrix_functions module<a class="headerlink" href="#module-geodesicparams.ellipsefitting.matrix_functions" title="Link to this heading"></a></h2>
+<p>Functions for performing element-wise operations on matrices.</p>
+<p>These operations include element-wise exponentiation, multiplication,
+and division.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.ellipsefitting.matrix_functions.element_div">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.ellipsefitting.matrix_functions.</span></span><span class="sig-name descname"><span class="pre">element_div</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mat1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mat2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/ellipsefitting/matrix_functions.html#element_div"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.ellipsefitting.matrix_functions.element_div" title="Link to this definition"></a></dt>
+<dd><p>Compute the element-wise division of the matrix &lt;mat1&gt; by the matrix &lt;mat2&gt;.</p>
+<p>Specifically, the result[i, j] = mat1[i, j] / mat2[i, j].</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mat1</strong> (<em>matrix</em>) – An mpmath matrix with each element serving as the dividend.</p></li>
+<li><p><strong>mat2</strong> (<em>matrix</em>) – An mpmath matrix with each element serving as the divisor.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>result</strong> – An mpmath matrix containing the result of the element-wise division of
+&lt;mat1&gt; by &lt;mat2&gt;.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>matrix</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.ellipsefitting.matrix_functions.element_mul">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.ellipsefitting.matrix_functions.</span></span><span class="sig-name descname"><span class="pre">element_mul</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mat1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mat2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/ellipsefitting/matrix_functions.html#element_mul"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.ellipsefitting.matrix_functions.element_mul" title="Link to this definition"></a></dt>
+<dd><p>Compute the element-wise multiplication of the matrix &lt;mat1&gt; and the matrix &lt;mat2&gt;.</p>
+<p>Specifically, the result[i, j] = mat1[i, j] * mat2[i, j].</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mat1</strong> (<em>matrix</em>) – An mpmath matrix.</p></li>
+<li><p><strong>mat2</strong> (<em>matrix</em>) – An mpmath matrix.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>result</strong> – An mpmath matrix containing the result of the element-wise multiplication of
+&lt;mat1&gt; and &lt;mat2&gt;.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>matrix</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.ellipsefitting.matrix_functions.element_pow">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.ellipsefitting.matrix_functions.</span></span><span class="sig-name descname"><span class="pre">element_pow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mat1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mat2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/ellipsefitting/matrix_functions.html#element_pow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.ellipsefitting.matrix_functions.element_pow" title="Link to this definition"></a></dt>
+<dd><p>Compute the element-wise exponentiation of the matrix &lt;mat1&gt; to the matrix &lt;mat2&gt;
+powers.</p>
+<p>Specifically, the result[i, j] = mat1[i, j] ** mat2[i, j]. &lt;mat2&gt; can be an integer;
+in this case, the elements of mat1 will each be raised to the &lt;mat2&gt; power.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mat1</strong> (<em>matrix</em>) – An mpmath matrix with each element serving as the bases to exponentiated by
+&lt;mat2&gt;.</p></li>
+<li><p><strong>mat2</strong> (<em>matrix, integer</em>) – An mpmath matrix or an integer. If a matrix is used, the elements of &lt;mat1&gt;
+are raised to the power of each element in &lt;mat2&gt;.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>result</strong> – An mpmath matrix containing the result of the element-wise exponentiation of
+&lt;mat1&gt; and &lt;mat2&gt;.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>matrix</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-geodesicparams.ellipsefitting">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-geodesicparams.ellipsefitting" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Alexander Abesteh.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

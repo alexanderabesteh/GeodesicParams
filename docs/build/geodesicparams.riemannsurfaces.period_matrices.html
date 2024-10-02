@@ -1,0 +1,735 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>geodesicparams.riemannsurfaces.period_matrices package &mdash; GeodesicParams 0.2.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=66b59bf7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=37f418d5"></script>
+      <script src="_static/doctools.js?v=9a2dae69"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            GeodesicParams
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">geodesicparams.riemannsurfaces.period_matrices package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-geodesicparams.riemannsurfaces.period_matrices.periods_genus1_first">geodesicparams.riemannsurfaces.period_matrices.periods_genus1_first module</a><ul>
+<li><a class="reference internal" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus1_first.periods_firstkind"><code class="docutils literal notranslate"><span class="pre">periods_firstkind()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-geodesicparams.riemannsurfaces.period_matrices.periods_genus1_second">geodesicparams.riemannsurfaces.period_matrices.periods_genus1_second module</a><ul>
+<li><a class="reference internal" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus1_second.periods_secondkind"><code class="docutils literal notranslate"><span class="pre">periods_secondkind()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first">geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first module</a><ul>
+<li><a class="reference internal" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.branch_list_genus2"><code class="docutils literal notranslate"><span class="pre">branch_list_genus2()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.eval_period"><code class="docutils literal notranslate"><span class="pre">eval_period()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.ima2Per"><code class="docutils literal notranslate"><span class="pre">ima2Per()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.ima2Per1"><code class="docutils literal notranslate"><span class="pre">ima2Per1()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.ima2Per2"><code class="docutils literal notranslate"><span class="pre">ima2Per2()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.ima2Per3"><code class="docutils literal notranslate"><span class="pre">ima2Per3()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.ima2Per4"><code class="docutils literal notranslate"><span class="pre">ima2Per4()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.ima4Per"><code class="docutils literal notranslate"><span class="pre">ima4Per()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.ima4Per1"><code class="docutils literal notranslate"><span class="pre">ima4Per1()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.ima4Per2"><code class="docutils literal notranslate"><span class="pre">ima4Per2()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.ima4Per3"><code class="docutils literal notranslate"><span class="pre">ima4Per3()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.imaPer"><code class="docutils literal notranslate"><span class="pre">imaPer()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.int_genus2_first"><code class="docutils literal notranslate"><span class="pre">int_genus2_first()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.periods"><code class="docutils literal notranslate"><span class="pre">periods()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.reaPer"><code class="docutils literal notranslate"><span class="pre">reaPer()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.set_period_globals_genus2"><code class="docutils literal notranslate"><span class="pre">set_period_globals_genus2()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second">geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second module</a><ul>
+<li><a class="reference internal" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.ima2Per1_second"><code class="docutils literal notranslate"><span class="pre">ima2Per1_second()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.ima2Per2_second"><code class="docutils literal notranslate"><span class="pre">ima2Per2_second()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.ima2Per3_second"><code class="docutils literal notranslate"><span class="pre">ima2Per3_second()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.ima2Per4_second"><code class="docutils literal notranslate"><span class="pre">ima2Per4_second()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.ima2_second"><code class="docutils literal notranslate"><span class="pre">ima2_second()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.ima4Per1_second"><code class="docutils literal notranslate"><span class="pre">ima4Per1_second()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.ima4Per2_second"><code class="docutils literal notranslate"><span class="pre">ima4Per2_second()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.ima4Per3_second"><code class="docutils literal notranslate"><span class="pre">ima4Per3_second()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.ima4_second"><code class="docutils literal notranslate"><span class="pre">ima4_second()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.ima_second"><code class="docutils literal notranslate"><span class="pre">ima_second()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.periods_second"><code class="docutils literal notranslate"><span class="pre">periods_second()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.rea_second"><code class="docutils literal notranslate"><span class="pre">rea_second()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-geodesicparams.riemannsurfaces.period_matrices">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">GeodesicParams</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">geodesicparams.riemannsurfaces.period_matrices package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/geodesicparams.riemannsurfaces.period_matrices.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="geodesicparams-riemannsurfaces-period-matrices-package">
+<h1>geodesicparams.riemannsurfaces.period_matrices package<a class="headerlink" href="#geodesicparams-riemannsurfaces-period-matrices-package" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-geodesicparams.riemannsurfaces.period_matrices.periods_genus1_first">
+<span id="geodesicparams-riemannsurfaces-period-matrices-periods-genus1-first-module"></span><h2>geodesicparams.riemannsurfaces.period_matrices.periods_genus1_first module<a class="headerlink" href="#module-geodesicparams.riemannsurfaces.period_matrices.periods_genus1_first" title="Link to this heading"></a></h2>
+<p>Procedures for computing the periods of the first kind (the half periods in the
+period lattice) from the elliptic invariants g2 and g3 from the Weierstrass cubic
+4z**3 - g2z - g3.</p>
+<p>NOTE: fix some things here like the precision.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.riemannsurfaces.period_matrices.periods_genus1_first.periods_firstkind">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.riemannsurfaces.period_matrices.periods_genus1_first.</span></span><span class="sig-name descname"><span class="pre">periods_firstkind</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/riemannsurfaces/period_matrices/periods_genus1_first.html#periods_firstkind"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus1_first.periods_firstkind" title="Link to this definition"></a></dt>
+<dd><p>Computes the periods of the first kind (i.e. the integrals of the canonical holomorphic
+differentials for a genus 1 Riemann surface) from the elliptic invariants &lt;g2&gt; and &lt;g3&gt;.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>g2</strong> (<em>complex</em>) – The elliptic invariant in the Weierstrass cubic.</p></li>
+<li><p><strong>g3</strong> (<em>complex</em>) – The elliptic invariant in the Weierstrass cubic.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>omega1</strong> (<em>complex</em>) – The first half period in the period lattice.</p></li>
+<li><p><strong>omega3</strong> (<em>complex</em>) – The second half period in the period lattice.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-geodesicparams.riemannsurfaces.period_matrices.periods_genus1_second">
+<span id="geodesicparams-riemannsurfaces-period-matrices-periods-genus1-second-module"></span><h2>geodesicparams.riemannsurfaces.period_matrices.periods_genus1_second module<a class="headerlink" href="#module-geodesicparams.riemannsurfaces.period_matrices.periods_genus1_second" title="Link to this heading"></a></h2>
+<p>Procedures for computing the periods of the second kind (the integrals of the canonical
+meromorphic differentials for a genus 1 Riemann surface).</p>
+<p>NOTE: fix some things here like the precision.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.riemannsurfaces.period_matrices.periods_genus1_second.periods_secondkind">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.riemannsurfaces.period_matrices.periods_genus1_second.</span></span><span class="sig-name descname"><span class="pre">periods_secondkind</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">omega1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">omega3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/riemannsurfaces/period_matrices/periods_genus1_second.html#periods_secondkind"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus1_second.periods_secondkind" title="Link to this definition"></a></dt>
+<dd><p>Computes the periods of the second kind (i.e. the integrals of the canonical meromorphic
+differentials for a genus 1 Riemann surface) from the half periods &lt;omega1&gt; and &lt;omega3&gt;.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>omega1</strong> (<em>complex</em>) – The first half period within the period lattice.</p></li>
+<li><p><strong>omega3</strong> (<em>complex</em>) – The second half period within the period lattice.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>eta</strong> (<em>complex</em>) – The first period of the second kind.</p></li>
+<li><p><strong>eta_prime</strong> (<em>complex</em>) – The second period of the second kind.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first">
+<span id="geodesicparams-riemannsurfaces-period-matrices-periods-genus2-first-module"></span><h2>geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first module<a class="headerlink" href="#module-geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first" title="Link to this heading"></a></h2>
+<p>Procedures for computing the periods of the first kind for a genus 2 Riemann surface.</p>
+<p>This is done by integrating the vector of canonical holomorphic differentials along the
+contours that connect the branch cuts and the contours that encircle the branch cuts.</p>
+<p>NOTE: fix some things here like the precision and documentation.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.branch_list_genus2">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.</span></span><span class="sig-name descname"><span class="pre">branch_list_genus2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zeros</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_realNS</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/riemannsurfaces/period_matrices/periods_genus2_first.html#branch_list_genus2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.branch_list_genus2" title="Link to this definition"></a></dt>
+<dd><p>Determines the branch adjacent to any zero given a list of zeros.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>zeros</strong> (<em>list</em>) – The 5 zeros of the polynomial defining the genus 2 Riemann surface.</p></li>
+<li><p><strong>num_realNS</strong> (<em>list</em>) – The number of real zeros in &lt;zeros&gt;, which may be 1, 3, or 5.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>erg</strong> – A list containing 5 lists. Each element of the 5 lists consists of three parts:
+The first is the branch left of the zero, the second is the zero, and the third is
+the branch right of the zero. In the case that the second part is a complex zero, the
+entries depend on the sign of the imaginary part. If it is negative, the first entry
+is the branch left of the branch cut on the real axis and the third is the branch on
+the branch cut. If it’s positive, the first entry is the branch on the branch cut and
+the third is the branch right of the branch cut on the real axis.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.eval_period">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.</span></span><span class="sig-name descname"><span class="pre">eval_period</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">realNS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zeros</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">omega</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">component</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/riemannsurfaces/period_matrices/periods_genus2_first.html#eval_period"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.eval_period" title="Link to this definition"></a></dt>
+<dd><p>Computes the period from one real zero of the set of zeros defining a Riemann surface
+of genus 2 to another or to infinity.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>m</strong> (<em>int</em>) – The index of the zero to compute the period from (realNS[&lt;m&gt;]).</p></li>
+<li><p><strong>n</strong> (<em>int, oo</em>) – The index of the zero to compute the period to (realNS[&lt;n&gt;]). If &lt;n&gt; is oo, then
+the period if computed from realNS[&lt;m&gt;] to oo.</p></li>
+<li><p><strong>realNS</strong> (<em>list</em>) – The real zeros of the polynomial defining the genus 2 Riemann surface.</p></li>
+<li><p><strong>zeros</strong> (<em>list</em>) – The zeros of the polynomial defining the genus 2 Riemann surface.</p></li>
+<li><p><strong>omega</strong> (<em>matrix</em>) – A 2x4 mpmath matrix such that period_matrix = [&lt;periods_first&gt;, &lt;periods_second&gt;] (see
+above).</p></li>
+<li><p><strong>component</strong> (<em>int, optional</em>) – The row of the period matrix &lt;omega&gt; that should be used for the computation of the
+period (can either be 0 or 1, where the default value is 0).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>result</strong> – The period from realNS[&lt;m&gt;] to realNS[&lt;n&gt;].</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>complex</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.ima2Per">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.</span></span><span class="sig-name descname"><span class="pre">ima2Per</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">realNS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">complexNS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digits</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/riemannsurfaces/period_matrices/periods_genus2_first.html#ima2Per"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.ima2Per" title="Link to this definition"></a></dt>
+<dd><p>Computes the periods of the first kind for a genus 2 Riemann surface for the case that
+two zeros of the polynomial defining the Riemann surface are complex. There are 4 different
+subcases, ima2Perk, where k is an integer related to the ordering of the zeros.</p>
+<p>For all &lt;k&gt; subcases it is necessary to compute integrals along branch cuts perpendicular
+to the real axis. For the calculation it has to be taken into account that the real part of
+the integrals computed along such branch cuts is symmetrical with respect to the real axis
+but that the imaginary part is antisymmetric. Therefore, the whole integral will be real.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>realNS</strong> (<em>list</em>) – A list of real numbers, the real roots of the polynomial defining the Riemann
+surface.</p></li>
+<li><p><strong>complexNS</strong> (<em>list</em>) – A list of complex numbers, the complex roots of the polynomial defining the Riemann
+surface.</p></li>
+<li><p><strong>digits</strong> (<em>int</em>) – The number of digits to be used in the computation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A 2x4 matrix: the first 2x2 matrix represents the period matrix corresponding to the
+integrations along the contours encircling the branch cuts. The second 2x2 matrix
+represents the period matrix corresponding to the integrations along the contours
+connecting the branch cuts.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>matrix</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.ima2Per1">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.</span></span><span class="sig-name descname"><span class="pre">ima2Per1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">realNS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">complexNS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digits</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/riemannsurfaces/period_matrices/periods_genus2_first.html#ima2Per1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.ima2Per1" title="Link to this definition"></a></dt>
+<dd><p>Computes the periods of the first kind for a genus 2 Riemann surface for the case that
+two zeros of the polynomial defining the Riemann surface are complex, with subcase &lt;k&gt; = 1. There are 4 different</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>realNS</strong> (<em>list</em>) – A list of real numbers, the real roots of the polynomial defining the Riemann
+surface.</p></li>
+<li><p><strong>complexNS</strong> (<em>list</em>) – A list of complex numbers, the complex roots of the polynomial defining the Riemann
+surface.</p></li>
+<li><p><strong>digits</strong> (<em>int</em>) – The number of digits to be used in the computation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A 2x4 matrix: the first 2x2 matrix represents the period matrix corresponding to the
+integrations along the contours encircling the branch cuts. The second 2x2 matrix
+represents the period matrix corresponding to the integrations along the contours
+connecting the branch cuts.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>matrix</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.ima2Per2">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.</span></span><span class="sig-name descname"><span class="pre">ima2Per2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">realNS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">complexNS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digits</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/riemannsurfaces/period_matrices/periods_genus2_first.html#ima2Per2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.ima2Per2" title="Link to this definition"></a></dt>
+<dd><p>Computes the periods of the first kind for a genus 2 Riemann surface for the case that
+two zeros of the polynomial defining the Riemann surface are complex, with subcase &lt;k&gt; = 2. There are 4 different</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>realNS</strong> (<em>list</em>) – A list of real numbers, the real roots of the polynomial defining the Riemann
+surface.</p></li>
+<li><p><strong>complexNS</strong> (<em>list</em>) – A list of complex numbers, the complex roots of the polynomial defining the Riemann
+surface.</p></li>
+<li><p><strong>digits</strong> (<em>int</em>) – The number of digits to be used in the computation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A 2x4 matrix: the first 2x2 matrix represents the period matrix corresponding to the
+integrations along the contours encircling the branch cuts. The second 2x2 matrix
+represents the period matrix corresponding to the integrations along the contours
+connecting the branch cuts.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>matrix</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.ima2Per3">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.</span></span><span class="sig-name descname"><span class="pre">ima2Per3</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">realNS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">complexNS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digits</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/riemannsurfaces/period_matrices/periods_genus2_first.html#ima2Per3"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.ima2Per3" title="Link to this definition"></a></dt>
+<dd><p>Computes the periods of the first kind for a genus 2 Riemann surface for the case that
+two zeros of the polynomial defining the Riemann surface are complex, with subcase &lt;k&gt; = 3. There are 4 different</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>realNS</strong> (<em>list</em>) – A list of real numbers, the real roots of the polynomial defining the Riemann
+surface.</p></li>
+<li><p><strong>complexNS</strong> (<em>list</em>) – A list of complex numbers, the complex roots of the polynomial defining the Riemann
+surface.</p></li>
+<li><p><strong>digits</strong> (<em>int</em>) – The number of digits to be used in the computation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A 2x4 matrix: the first 2x2 matrix represents the period matrix corresponding to the
+integrations along the contours encircling the branch cuts. The second 2x2 matrix
+represents the period matrix corresponding to the integrations along the contours
+connecting the branch cuts.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>matrix</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.ima2Per4">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.</span></span><span class="sig-name descname"><span class="pre">ima2Per4</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">realNS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">complexNS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digits</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/riemannsurfaces/period_matrices/periods_genus2_first.html#ima2Per4"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.ima2Per4" title="Link to this definition"></a></dt>
+<dd><p>Computes the periods of the first kind for a genus 2 Riemann surface for the case that
+two zeros of the polynomial defining the Riemann surface are complex, with subcase &lt;k&gt; = 4. There are 4 different</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>realNS</strong> (<em>list</em>) – A list of real numbers, the real roots of the polynomial defining the Riemann
+surface.</p></li>
+<li><p><strong>complexNS</strong> (<em>list</em>) – A list of complex numbers, the complex roots of the polynomial defining the Riemann
+surface.</p></li>
+<li><p><strong>digits</strong> (<em>int</em>) – The number of digits to be used in the computation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A 2x4 matrix: the first 2x2 matrix represents the period matrix corresponding to the
+integrations along the contours encircling the branch cuts. The second 2x2 matrix
+represents the period matrix corresponding to the integrations along the contours
+connecting the branch cuts.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>matrix</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.ima4Per">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.</span></span><span class="sig-name descname"><span class="pre">ima4Per</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">realNS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">complexNS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digits</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/riemannsurfaces/period_matrices/periods_genus2_first.html#ima4Per"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.ima4Per" title="Link to this definition"></a></dt>
+<dd><p>Computes the periods of the first kind for a genus 2 Riemann surface for the case that
+four zeros z1, z2, z3, z4 of the polynomial defining the Riemann surface are complex, where
+Re(z1) = Re(z2), Re(z3) = Re(z4), and Re(z1) &lt; Re(z3). There are 3 different subcases,
+ima4Perk, where k is an integer related to the ordering of the zeros.</p>
+<p>For all &lt;k&gt; subcases it is necessary to compute integrals along branch cuts perpendicular
+to the real axis. For the calculation it has to be taken into account that the real part
+of the integrals computed along such branch cuts is symmetrical with respect to the real
+axis but that the imaginary part is antisymmetric. Therefore, the whole integral will be
+real.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>realNS</strong> (<em>list</em>) – A list of real numbers, the real roots of the polynomial defining the Riemann
+surface.</p></li>
+<li><p><strong>complexNS</strong> (<em>list</em>) – A list of complex numbers, the complex roots of the polynomial defining the Riemann
+surface.</p></li>
+<li><p><strong>digits</strong> (<em>int</em>) – The number of digits to be used in the computation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A 2x4 matrix: the first 2x2 matrix represents the period matrix corresponding to the
+integrations along the contours encircling the branch cuts. The second 2x2 matrix
+represents the period matrix corresponding to the integrations along the contours
+connecting the branch cuts.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>matrix</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.ima4Per1">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.</span></span><span class="sig-name descname"><span class="pre">ima4Per1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">realNS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rea1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ima1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rea2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ima2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digits</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/riemannsurfaces/period_matrices/periods_genus2_first.html#ima4Per1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.ima4Per1" title="Link to this definition"></a></dt>
+<dd><p>Computes the periods of the first kind for a genus 2 Riemann surface for the case that
+four zeros z1, z2, z3, z4 of the polynomial defining the Riemann surface are complex, where
+Re(z1) = Re(z2), Re(z3) = Re(z4), and Re(z1) &lt; Re(z3), with subcase &lt;k&gt; = 1.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>realNS</strong> (<em>list</em>) – A list of real numbers, the real roots of the polynomial defining the Riemann
+surface.</p></li>
+<li><p><strong>rea1</strong> (<em>float</em>) – The real part of the first complex zero.</p></li>
+<li><p><strong>ima1</strong> (<em>float</em>) – The absolute value of the imaginary part of the first complex zero.</p></li>
+<li><p><strong>rea2</strong> (<em>float</em>) – The real part of the third complex zero.</p></li>
+<li><p><strong>ima2</strong> (<em>float</em>) – The absolute value of the imaginary part of the third complex zero.</p></li>
+<li><p><strong>digits</strong> (<em>int</em>) – The number of digits to be used in the computation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A 2x4 matrix: the first 2x2 matrix represents the period matrix corresponding to the
+integrations along the contours encircling the branch cuts. The second 2x2 matrix
+represents the period matrix corresponding to the integrations along the contours
+connecting the branch cuts.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>matrix</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.ima4Per2">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.</span></span><span class="sig-name descname"><span class="pre">ima4Per2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">realNS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rea1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ima1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rea2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ima2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digits</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/riemannsurfaces/period_matrices/periods_genus2_first.html#ima4Per2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.ima4Per2" title="Link to this definition"></a></dt>
+<dd><p>Computes the periods of the first kind for a genus 2 Riemann surface for the case that
+four zeros z1, z2, z3, z4 of the polynomial defining the Riemann surface are complex, where
+Re(z1) = Re(z2), Re(z3) = Re(z4), and Re(z1) &lt; Re(z3), with subcase &lt;k&gt; = 2.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>realNS</strong> (<em>list</em>) – A list of real numbers, the real roots of the polynomial defining the Riemann
+surface.</p></li>
+<li><p><strong>rea1</strong> (<em>float</em>) – The real part of the first complex zero.</p></li>
+<li><p><strong>ima1</strong> (<em>float</em>) – The absolute value of the imaginary part of the first complex zero.</p></li>
+<li><p><strong>rea2</strong> (<em>float</em>) – The real part of the third complex zero.</p></li>
+<li><p><strong>ima2</strong> (<em>float</em>) – The absolute value of the imaginary part of the third complex zero.</p></li>
+<li><p><strong>digits</strong> (<em>int</em>) – The number of digits to be used in the computation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A 2x4 matrix: the first 2x2 matrix represents the period matrix corresponding to the
+integrations along the contours encircling the branch cuts. The second 2x2 matrix
+represents the period matrix corresponding to the integrations along the contours
+connecting the branch cuts.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>matrix</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.ima4Per3">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.</span></span><span class="sig-name descname"><span class="pre">ima4Per3</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">realNS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rea1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ima1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rea2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ima2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digits</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/riemannsurfaces/period_matrices/periods_genus2_first.html#ima4Per3"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.ima4Per3" title="Link to this definition"></a></dt>
+<dd><p>Computes the periods of the first kind for a genus 2 Riemann surface for the case that
+four zeros z1, z2, z3, z4 of the polynomial defining the Riemann surface are complex, where
+Re(z1) = Re(z2), Re(z3) = Re(z4), and Re(z1) &lt; Re(z3), with subcase &lt;k&gt; = 3.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>realNS</strong> (<em>list</em>) – A list of real numbers, the real roots of the polynomial defining the Riemann
+surface.</p></li>
+<li><p><strong>rea1</strong> (<em>float</em>) – The real part of the first complex zero.</p></li>
+<li><p><strong>ima1</strong> (<em>float</em>) – The absolute value of the imaginary part of the first complex zero.</p></li>
+<li><p><strong>rea2</strong> (<em>float</em>) – The real part of the third complex zero.</p></li>
+<li><p><strong>ima2</strong> (<em>float</em>) – The absolute value of the imaginary part of the third complex zero.</p></li>
+<li><p><strong>digits</strong> (<em>int</em>) – The number of digits to be used in the computation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A 2x4 matrix: the first 2x2 matrix represents the period matrix corresponding to the
+integrations along the contours encircling the branch cuts. The second 2x2 matrix
+represents the period matrix corresponding to the integrations along the contours
+connecting the branch cuts.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>matrix</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.imaPer">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.</span></span><span class="sig-name descname"><span class="pre">imaPer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">realNS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">complexNS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digits</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/riemannsurfaces/period_matrices/periods_genus2_first.html#imaPer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.imaPer" title="Link to this definition"></a></dt>
+<dd><p>Computes the periods of the first kind for a genus 2 Riemann surface for the case that
+the zeros of the polynomial defining the Riemann surface are complex. &lt;ima2Per&gt; is
+called if there are two complex zeros, and &lt;ima4Per&gt; is called when there are 4 complex
+zeros.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>realNS</strong> (<em>list</em>) – A list of real numbers, the real roots of the polynomial defining the Riemann
+surface.</p></li>
+<li><p><strong>complexNS</strong> (<em>list</em>) – A list of complex numbers, the complex roots of the polynomial defining the Riemann
+surface.</p></li>
+<li><p><strong>digits</strong> (<em>int</em>) – The number of digits to be used in the computation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A 2x4 matrix: the first 2x2 matrix represents the period matrix corresponding to the
+integrations along the contours encircling the branch cuts. The second 2x2 matrix
+represents the period matrix corresponding to the integrations along the contours
+connecting the branch cuts.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>matrix</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.int_genus2_first">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.</span></span><span class="sig-name descname"><span class="pre">int_genus2_first</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zeros</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">periodMatrix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/riemannsurfaces/period_matrices/periods_genus2_first.html#int_genus2_first"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.int_genus2_first" title="Link to this definition"></a></dt>
+<dd><p>Integrates the vector of canonical holomorphic differentials dz = [1/sqrt(P(z)),
+z/sqrt(P(z))] from &lt;lower&gt; to &lt;upper&gt;.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>zeros</strong> (<em>list</em>) – The 5 zeros of the polynomial defining the genus 2 Riemann surface.</p></li>
+<li><p><strong>lower</strong> (<em>real</em>) – The lower integration bound.</p></li>
+<li><p><strong>upper</strong> (<em>real</em>) – The upper integration bound.</p></li>
+<li><p><strong>digits</strong> (<em>int</em>) – The number of digits to use in the computation.</p></li>
+<li><p><strong>periodMatrix</strong> (<em>matrix, optional</em>) – A 2x4 mpmath matrix such that periodMatrix = [&lt;periods_first&gt;, &lt;periods_second&gt;],
+where &lt;periods_first&gt; is the period matrix of the integral of holomorphic differentals
+taken along the contours around the branch cuts, while &lt;periods_first&gt; is the period
+matrix integrated along the contours connecting branch cuts.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>result</strong> – The value of the two integrals as a list.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.periods">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.</span></span><span class="sig-name descname"><span class="pre">periods</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">realNS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">complexNS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digits</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/riemannsurfaces/period_matrices/periods_genus2_first.html#periods"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.periods" title="Link to this definition"></a></dt>
+<dd><p>Computes the periods of the first kind for a genus 2 Riemann surface.</p>
+<p>This is done by integrating the vector of canonical holomorphic differentials along the
+contours that encircle the branch cuts and the contours connect the branch cuts.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>realNS</strong> (<em>list</em>) – A list of real numbers, the real roots of the polynomial defining the Riemann
+surface.</p></li>
+<li><p><strong>complexNS</strong> (<em>list</em>) – A list of complex numbers, the complex roots of the polynomial defining the Riemann
+surface.</p></li>
+<li><p><strong>digits</strong> (<em>int</em>) – The number of digits to be used in the computation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A 2x4 matrix: the first 2x2 matrix represents the period matrix corresponding to the
+integrations along the contours encircling the branch cuts. The second 2x2 matrix
+represents the period matrix corresponding to the integrations along the contours
+connecting the branch cuts.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>matrix</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.reaPer">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.</span></span><span class="sig-name descname"><span class="pre">reaPer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">realNS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digits</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/riemannsurfaces/period_matrices/periods_genus2_first.html#reaPer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.reaPer" title="Link to this definition"></a></dt>
+<dd><p>Computes the periods of the first kind for a genus 2 Riemann surface for the case that
+all zeros of the polynomial defining the Riemann surface are real.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>realNS</strong> (<em>list</em>) – A list of real numbers, the real roots of the polynomial defining the Riemann
+surface.</p></li>
+<li><p><strong>digits</strong> (<em>int</em>) – The number of digits to be used in the computation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A 2x4 matrix: the first 2x2 matrix represents the period matrix corresponding to the
+integrations along the contours encircling the branch cuts. The second 2x2 matrix
+represents the period matrix corresponding to the integrations along the contours
+connecting the branch cuts.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>matrix</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.set_period_globals_genus2">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.</span></span><span class="sig-name descname"><span class="pre">set_period_globals_genus2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">period_matrix</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/riemannsurfaces/period_matrices/periods_genus2_first.html#set_period_globals_genus2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_first.set_period_globals_genus2" title="Link to this definition"></a></dt>
+<dd><p>Sets the global variables &lt;periods_inverse&gt; and &lt;riemannM&gt; based on &lt;period_matrix&gt;, where
+&lt;period_matrix&gt; = [&lt;periods_first&gt;, &lt;periods_second] (&lt;periods_first&gt; and
+&lt;periods_second&gt; are 2x2 matrices such that &lt;periods_first&gt; are the integrals of the
+vector of canonical holomorphic differentials along the contours that encircle the branch
+cuts while &lt;periods_second&gt; are the integrals along the contours connecting the branch
+cuts).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>period_matrix</strong> (<em>matrix</em>) – A 2x4 mpmath matrix such that period_matrix = [&lt;periods_first&gt;, &lt;periods_second&gt;] (see
+above).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>periods_inverse</strong> (<em>matrix</em>) – A 2x2 mpmath matrix representing the inverse of the matrix &lt;periods_first&gt;</p></li>
+<li><p><strong>riemannM</strong> (<em>matrix</em>) – A 2x2 mpmath matrix representing the Riemann matrix tau (riemannM = &lt;periods_inverse&gt;
+* &lt;periods_second).</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second">
+<span id="geodesicparams-riemannsurfaces-period-matrices-periods-genus2-second-module"></span><h2>geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second module<a class="headerlink" href="#module-geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.ima2Per1_second">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.</span></span><span class="sig-name descname"><span class="pre">ima2Per1_second</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dr1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dr2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">realNS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">complexNS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digits</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/riemannsurfaces/period_matrices/periods_genus2_second.html#ima2Per1_second"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.ima2Per1_second" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.ima2Per2_second">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.</span></span><span class="sig-name descname"><span class="pre">ima2Per2_second</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dr1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dr2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">realNS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">complexNS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digits</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/riemannsurfaces/period_matrices/periods_genus2_second.html#ima2Per2_second"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.ima2Per2_second" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.ima2Per3_second">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.</span></span><span class="sig-name descname"><span class="pre">ima2Per3_second</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dr1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dr2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">realNS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">complexNS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digits</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/riemannsurfaces/period_matrices/periods_genus2_second.html#ima2Per3_second"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.ima2Per3_second" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.ima2Per4_second">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.</span></span><span class="sig-name descname"><span class="pre">ima2Per4_second</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dr1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dr2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">realNS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">complexNS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digits</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/riemannsurfaces/period_matrices/periods_genus2_second.html#ima2Per4_second"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.ima2Per4_second" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.ima2_second">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.</span></span><span class="sig-name descname"><span class="pre">ima2_second</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dr1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dr2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">realNS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">complexNS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digits</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/riemannsurfaces/period_matrices/periods_genus2_second.html#ima2_second"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.ima2_second" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.ima4Per1_second">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.</span></span><span class="sig-name descname"><span class="pre">ima4Per1_second</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dr1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dr2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">realNS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rea1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ima1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rea2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ima2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digits</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/riemannsurfaces/period_matrices/periods_genus2_second.html#ima4Per1_second"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.ima4Per1_second" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.ima4Per2_second">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.</span></span><span class="sig-name descname"><span class="pre">ima4Per2_second</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dr1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dr2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">realNS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rea1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ima1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rea2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ima2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digits</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/riemannsurfaces/period_matrices/periods_genus2_second.html#ima4Per2_second"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.ima4Per2_second" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.ima4Per3_second">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.</span></span><span class="sig-name descname"><span class="pre">ima4Per3_second</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dr1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dr2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">realNS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rea1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ima1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rea2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ima2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digits</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/riemannsurfaces/period_matrices/periods_genus2_second.html#ima4Per3_second"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.ima4Per3_second" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.ima4_second">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.</span></span><span class="sig-name descname"><span class="pre">ima4_second</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dr1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dr2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">realNS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">complexNS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digits</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/riemannsurfaces/period_matrices/periods_genus2_second.html#ima4_second"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.ima4_second" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.ima_second">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.</span></span><span class="sig-name descname"><span class="pre">ima_second</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dr1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dr2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">realNS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">complexNS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digits</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/riemannsurfaces/period_matrices/periods_genus2_second.html#ima_second"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.ima_second" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.periods_second">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.</span></span><span class="sig-name descname"><span class="pre">periods_second</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dr1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dr2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">realNS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">complexNS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digits</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/riemannsurfaces/period_matrices/periods_genus2_second.html#periods_second"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.periods_second" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.rea_second">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.</span></span><span class="sig-name descname"><span class="pre">rea_second</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dr1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dr2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">realNS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digits</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/riemannsurfaces/period_matrices/periods_genus2_second.html#rea_second"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.riemannsurfaces.period_matrices.periods_genus2_second.rea_second" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-geodesicparams.riemannsurfaces.period_matrices">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-geodesicparams.riemannsurfaces.period_matrices" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Alexander Abesteh.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

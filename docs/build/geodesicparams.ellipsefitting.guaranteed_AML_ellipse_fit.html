@@ -1,0 +1,353 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit package &mdash; GeodesicParams 0.2.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=66b59bf7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=37f418d5"></script>
+      <script src="_static/doctools.js?v=9a2dae69"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            GeodesicParams
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.ellipse_estimates">geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.ellipse_estimates module</a><ul>
+<li><a class="reference internal" href="#geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.ellipse_estimates.compute_guaranteedellipse_estimate"><code class="docutils literal notranslate"><span class="pre">compute_guaranteedellipse_estimate()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.ellipse_estimates.conv_coeffs_to_axis"><code class="docutils literal notranslate"><span class="pre">conv_coeffs_to_axis()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.ellipse_estimates.conv_coeffs_to_init_pos"><code class="docutils literal notranslate"><span class="pre">conv_coeffs_to_init_pos()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.ellipse_estimates.parametric_rep"><code class="docutils literal notranslate"><span class="pre">parametric_rep()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.guaranteed_ellipse_fit">geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.guaranteed_ellipse_fit module</a><ul>
+<li><a class="reference internal" href="#geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.guaranteed_ellipse_fit.EllipseData"><code class="docutils literal notranslate"><span class="pre">EllipseData</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.guaranteed_ellipse_fit.guaranteedEllipseFit"><code class="docutils literal notranslate"><span class="pre">guaranteedEllipseFit()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.levenberg_marquardt">geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.levenberg_marquardt module</a><ul>
+<li><a class="reference internal" href="#geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.levenberg_marquardt.levenbergMarquardtStep"><code class="docutils literal notranslate"><span class="pre">levenbergMarquardtStep()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.line_search_step">geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.line_search_step module</a><ul>
+<li><a class="reference internal" href="#geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.line_search_step.lineSearchStep"><code class="docutils literal notranslate"><span class="pre">lineSearchStep()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">GeodesicParams</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="geodesicparams-ellipsefitting-guaranteed-aml-ellipse-fit-package">
+<h1>geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit package<a class="headerlink" href="#geodesicparams-ellipsefitting-guaranteed-aml-ellipse-fit-package" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.ellipse_estimates">
+<span id="geodesicparams-ellipsefitting-guaranteed-aml-ellipse-fit-ellipse-estimates-module"></span><h2>geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.ellipse_estimates module<a class="headerlink" href="#module-geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.ellipse_estimates" title="Link to this heading"></a></h2>
+<p>Procedure for computing the coefficents of an ellipse within the Sampson Distance that
+fits a set of data.</p>
+<p>The primary function &lt;compute_guaranteedellipse_estimate&gt; returns the coefficients
+of an ellipse within the Sampson Distance (i.e. Ax**2 + Bxy + Cy**2 + Dx + Ey + F = 0,
+provided that B**2 - 4ac &lt; 0) that fits the data. The other functions are used for
+conversions, such as converting the coefficient representation into a parametric
+representation that can then be used to generate data.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.ellipse_estimates.compute_guaranteedellipse_estimate">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.ellipse_estimates.</span></span><span class="sig-name descname"><span class="pre">compute_guaranteedellipse_estimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_points</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/ellipsefitting/guaranteed_AML_ellipse_fit/ellipse_estimates.html#compute_guaranteedellipse_estimate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.ellipse_estimates.compute_guaranteedellipse_estimate" title="Link to this definition"></a></dt>
+<dd><p>Compute the coefficients of a general ellipse within the Sampson Distance that fits
+a set of ellipse data (i.e. Ax**2 + Bxy + Cy**2 + Dx + Ey + F = 0, provided that
+B**2 - 4ac &lt; 0).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data_points</strong> (<em>matrix</em>) – A 2xN mpmath matrix, where the first row represents the x coordinates of the data
+points, and the second represents the y coordinates of the data points.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>result</strong> – A 1x6 matrix representing the coefficients of the ellipse [A, B, C, D, E, F] that
+fits the data points within the Sampson Distance.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>matrix</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.ellipse_estimates.conv_coeffs_to_axis">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.ellipse_estimates.</span></span><span class="sig-name descname"><span class="pre">conv_coeffs_to_axis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coeffs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/ellipsefitting/guaranteed_AML_ellipse_fit/ellipse_estimates.html#conv_coeffs_to_axis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.ellipse_estimates.conv_coeffs_to_axis" title="Link to this definition"></a></dt>
+<dd><p>Given the coefficients of a general ellipse [A, B, C, D, E, F], return the semi-major
+and semi-minor axis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>coeffs</strong> (<em>matrix, list</em>) – A 1x6 mpmath matrix or a list containing 6 element: the coefficients of the general
+ellipse.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>semi_maj</strong> (<em>float</em>) – The semi_major axis of the ellipse.</p></li>
+<li><p><strong>semi_min</strong> (<em>float</em>) – The semi-minor axis of the ellipse.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.ellipse_estimates.conv_coeffs_to_init_pos">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.ellipse_estimates.</span></span><span class="sig-name descname"><span class="pre">conv_coeffs_to_init_pos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coeffs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/ellipsefitting/guaranteed_AML_ellipse_fit/ellipse_estimates.html#conv_coeffs_to_init_pos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.ellipse_estimates.conv_coeffs_to_init_pos" title="Link to this definition"></a></dt>
+<dd><p>Given the coefficients of a general ellipse [A, B, C, D, E, F], return the center
+coordinates of the ellipse (x_init, y_init) and the rotation angle of the ellipse
+counterclockwise around the center.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>coeffs</strong> (<em>matrix, list</em>) – A 1x6 mpmath matrix or a list containing 6 element: the coefficients of the general
+ellipse.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>x_init</strong> (<em>float</em>) – The x coordinate of the center of the ellipse.</p></li>
+<li><p><strong>y_init</strong> (<em>float</em>) – The y coordinate of the center of the ellipse.</p></li>
+<li><p><strong>rot_angle</strong> (<em>float</em>) – The rotation angle of the ellipse counterclockwise around the center.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.ellipse_estimates.parametric_rep">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.ellipse_estimates.</span></span><span class="sig-name descname"><span class="pre">parametric_rep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coeffs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/ellipsefitting/guaranteed_AML_ellipse_fit/ellipse_estimates.html#parametric_rep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.ellipse_estimates.parametric_rep" title="Link to this definition"></a></dt>
+<dd><p>Given the coefficients of a general ellipse [A, B, C, D, E, F], return the parametric
+representation of the ellipse as a function of the eccentric anomaly t.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>coeffs</strong> (<em>matrix, list</em>) – A 1x6 mpmath matrix or a list containing 6 element: the coefficients of the general
+ellipse.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>x</strong> (<em>callable</em>) – The x coordinate in the parametric representation as a function of the eccentric anomaly
+t.</p></li>
+<li><p><strong>y</strong> (<em>callable</em>) – The y coordinate in the parametric representation as a function of the eccentric anomaly
+t.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.guaranteed_ellipse_fit">
+<span id="geodesicparams-ellipsefitting-guaranteed-aml-ellipse-fit-guaranteed-ellipse-fit-module"></span><h2>geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.guaranteed_ellipse_fit module<a class="headerlink" href="#module-geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.guaranteed_ellipse_fit" title="Link to this heading"></a></h2>
+<p>Computations for computing the coefficents of an ellipse within the Sampson Distance that
+fits a set of data.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.guaranteed_ellipse_fit.EllipseData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.guaranteed_ellipse_fit.</span></span><span class="sig-name descname"><span class="pre">EllipseData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">use_pseudoinverse</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta_updated</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lbd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">damping_multiplier</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">numberOfPoints</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">I</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tolDelta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tolCost</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tolTheta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cost</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jacobian_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jacobian_matrix_barrier</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jacobian_matrix_full</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hessian</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/ellipsefitting/guaranteed_AML_ellipse_fit/guaranteed_ellipse_fit.html#EllipseData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.guaranteed_ellipse_fit.EllipseData" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A data structure that contains all information used throughout the iteration process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>use_pseudoinverse</strong> (<em>bool</em>) – Determines whether LineSearchStep or LevenbergMarquadtStep or used (True = LineSearchStep,
+False = LevenbergMarquadtStep).</p></li>
+<li><p><strong>theta_updated</strong> (<em>bool</em>) – Determines if theta was updated (True for yes, False for no) since in some cases a
+LevenbergMarquardtStep does not decrease the cost function.</p></li>
+<li><p><strong>lbd</strong> (<em>float</em>) – Damping parameter in LevenbergMarquadtStep.</p></li>
+<li><p><strong>k</strong> (<em>int</em>) – loop counter index.</p></li>
+<li><p><strong>damping_multiplier</strong> (<em>float</em>) – Used to modify the tradeoff between gradient descent and hessian based descent in
+LevenbergMarquadtStep.</p></li>
+<li><p><strong>gamma</strong> (<em>float</em>) – Used in LineSearchStep.</p></li>
+<li><p><strong>numberOfPoints</strong> (<em>int</em>) – The number of data points.</p></li>
+<li><p><strong>f</strong> (<em>matrix</em>) – A barrier term that forces the parameters to stay in the elliptic region.</p></li>
+<li><p><strong>I</strong> (<em>matrix</em>) – A barrier term that forces the parameters to stay in the elliptic region.</p></li>
+<li><p><strong>alpha</strong> (<em>float</em>) – Homotopy parameter that weighs contribution of barrier term.</p></li>
+<li><p><strong>data_points</strong> (<em>matrix</em>) – The data points that are going to be fitted to the ellipse.</p></li>
+<li><p><strong>tolDelta</strong> (<em>float</em>) – The step-size tolerance.</p></li>
+<li><p><strong>tolCost</strong> (<em>float</em>) – The cost tolerance.</p></li>
+<li><p><strong>tolTheta</strong> (<em>float</em>) – The coefficients tolerance.</p></li>
+<li><p><strong>cost</strong> (<em>list</em>) – The list containing the cost of each iteration.</p></li>
+<li><p><strong>t</strong> (<em>matrix</em>) – The current coefficients estimate.</p></li>
+<li><p><strong>delta</strong> (<em>matrix</em>) – A 6xK mpmath matrix (where K is the max number of iterations) that stores the
+parameter direction of each iteration.</p></li>
+<li><p><strong>r</strong> (<em>matrix</em>) – An N+1x1 mpmath matrix representing the residuals of each step (+1 to store the barrier
+term).</p></li>
+<li><p><strong>jacobian_matrix</strong> (<em>matrix</em>) – An Nx6 mpmath matrix representing the jacobian matrix for each iteration.</p></li>
+<li><p><strong>jacobian_matrix_barrier</strong> (<em>matrix</em>) – A 1x6 mpmath matrix representing the jacobian matrix for the barrier term.</p></li>
+<li><p><strong>jacobian_matrix_full</strong> (<em>matrix</em>) – A combination of &lt;jacobian_matrix&gt; and &lt;jacobian_matrix_barrier&gt;.</p></li>
+<li><p><strong>hessian</strong> (<em>matrix</em>) – The hessian matrix.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.guaranteed_ellipse_fit.guaranteedEllipseFit">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.guaranteed_ellipse_fit.</span></span><span class="sig-name descname"><span class="pre">guaranteedEllipseFit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_points</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/ellipsefitting/guaranteed_AML_ellipse_fit/guaranteed_ellipse_fit.html#guaranteedEllipseFit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.guaranteed_ellipse_fit.guaranteedEllipseFit" title="Link to this definition"></a></dt>
+<dd><p>Compute the coefficients of a general ellipse within the Sampson Distance that fits
+a set of ellipse data (i.e. Ax**2 + Bxy + Cy**2 + Dx + Ey + F = 0, provided that
+B**2 - 4ac &lt; 0).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>t</strong> (<em>matrix</em>) – A 1x6 mpmath matrix containing initial estimates of the coefficients.</p></li>
+<li><p><strong>data_points</strong> (<em>matrix</em>) – A 3xN mpmath matrix, where the first row represents the x coordinates of the data
+points, the second represents the y coordinates of the data points, and the third
+is a list of one’s generated by the coordinate transformation in &lt;ellipse_estiamtes&gt;.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>result</strong> – A 1x6 matrix representing the coefficients of the ellipse [A, B, C, D, E, F] that
+fits the data points within the Sampson Distance.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>matrix</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.levenberg_marquardt">
+<span id="geodesicparams-ellipsefitting-guaranteed-aml-ellipse-fit-levenberg-marquardt-module"></span><h2>geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.levenberg_marquardt module<a class="headerlink" href="#module-geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.levenberg_marquardt" title="Link to this heading"></a></h2>
+<p>This function is used in the main loop of guaranteedEllipseFit in the process of minimizing an
+approximate maximum likelihood cost function of an ellipse fit to data.</p>
+<p>It computes an update for the parameters representing the ellipse, using the method of
+Levenberg-Marquardt for non-linear optimisation.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.levenberg_marquardt.levenbergMarquardtStep">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.levenberg_marquardt.</span></span><span class="sig-name descname"><span class="pre">levenbergMarquardtStep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">struct</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/ellipsefitting/guaranteed_AML_ellipse_fit/levenberg_marquardt.html#levenbergMarquardtStep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.levenberg_marquardt.levenbergMarquardtStep" title="Link to this definition"></a></dt>
+<dd><p>This function computes an update for the parameters representing the ellipse, using the method
+of Levenberg-Marquardt for non-linear optimisation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>struct</strong> (<em>EllipseData</em>) – An EllipseData type object containing all the iteration information.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>struct</strong> – An EllipseData type object after applying the Levenberg-Marquardt method.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.guaranteed_ellipse_fit.EllipseData" title="geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.guaranteed_ellipse_fit.EllipseData">EllipseData</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.line_search_step">
+<span id="geodesicparams-ellipsefitting-guaranteed-aml-ellipse-fit-line-search-step-module"></span><h2>geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.line_search_step module<a class="headerlink" href="#module-geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.line_search_step" title="Link to this heading"></a></h2>
+<p>This function is used in the main loop of guaranteedEllipseFit in the process of minimizing an
+approximate maximum likelihood cost function of an ellipse fit to data.</p>
+<p>It computes an update for the parameters representing the ellipse, using the pseudo-inverse
+of a Gauss-Newton approximation of the Hessian matrix. It then performs an inexact line search
+to determine how far to move along the update direction so that the resulting fit is still an
+ellipse.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.line_search_step.lineSearchStep">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.line_search_step.</span></span><span class="sig-name descname"><span class="pre">lineSearchStep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">struct</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/ellipsefitting/guaranteed_AML_ellipse_fit/line_search_step.html#lineSearchStep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.line_search_step.lineSearchStep" title="Link to this definition"></a></dt>
+<dd><p>This function computes an update for the parameters representing the ellipse, using the
+pseudo-inverse of a Gauss-Newton approximation of the Hessian matrix. It then performs an
+inexact line search to determine how far to move along the update direction so that the
+resulting fit is still an ellipse.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>struct</strong> (<em>EllipseData</em>) – An EllipseData type object containing all the iteration information.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>struct</strong> – An EllipseData type object after applying the Line Search Step method.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.guaranteed_ellipse_fit.EllipseData" title="geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.guaranteed_ellipse_fit.EllipseData">EllipseData</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Alexander Abesteh.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

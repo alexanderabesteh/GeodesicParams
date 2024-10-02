@@ -1,0 +1,358 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>geodesicparams.solvegeodesics.substitution &mdash; GeodesicParams 0.2.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=66b59bf7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=37f418d5"></script>
+      <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            GeodesicParams
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">GeodesicParams</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">geodesicparams.solvegeodesics.substitution</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for geodesicparams.solvegeodesics.substitution</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Helper functions for converting polynomials in hyperelliptic and elliptic differential</span>
+<span class="sd">equations into standard form.</span>
+
+<span class="sd">Functions include convert_deg5, which converts a 5th degree polynomial into standard form</span>
+<span class="sd">(y^5 + a4 * y^4 + a3 + ... + a1 * y + a0, where a1, a2, ... , a4 are real numbers);</span>
+<span class="sd">convert_deg3, which converts a 3rd degree polynomial into the weierstrass standard form </span>
+<span class="sd">(4z^3 - g2z - g3); and convert_degeven, which either converts a 6th degree polynomial to a </span>
+<span class="sd">5th degree polynomial, or a 4th degree polynomial to a 3rd degree, which can then be passed</span>
+<span class="sd">to convert_deg5 or convert_deg3. convert_polynomial encapsulates all these behaviours depending</span>
+<span class="sd">on the degree of the polynomial. As of now, polynomials with multiple zeroes have yet to be</span>
+<span class="sd">implemented.</span>
+<span class="sd"> </span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">mpmath</span> <span class="kn">import</span> <span class="n">sign</span>
+<span class="kn">from</span> <span class="nn">sympy</span> <span class="kn">import</span> <span class="n">collect</span><span class="p">,</span> <span class="n">lambdify</span><span class="p">,</span> <span class="n">Symbol</span><span class="p">,</span> <span class="n">Abs</span><span class="p">,</span> <span class="n">Poly</span><span class="p">,</span> <span class="n">re</span><span class="p">,</span> <span class="n">degree</span><span class="p">,</span> <span class="n">sign</span><span class="p">,</span> <span class="n">pprint</span>
+
+<span class="kn">from</span> <span class="nn">..utilities</span> <span class="kn">import</span> <span class="n">inlist</span><span class="p">,</span> <span class="n">extract_multiple_elems</span><span class="p">,</span> <span class="n">separate_zeros</span><span class="p">,</span> <span class="n">eval_roots</span>
+
+<div class="viewcode-block" id="convert_deg5">
+<a class="viewcode-back" href="../../../geodesicparams.solvegeodesics.html#geodesicparams.solvegeodesics.substitution.convert_deg5">[docs]</a>
+<span class="k">def</span> <span class="nf">convert_deg5</span><span class="p">(</span><span class="n">polynomial</span><span class="p">,</span> <span class="n">zeros</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert a 5th degree polynomial to its standard form, using the substitution y = - z </span>
+<span class="sd">    or y = z, such that the leading coefficient is positive.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    polynomial : symbolic</span>
+<span class="sd">        A symbolic statement representing the polynomial to be converted.</span>
+<span class="sd">    zeros : list</span>
+<span class="sd">        A list of 5 complex or real numbers representing the zeros of &lt;polynomial&gt;.</span>
+<span class="sd">        </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    p_standard : symbolic</span>
+<span class="sd">        The polynomial converted to standard form.</span>
+<span class="sd">    constant : float or symbolic</span>
+<span class="sd">        The prefactor infront of the converted polynomial in the differential equation.</span>
+<span class="sd">    callabe</span>
+<span class="sd">        The substitution used in the conversion as a callable lambda function.</span>
+<span class="sd">    substitution : symbolic </span>
+<span class="sd">        The substitution used in the conversion as a symbolic statement.</span>
+<span class="sd">    sign : integer</span>
+<span class="sd">        The sign, either +1 or -1, depending on the initial direction of motion</span>
+<span class="sd">        (not implemented yet).</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">y</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">)</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">polynomial</span>
+
+    <span class="c1"># Check for multiplicity (not implemented yet, tbd)</span>
+    <span class="n">zeros_list</span><span class="p">,</span> <span class="n">mult_zeros</span> <span class="o">=</span> <span class="n">extract_multiple_elems</span><span class="p">(</span><span class="n">zeros</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">mult_zeros</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Multiple zeros in polynomial, to be done&quot;</span><span class="p">)</span>
+
+    <span class="n">p_standard</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">p_sym</span> <span class="o">=</span> <span class="n">Poly</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">gen</span>
+
+    <span class="n">coeff_5</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">coeff</span><span class="p">(</span><span class="n">p_sym</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+
+    <span class="c1"># Determine and apply substitution, changes whether &lt;coeff_5&gt; is positive or negative</span>
+    <span class="k">if</span> <span class="n">coeff_5</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">collect</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">p_sym</span><span class="p">,</span> <span class="o">-</span><span class="n">y</span><span class="p">),</span> <span class="n">y</span><span class="p">)</span>
+        <span class="n">constant</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">coeff</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">):</span>
+            <span class="n">p_standard</span> <span class="o">+=</span> <span class="n">re</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">coeff</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="o">/</span> <span class="n">constant</span><span class="p">)</span> <span class="o">*</span> <span class="n">y</span><span class="o">**</span><span class="n">i</span>
+        <span class="n">substitution</span> <span class="o">=</span> <span class="o">-</span><span class="n">y</span>
+        <span class="n">sign</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">constant</span> <span class="o">=</span> <span class="n">coeff_5</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">):</span>
+            <span class="n">p_standard</span> <span class="o">+=</span> <span class="n">re</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">coeff</span><span class="p">(</span><span class="n">p_sym</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="o">/</span> <span class="n">constant</span><span class="p">)</span> <span class="o">*</span> <span class="n">y</span><span class="o">**</span><span class="n">i</span>
+        <span class="n">substitution</span> <span class="o">=</span> <span class="n">y</span>
+        <span class="n">sign</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">p_standard</span><span class="p">,</span> <span class="n">constant</span><span class="p">,</span> <span class="n">lambdify</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">substitution</span><span class="p">),</span> <span class="n">substitution</span><span class="p">,</span> <span class="n">sign</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="convert_deg3">
+<a class="viewcode-back" href="../../../geodesicparams.solvegeodesics.html#geodesicparams.solvegeodesics.substitution.convert_deg3">[docs]</a>
+<span class="k">def</span> <span class="nf">convert_deg3</span><span class="p">(</span><span class="n">polynomial</span><span class="p">,</span> <span class="n">zeros</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert a 3rd degree polynomial to its standard form, using the substitution</span>
+<span class="sd">    y = 1/b3 * (4*z - b2/3).</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    polynomial : symbolic</span>
+<span class="sd">        A symbolic statement representing the polynomial to be converted.</span>
+<span class="sd">    zeros : list</span>
+<span class="sd">        A list of 3 complex or real numbers representing the zeros of &lt;polynomial&gt;.</span>
+<span class="sd">        </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    p_standard : symbolic</span>
+<span class="sd">        The polynomial converted to standard form.</span>
+<span class="sd">    constant : integer</span>
+<span class="sd">        The prefactor infront of the converted polynomial in the differential equation</span>
+<span class="sd">        (always 1).</span>
+<span class="sd">    callabe</span>
+<span class="sd">        The substitution used in the conversion as a callable lambda function.</span>
+<span class="sd">    substitution : symbolic </span>
+<span class="sd">        The substitution used in the conversion as a symbolic statement.</span>
+<span class="sd">    sign : integer</span>
+<span class="sd">        The sign, either +1 or -1, depending on the initial direction of motion.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">y</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">)</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">polynomial</span>
+    
+    <span class="c1"># Check for multiplicity (not implemented yet, tbd)</span>
+    <span class="n">zeros_list</span><span class="p">,</span> <span class="n">mult_zeros</span> <span class="o">=</span> <span class="n">extract_multiple_elems</span><span class="p">(</span><span class="n">zeros</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">mult_zeros</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;multiple zeros, tbd&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Determine substitution</span>
+    <span class="n">a3</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">coeff</span><span class="p">(</span><span class="n">Poly</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">gen</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="n">a2</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">coeff</span><span class="p">(</span><span class="n">Poly</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">gen</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">sign_a3</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">sign</span><span class="p">(</span><span class="n">a3</span><span class="p">))</span>
+    <span class="n">substitution</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">a3</span> <span class="o">*</span> <span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">y</span> <span class="o">-</span> <span class="n">a2</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span>
+
+    <span class="c1"># Apply substitution</span>
+    <span class="n">p_standard</span> <span class="o">=</span><span class="p">(</span><span class="n">a3</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="mi">4</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">p</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">Poly</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">gen</span><span class="p">,</span> <span class="n">substitution</span><span class="p">))</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">Abs</span><span class="p">(</span><span class="n">p_standard</span><span class="o">.</span><span class="n">coeff</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">p_standard</span> <span class="o">=</span> <span class="mi">4</span><span class="o">*</span><span class="n">y</span> <span class="o">**</span> <span class="mi">3</span> <span class="o">+</span> <span class="n">p_standard</span><span class="o">.</span><span class="n">coeff</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">y</span> <span class="o">+</span> <span class="n">p_standard</span><span class="o">.</span><span class="n">coeff</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">p_standard</span> <span class="o">=</span> <span class="n">p_standard</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">y</span><span class="o">**</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">[</span><span class="n">p_standard</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lambdify</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">substitution</span><span class="p">),</span> <span class="n">substitution</span><span class="p">,</span> <span class="n">sign_a3</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="convert_degeven">
+<a class="viewcode-back" href="../../../geodesicparams.solvegeodesics.html#geodesicparams.solvegeodesics.substitution.convert_degeven">[docs]</a>
+<span class="k">def</span> <span class="nf">convert_degeven</span><span class="p">(</span><span class="n">polynomial</span><span class="p">,</span> <span class="n">zeros</span><span class="p">,</span> <span class="n">badzeros</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert a 4th degree polynomial to a 3rd degree polynomial or a 6th degree to a 5th </span>
+<span class="sd">    degree. </span>
+
+<span class="sd">    Using the substitution y = 1/z + ei, where ei is one of the roots of &lt;polynomial&gt;, the degree </span>
+<span class="sd">    of the is reduced by polynomial by 1. If the degree of the polynomial was 6, then the prefactor</span>
+<span class="sd">    is given by f(z) = z^2.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    polynomial : symbolic</span>
+<span class="sd">        A symbolic statement representing the polynomial to be converted.</span>
+<span class="sd">    zeros : list</span>
+<span class="sd">        A list of 4 or 6 complex or real numbers representing the zeros of &lt;polynomial&gt;.</span>
+<span class="sd">    badzeros : list</span>
+<span class="sd">        A list of complex or real numbers representing the roots of &lt;polynomial&gt; that are</span>
+<span class="sd">        not to be used in the conversion.</span>
+<span class="sd">        </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    p_standard : symbolic</span>
+<span class="sd">        The original polynomial converted to standard form.</span>
+<span class="sd">    constant : float or symbolic</span>
+<span class="sd">        The prefactor infront of the converted polynomial in the differential equation.</span>
+<span class="sd">    callabe</span>
+<span class="sd">        The substitution used in the conversion as a callable lambda function.</span>
+<span class="sd">    substitution : symbolic </span>
+<span class="sd">        The substitution used in the conversion as a symbolic statement.</span>
+<span class="sd">    sign : integer</span>
+<span class="sd">        The sign, either +1 or -1, depending on the initial direction of motion.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">z</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;z&#39;</span><span class="p">)</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">polynomial</span>
+    <span class="n">substitution</span> <span class="o">=</span> <span class="kc">None</span>
+    
+    <span class="c1"># Check for multiplicity (not implemented yet, tbd)</span>
+    <span class="n">zeros_list</span><span class="p">,</span> <span class="n">mult_zeros</span> <span class="o">=</span> <span class="n">extract_multiple_elems</span><span class="p">(</span><span class="n">zeros</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">mult_zeros</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Error: multiple zeros, tbd&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Determine substitution</span>
+    <span class="k">if</span> <span class="n">inlist</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">zeros_list</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">substitution</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">z</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">realNS</span><span class="p">,</span> <span class="n">complexNS</span> <span class="o">=</span> <span class="n">separate_zeros</span><span class="p">(</span><span class="n">zeros_list</span><span class="p">)</span>
+        <span class="c1"># Sort real zeros by how close they are to 1 or -1</span>
+        <span class="n">realz</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">realNS</span><span class="p">,</span> <span class="n">key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">Abs</span><span class="p">(</span><span class="n">Abs</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">realz</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">inlist</span><span class="p">(</span><span class="n">realz</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">badzeros</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">substitution</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">z</span> <span class="o">+</span> <span class="n">realz</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="k">break</span>
+    <span class="k">if</span> <span class="n">substitution</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">substitution</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">z</span> <span class="o">+</span> <span class="n">realz</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># Apply substitution to polynomial and prefactor</span>
+    <span class="k">if</span> <span class="n">degree</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="n">p_degodd</span> <span class="o">=</span> <span class="p">(</span><span class="n">z</span><span class="o">**</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">p</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">Poly</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">gen</span><span class="p">,</span> <span class="n">substitution</span><span class="p">))</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+        <span class="n">integrand</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">zeros_degodd</span> <span class="o">=</span> <span class="n">eval_roots</span><span class="p">(</span><span class="n">Poly</span><span class="p">(</span><span class="n">p_degodd</span><span class="p">)</span><span class="o">.</span><span class="n">all_roots</span><span class="p">())</span>
+        <span class="n">data_degodd</span> <span class="o">=</span> <span class="n">convert_deg3</span><span class="p">(</span><span class="n">p_degodd</span><span class="p">,</span> <span class="n">zeros_degodd</span><span class="p">)</span>
+        <span class="n">prefactor</span> <span class="o">=</span> <span class="n">integrand</span> <span class="o">*</span> <span class="n">data_degodd</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">degree</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
+        <span class="n">p_degodd</span> <span class="o">=</span> <span class="p">(</span><span class="n">z</span><span class="o">**</span><span class="mi">6</span> <span class="o">*</span> <span class="n">p</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">Poly</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">gen</span><span class="p">,</span> <span class="n">substitution</span><span class="p">))</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+        <span class="n">integrand</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">z</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">zeros_degodd</span> <span class="o">=</span> <span class="n">eval_roots</span><span class="p">(</span><span class="n">Poly</span><span class="p">(</span><span class="n">p_degodd</span><span class="p">)</span><span class="o">.</span><span class="n">all_roots</span><span class="p">())</span>
+        <span class="n">data_degodd</span> <span class="o">=</span> <span class="n">convert_deg5</span><span class="p">(</span><span class="n">p_degodd</span><span class="p">,</span> <span class="n">zeros_degodd</span><span class="p">)</span>
+        <span class="n">prefactor</span> <span class="o">=</span> <span class="p">(</span><span class="n">data_degodd</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">integrand</span><span class="p">)</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">data_degodd</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="p">[</span><span class="n">data_degodd</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">prefactor</span><span class="p">,</span> <span class="n">lambdify</span><span class="p">(</span><span class="n">Poly</span><span class="p">(</span><span class="n">data_degodd</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span><span class="o">.</span><span class="n">gen</span><span class="p">,</span> <span class="n">substitution</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">data_degodd</span><span class="p">[</span><span class="mi">3</span><span class="p">])),</span> <span class="n">substitution</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">data_degodd</span><span class="p">[</span><span class="mi">3</span><span class="p">]),</span> <span class="n">data_degodd</span><span class="p">[</span><span class="mi">4</span><span class="p">]]</span></div>
+
+
+<div class="viewcode-block" id="convert_polynomial">
+<a class="viewcode-back" href="../../../geodesicparams.solvegeodesics.html#geodesicparams.solvegeodesics.substitution.convert_polynomial">[docs]</a>
+<span class="k">def</span> <span class="nf">convert_polynomial</span><span class="p">(</span><span class="n">polynomial</span><span class="p">,</span> <span class="n">degree</span><span class="p">,</span> <span class="n">zeros</span><span class="p">,</span> <span class="n">badzeros</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert a polynomial used in a hyperelliptic or elliptic differential equation into</span>
+<span class="sd">    standard form. </span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    polynomial : symbolic</span>
+<span class="sd">        A symbolic statement representing the polynomial to be converted.</span>
+<span class="sd">    degree : integer</span>
+<span class="sd">        The degree of the polynomial.</span>
+<span class="sd">    zeros : list</span>
+<span class="sd">        A list of 4 or 6 complex or real numbers representing the zeros of &lt;polynomial&gt;.</span>
+<span class="sd">    badzeros : list, optional</span>
+<span class="sd">        A list of complex or real numbers representing the roots of &lt;polynomial&gt; that are</span>
+<span class="sd">        not to be used in the conversion.</span>
+<span class="sd">        </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    p_standard : symbolic</span>
+<span class="sd">        The original polynomial converted to standard form.</span>
+<span class="sd">    constant : float or symbolic</span>
+<span class="sd">        The prefactor infront of the converted polynomial in the differential equation.</span>
+<span class="sd">    callabe</span>
+<span class="sd">        The substitution used in the conversion as a callable lambda function.</span>
+<span class="sd">    substitution : symbolic </span>
+<span class="sd">        The substitution used in the conversion as a symbolic statement.</span>
+<span class="sd">    sign : integer</span>
+<span class="sd">        The sign, either +1 or -1, depending on the initial direction of motion.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">y</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">degree</span> <span class="o">&gt;</span> <span class="mi">6</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Degree larger than 6 is not supported&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">degree</span> <span class="o">==</span> <span class="mi">6</span> <span class="ow">or</span> <span class="n">degree</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">convert_degeven</span><span class="p">(</span><span class="n">polynomial</span><span class="p">,</span> <span class="n">zeros</span><span class="p">,</span> <span class="n">badzeros</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">degree</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">convert_deg5</span><span class="p">(</span><span class="n">polynomial</span><span class="p">,</span> <span class="n">zeros</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">degree</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">convert_deg3</span><span class="p">(</span><span class="n">polynomial</span><span class="p">,</span> <span class="n">zeros</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">degree</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">polynomial</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">Poly</span><span class="p">(</span><span class="n">polynomial</span><span class="p">)</span><span class="o">.</span><span class="n">gen</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lambdify</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="n">y</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span></div>
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Alexander Abesteh.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

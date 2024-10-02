@@ -1,0 +1,280 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.ellipse_estimates &mdash; GeodesicParams 0.2.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=66b59bf7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=37f418d5"></script>
+      <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            GeodesicParams
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">GeodesicParams</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.ellipse_estimates</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.ellipse_estimates</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Procedure for computing the coefficents of an ellipse within the Sampson Distance that</span>
+<span class="sd">fits a set of data.</span>
+
+<span class="sd">The primary function &lt;compute_guaranteedellipse_estimate&gt; returns the coefficients</span>
+<span class="sd">of an ellipse within the Sampson Distance (i.e. Ax**2 + Bxy + Cy**2 + Dx + Ey + F = 0, </span>
+<span class="sd">provided that B**2 - 4ac &lt; 0) that fits the data. The other functions are used for </span>
+<span class="sd">conversions, such as converting the coefficient representation into a parametric </span>
+<span class="sd">representation that can then be used to generate data.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">mpmath</span> <span class="kn">import</span> <span class="n">sqrt</span><span class="p">,</span> <span class="n">cos</span><span class="p">,</span> <span class="n">sin</span><span class="p">,</span> <span class="n">atan2</span><span class="p">,</span> <span class="n">matrix</span><span class="p">,</span> <span class="n">norm</span>
+
+<span class="kn">from</span> <span class="nn">..direct_ellipse_fitting.ellipse_fit</span> <span class="kn">import</span> <span class="n">direct_ellipse_fit</span>
+<span class="kn">from</span> <span class="nn">..helper_functions.normalise_2d_pts</span> <span class="kn">import</span> <span class="n">norm_2d_pts</span>
+<span class="kn">from</span> <span class="nn">.guaranteed_ellipse_fit</span> <span class="kn">import</span> <span class="n">guaranteedEllipseFit</span>
+
+<div class="viewcode-block" id="compute_guaranteedellipse_estimate">
+<a class="viewcode-back" href="../../../../geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.html#geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.ellipse_estimates.compute_guaranteedellipse_estimate">[docs]</a>
+<span class="k">def</span> <span class="nf">compute_guaranteedellipse_estimate</span><span class="p">(</span><span class="n">data_points</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the coefficients of a general ellipse within the Sampson Distance that fits</span>
+<span class="sd">    a set of ellipse data (i.e. Ax**2 + Bxy + Cy**2 + Dx + Ey + F = 0, provided that </span>
+<span class="sd">    B**2 - 4ac &lt; 0). </span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data_points : matrix</span>
+<span class="sd">         A 2xN mpmath matrix, where the first row represents the x coordinates of the data</span>
+<span class="sd">         points, and the second represents the y coordinates of the data points.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    result : matrix</span>
+<span class="sd">        A 1x6 matrix representing the coefficients of the ellipse [A, B, C, D, E, F] that</span>
+<span class="sd">        fits the data points within the Sampson Distance.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="n">data_points</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">cols</span>
+ 
+    <span class="c1"># Normalize points</span>
+    <span class="n">x_new</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+
+    <span class="n">x_new</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="n">x_new</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="n">x_new</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="n">x</span><span class="p">,</span> <span class="n">t</span> <span class="o">=</span> <span class="n">norm_2d_pts</span><span class="p">(</span><span class="n">x_new</span><span class="p">)</span>
+    <span class="n">norm_data</span> <span class="o">=</span> <span class="n">x</span>
+
+    <span class="c1"># Initial approximation of coefficients</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">direct_ellipse_fit</span><span class="p">(</span><span class="n">norm_data</span><span class="p">)</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">theta</span> <span class="o">/</span> <span class="n">norm</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+
+    <span class="c1"># Ellipse coefficients within the Sampson Distance</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">guaranteedEllipseFit</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">theta</span> <span class="o">/</span> <span class="n">norm</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+
+    <span class="c1"># Undo coordinate normalization to return the coefficients to their cartesian form</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">theta</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span> <span class="n">b</span> <span class="o">=</span> <span class="n">theta</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span> <span class="n">c</span> <span class="o">=</span> <span class="n">theta</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span> <span class="n">d</span> <span class="o">=</span> <span class="n">theta</span><span class="p">[</span><span class="mi">3</span><span class="p">];</span> <span class="n">e</span> <span class="o">=</span> <span class="n">theta</span><span class="p">[</span><span class="mi">4</span><span class="p">];</span> <span class="n">f</span> <span class="o">=</span> <span class="n">theta</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+    <span class="n">C</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">([[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">d</span> <span class="o">/</span><span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="n">b</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">e</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="n">d</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">e</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">f</span><span class="p">]])</span>
+
+    <span class="n">C</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">C</span> <span class="o">*</span> <span class="n">t</span>
+    <span class="n">aa</span> <span class="o">=</span> <span class="n">C</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">bb</span> <span class="o">=</span> <span class="n">C</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span>
+    <span class="n">dd</span> <span class="o">=</span> <span class="n">C</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span>
+    <span class="n">cc</span> <span class="o">=</span> <span class="n">C</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">ee</span> <span class="o">=</span> <span class="n">C</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span>
+    <span class="n">ff</span> <span class="o">=</span> <span class="n">C</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+    
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">([</span><span class="n">aa</span><span class="p">,</span> <span class="n">bb</span><span class="p">,</span> <span class="n">cc</span><span class="p">,</span> <span class="n">dd</span><span class="p">,</span> <span class="n">ee</span><span class="p">,</span> <span class="n">ff</span><span class="p">])</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">theta</span> <span class="o">/</span> <span class="n">norm</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">theta</span></div>
+
+
+<div class="viewcode-block" id="conv_coeffs_to_axis">
+<a class="viewcode-back" href="../../../../geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.html#geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.ellipse_estimates.conv_coeffs_to_axis">[docs]</a>
+<span class="k">def</span> <span class="nf">conv_coeffs_to_axis</span><span class="p">(</span><span class="n">coeffs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given the coefficients of a general ellipse [A, B, C, D, E, F], return the semi-major</span>
+<span class="sd">    and semi-minor axis.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    coeffs : matrix, list</span>
+<span class="sd">        A 1x6 mpmath matrix or a list containing 6 element: the coefficients of the general</span>
+<span class="sd">        ellipse.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    semi_maj : float</span>
+<span class="sd">        The semi_major axis of the ellipse.</span>
+<span class="sd">    semi_min : float</span>
+<span class="sd">        The semi-minor axis of the ellipse.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">coeffs</span>
+
+    <span class="c1"># Conversion function</span>
+    <span class="c1"># Sign of the square root determines which axis (+ for major, - for minor)</span>
+    <span class="n">convert</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">sign</span> <span class="p">:</span> <span class="o">-</span> <span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">a</span> <span class="o">*</span> <span class="n">e</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">c</span> <span class="o">*</span> <span class="n">d</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">b</span> <span class="o">*</span> <span class="n">d</span> <span class="o">*</span> <span class="n">e</span> <span class="o">+</span> <span class="p">(</span><span class="n">b</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">a</span> <span class="o">*</span> <span class="n">c</span><span class="p">)</span> <span class="o">*</span> <span class="n">f</span><span class="p">)</span> <span class="o">*</span> <span class="p">((</span><span class="n">a</span> <span class="o">+</span> <span class="n">c</span><span class="p">)</span> <span class="o">+</span> <span class="n">sign</span> <span class="o">*</span> <span class="n">sqrt</span><span class="p">((</span><span class="n">a</span> <span class="o">-</span> <span class="n">c</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">b</span><span class="o">**</span><span class="mi">2</span><span class="p">)))</span> <span class="o">/</span> <span class="p">(</span><span class="n">b</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">a</span> <span class="o">*</span> <span class="n">c</span><span class="p">)</span>
+    
+    <span class="n">semi_maj</span> <span class="o">=</span> <span class="n">convert</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">semi_min</span> <span class="o">=</span> <span class="n">convert</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">semi_maj</span><span class="p">,</span> <span class="n">semi_min</span></div>
+
+
+<div class="viewcode-block" id="conv_coeffs_to_init_pos">
+<a class="viewcode-back" href="../../../../geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.html#geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.ellipse_estimates.conv_coeffs_to_init_pos">[docs]</a>
+<span class="k">def</span> <span class="nf">conv_coeffs_to_init_pos</span><span class="p">(</span><span class="n">coeffs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given the coefficients of a general ellipse [A, B, C, D, E, F], return the center</span>
+<span class="sd">    coordinates of the ellipse (x_init, y_init) and the rotation angle of the ellipse</span>
+<span class="sd">    counterclockwise around the center.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    coeffs : matrix, list</span>
+<span class="sd">        A 1x6 mpmath matrix or a list containing 6 element: the coefficients of the general</span>
+<span class="sd">        ellipse.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    x_init : float</span>
+<span class="sd">        The x coordinate of the center of the ellipse.</span>
+<span class="sd">    y_init : float</span>
+<span class="sd">        The y coordinate of the center of the ellipse.</span>
+<span class="sd">    rot_angle : float</span>
+<span class="sd">        The rotation angle of the ellipse counterclockwise around the center.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">coeffs</span>
+    <span class="n">cond</span> <span class="o">=</span> <span class="n">b</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">a</span> <span class="o">*</span> <span class="n">c</span>
+
+    <span class="n">x_init</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">c</span> <span class="o">*</span> <span class="n">d</span> <span class="o">-</span> <span class="n">b</span> <span class="o">*</span> <span class="n">e</span><span class="p">)</span> <span class="o">/</span> <span class="n">cond</span>
+    <span class="n">y_init</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">a</span> <span class="o">*</span> <span class="n">e</span> <span class="o">-</span> <span class="n">b</span> <span class="o">*</span> <span class="n">d</span><span class="p">)</span> <span class="o">/</span> <span class="n">cond</span>
+    <span class="n">rot_angle</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="mi">2</span> <span class="o">*</span> <span class="n">atan2</span><span class="p">(</span><span class="o">-</span><span class="n">b</span><span class="p">,</span> <span class="n">c</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">[</span><span class="n">x_init</span><span class="p">,</span> <span class="n">y_init</span><span class="p">,</span> <span class="n">rot_angle</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="parametric_rep">
+<a class="viewcode-back" href="../../../../geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.html#geodesicparams.ellipsefitting.guaranteed_AML_ellipse_fit.ellipse_estimates.parametric_rep">[docs]</a>
+<span class="k">def</span> <span class="nf">parametric_rep</span><span class="p">(</span><span class="n">coeffs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given the coefficients of a general ellipse [A, B, C, D, E, F], return the parametric</span>
+<span class="sd">    representation of the ellipse as a function of the eccentric anomaly t.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    coeffs : matrix, list</span>
+<span class="sd">        A 1x6 mpmath matrix or a list containing 6 element: the coefficients of the general</span>
+<span class="sd">        ellipse.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    x : callable</span>
+<span class="sd">        The x coordinate in the parametric representation as a function of the eccentric anomaly</span>
+<span class="sd">        t.</span>
+<span class="sd">    y : callable</span>
+<span class="sd">        The y coordinate in the parametric representation as a function of the eccentric anomaly</span>
+<span class="sd">        t.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span>  <span class="n">conv_coeffs_to_axis</span><span class="p">(</span><span class="n">coeffs</span><span class="p">)</span>
+    <span class="n">x_init</span><span class="p">,</span> <span class="n">y_init</span><span class="p">,</span> <span class="n">rot_angle</span> <span class="o">=</span> <span class="n">conv_coeffs_to_init_pos</span><span class="p">(</span><span class="n">coeffs</span><span class="p">)</span>
+
+    <span class="c1"># Parametric representation</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">t</span> <span class="p">:</span> <span class="n">a</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">rot_angle</span><span class="p">)</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">-</span> <span class="n">b</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">rot_angle</span><span class="p">)</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">+</span> <span class="n">x_init</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">t</span> <span class="p">:</span> <span class="n">a</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">rot_angle</span><span class="p">)</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">+</span> <span class="n">b</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">rot_angle</span><span class="p">)</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">+</span> <span class="n">y_init</span>  
+
+    <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Alexander Abesteh.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

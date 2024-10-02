@@ -1,0 +1,222 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>geodesicparams.ellipsefitting.ellipse_3d.fit_3d_ellipse &mdash; GeodesicParams 0.2.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=66b59bf7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=37f418d5"></script>
+      <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            GeodesicParams
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">GeodesicParams</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">geodesicparams.ellipsefitting.ellipse_3d.fit_3d_ellipse</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for geodesicparams.ellipsefitting.ellipse_3d.fit_3d_ellipse</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Procedures for fitting an ellipse to three dimensional cartesian data points using</span>
+<span class="sd">the guaranteed ellipse fitting method and rodrigues rotation to project the 3D data points</span>
+<span class="sd">to the 2D fitting plane.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">mpmath</span> <span class="kn">import</span> <span class="n">matrix</span><span class="p">,</span> <span class="n">pi</span><span class="p">,</span> <span class="n">linspace</span><span class="p">,</span> <span class="n">findroot</span> 
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">dot</span><span class="p">,</span> <span class="n">cos</span><span class="p">,</span> <span class="n">sin</span><span class="p">,</span> <span class="n">cross</span><span class="p">,</span> <span class="n">zeros</span><span class="p">,</span> <span class="n">newaxis</span><span class="p">,</span> <span class="n">arccos</span><span class="p">,</span> <span class="n">array</span> 
+<span class="kn">from</span> <span class="nn">numpy.linalg</span> <span class="kn">import</span> <span class="n">norm</span><span class="p">,</span> <span class="n">svd</span> 
+
+<span class="kn">from</span> <span class="nn">..guaranteed_AML_ellipse_fit.ellipse_estimates</span> <span class="kn">import</span> <span class="n">compute_guaranteedellipse_estimate</span><span class="p">,</span> <span class="n">parametric_rep</span>
+
+<div class="viewcode-block" id="rodrigues_rot">
+<a class="viewcode-back" href="../../../../geodesicparams.ellipsefitting.ellipse_3d.html#geodesicparams.ellipsefitting.ellipse_3d.fit_3d_ellipse.rodrigues_rot">[docs]</a>
+<span class="k">def</span> <span class="nf">rodrigues_rot</span><span class="p">(</span><span class="n">data_points</span><span class="p">,</span> <span class="n">n0</span><span class="p">,</span> <span class="n">n1</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Rotates given points based on a starting vector &lt;n0&gt; and ending vector &lt;n1&gt;.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data_points : matrix</span>
+<span class="sd">         A 2xN mpmath matrix, where the first row represents the x coordinates of the data</span>
+<span class="sd">         points, and the second represents the y coordinates of the data points.</span>
+<span class="sd">    n0 : list</span>
+<span class="sd">        A 1x3 starting vector, which gives the axis k and angle of rotation theta.</span>
+<span class="sd">    n1 : list</span>
+<span class="sd">        A 1x3 ending vector, which gives the axis k and angle of rotation theta.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    data_rot : matrix</span>
+<span class="sd">        An Nx3 matrix containing the fitted x, y, z data points of N length.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span> 
+
+    <span class="c1"># If P is only 1d array (coords of single point), fix it to be matrix</span>
+    <span class="k">if</span> <span class="n">data_points</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">data_points</span> <span class="o">=</span> <span class="n">data_points</span><span class="p">[</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span>
+    
+    <span class="c1"># Get vector of rotation k and angle theta</span>
+    <span class="n">n0</span> <span class="o">=</span> <span class="n">n0</span> <span class="o">/</span> <span class="n">norm</span><span class="p">(</span><span class="n">n0</span><span class="p">)</span>
+    <span class="n">n1</span> <span class="o">=</span> <span class="n">n1</span> <span class="o">/</span> <span class="n">norm</span><span class="p">(</span><span class="n">n1</span><span class="p">)</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="n">cross</span><span class="p">(</span><span class="n">n0</span><span class="p">,</span> <span class="n">n1</span><span class="p">)</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="n">k</span> <span class="o">/</span> <span class="n">norm</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">arccos</span><span class="p">(</span><span class="n">dot</span><span class="p">(</span><span class="n">n0</span><span class="p">,</span> <span class="n">n1</span><span class="p">))</span>
+    
+    <span class="c1"># Compute rotated points</span>
+    <span class="n">data_rot</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">data_points</span><span class="p">),</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data_points</span><span class="p">)):</span>
+        <span class="n">data_rot</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_points</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">+</span> <span class="n">cross</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">data_points</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">+</span> <span class="n">k</span> <span class="o">*</span> <span class="n">dot</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">data_points</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">data_rot</span></div>
+
+
+<div class="viewcode-block" id="fit_ellipse_3d">
+<a class="viewcode-back" href="../../../../geodesicparams.ellipsefitting.ellipse_3d.html#geodesicparams.ellipsefitting.ellipse_3d.fit_3d_ellipse.fit_ellipse_3d">[docs]</a>
+<span class="k">def</span> <span class="nf">fit_ellipse_3d</span><span class="p">(</span><span class="n">data_points</span><span class="p">,</span> <span class="n">nPoints</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given data &lt;data_points&gt; in the 3D cartesian plane, </span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data_points : matrix</span>
+<span class="sd">         A 3xN mpmath matrix, where the first row represents the x coordinates of the data</span>
+<span class="sd">         points, the second represents the y coordinates of the data points.</span>
+<span class="sd">    nPoints : int</span>
+<span class="sd">        The number of fitted data points to generate.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Matrix</span>
+<span class="sd">        An Nx3 matrix containing the fitted x, y, z data points of N length.</span>
+<span class="sd">    coeffs : matrix</span>
+<span class="sd">        A 1x6 matrix representing the coefficients of the ellipse [A, B, C, D, E, F] that</span>
+<span class="sd">        fits the data points within the Sampson Distance.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span> 
+
+    <span class="n">P_mean</span> <span class="o">=</span> <span class="n">data_points</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">P_centered</span> <span class="o">=</span> <span class="n">data_points</span> <span class="o">-</span> <span class="n">P_mean</span>
+    
+    <span class="c1"># Fitting plane by SVD for the mean-centered data</span>
+    <span class="n">U</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">V</span> <span class="o">=</span> <span class="n">svd</span><span class="p">(</span><span class="n">P_centered</span><span class="p">,</span> <span class="n">full_matrices</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span>
+    
+    <span class="c1"># Normal vector of fitting plane is given by 3rd column in V</span>
+    <span class="c1"># Note svd returns V^T, so we need to select 3rd row from V^T</span>
+    <span class="c1"># normal on 3d plane</span>
+    <span class="n">normal</span> <span class="o">=</span> <span class="n">V</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span>
+    
+    <span class="c1"># Project points to coords X-Y in 2D plane</span>
+    <span class="n">P_xy</span> <span class="o">=</span> <span class="n">rodrigues_rot</span><span class="p">(</span><span class="n">P_centered</span><span class="p">,</span> <span class="n">normal</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+    <span class="n">P_xy</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">(</span><span class="n">P_xy</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+
+    <span class="c1"># Use guaranteed ellipse estimate to fit an ellipse to set of 2d points</span>
+    <span class="n">coeffs</span> <span class="o">=</span> <span class="n">compute_guaranteedellipse_estimate</span><span class="p">(</span><span class="n">P_xy</span><span class="p">)</span> 
+    <span class="c1"># Generate n 2D points on the fitted elippse</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">parametric_rep</span><span class="p">(</span><span class="n">coeffs</span><span class="p">)</span> 
+    
+    <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">t1</span><span class="p">,</span> <span class="n">t2</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">x</span><span class="p">(</span><span class="n">t1</span><span class="p">)</span> <span class="o">-</span> <span class="n">P_xy</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">y</span><span class="p">(</span><span class="n">t2</span><span class="p">)</span> <span class="o">-</span> <span class="n">P_xy</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># This needs to be fixed</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">findroot</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="n">theta_x</span> <span class="o">=</span> <span class="n">linspace</span><span class="p">(</span><span class="n">start</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">+</span> <span class="n">start</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nPoints</span><span class="p">)</span>
+    <span class="n">theta_y</span> <span class="o">=</span> <span class="n">linspace</span><span class="p">(</span><span class="n">start</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">+</span> <span class="n">start</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">nPoints</span><span class="p">)</span>
+
+    <span class="n">x_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">theta_x</span><span class="p">]</span>
+    <span class="n">y_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">y</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">theta_y</span><span class="p">]</span>
+
+    <span class="n">xy</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x_list</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">xy</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">(</span><span class="n">x_list</span><span class="p">)</span>
+    <span class="n">xy</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">(</span><span class="n">y_list</span><span class="p">)</span>
+
+    <span class="c1"># Convert the 2D generated points to the 3D space</span>
+    <span class="n">points</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">xy</span><span class="p">)):</span>
+        <span class="n">points</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">xy</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">xy</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">points</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+    <span class="n">ellipse_points_3d</span> <span class="o">=</span> <span class="n">rodrigues_rot</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">normal</span><span class="p">)</span> <span class="o">+</span> <span class="n">P_mean</span>
+    
+    <span class="k">return</span> <span class="n">matrix</span><span class="p">(</span><span class="n">ellipse_points_3d</span><span class="p">),</span> <span class="n">coeffs</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Alexander Abesteh.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

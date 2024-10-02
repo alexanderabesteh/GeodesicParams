@@ -1,0 +1,1022 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>geodesicparams.solvegeodesics package &mdash; GeodesicParams 0.2.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=66b59bf7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=37f418d5"></script>
+      <script src="_static/doctools.js?v=9a2dae69"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            GeodesicParams
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">geodesicparams.solvegeodesics package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-geodesicparams.solvegeodesics.general_relativity">geodesicparams.solvegeodesics.general_relativity module</a><ul>
+<li><a class="reference internal" href="#geodesicparams.solvegeodesics.general_relativity.check_orbit_types"><code class="docutils literal notranslate"><span class="pre">check_orbit_types()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.solvegeodesics.general_relativity.check_rinitials"><code class="docutils literal notranslate"><span class="pre">check_rinitials()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.solvegeodesics.general_relativity.check_thetainitials"><code class="docutils literal notranslate"><span class="pre">check_thetainitials()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.solvegeodesics.general_relativity.classify_spacetime"><code class="docutils literal notranslate"><span class="pre">classify_spacetime()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.solvegeodesics.general_relativity.convert_boundsinit"><code class="docutils literal notranslate"><span class="pre">convert_boundsinit()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.solvegeodesics.general_relativity.four_velocity"><code class="docutils literal notranslate"><span class="pre">four_velocity()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.solvegeodesics.general_relativity.get_allowed_orbits"><code class="docutils literal notranslate"><span class="pre">get_allowed_orbits()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-geodesicparams.solvegeodesics.solve_eom">geodesicparams.solvegeodesics.solve_eom module</a><ul>
+<li><a class="reference internal" href="#geodesicparams.solvegeodesics.solve_eom.check_initNewton"><code class="docutils literal notranslate"><span class="pre">check_initNewton()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.solvegeodesics.solve_eom.compute_secondkind_periods"><code class="docutils literal notranslate"><span class="pre">compute_secondkind_periods()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.solvegeodesics.solve_eom.integrate_elliptic_third"><code class="docutils literal notranslate"><span class="pre">integrate_elliptic_third()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.solvegeodesics.solve_eom.integrate_eom"><code class="docutils literal notranslate"><span class="pre">integrate_eom()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.solvegeodesics.solve_eom.integrate_hyperelliptic_first"><code class="docutils literal notranslate"><span class="pre">integrate_hyperelliptic_first()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.solvegeodesics.solve_eom.integrate_hyperelliptic_third"><code class="docutils literal notranslate"><span class="pre">integrate_hyperelliptic_third()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.solvegeodesics.solve_eom.invert_elliptic_first"><code class="docutils literal notranslate"><span class="pre">invert_elliptic_first()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.solvegeodesics.solve_eom.invert_eom"><code class="docutils literal notranslate"><span class="pre">invert_eom()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.solvegeodesics.solve_eom.invert_hyperelliptic_first"><code class="docutils literal notranslate"><span class="pre">invert_hyperelliptic_first()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.solvegeodesics.solve_eom.invert_trigonometric_first"><code class="docutils literal notranslate"><span class="pre">invert_trigonometric_first()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.solvegeodesics.solve_eom.orbitdata"><code class="docutils literal notranslate"><span class="pre">orbitdata()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.solvegeodesics.solve_eom.sigma_ln"><code class="docutils literal notranslate"><span class="pre">sigma_ln()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.solvegeodesics.solve_eom.sigma_ln_numerical"><code class="docutils literal notranslate"><span class="pre">sigma_ln_numerical()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.solvegeodesics.solve_eom.solution"><code class="docutils literal notranslate"><span class="pre">solution()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.solvegeodesics.solve_eom.solution_first"><code class="docutils literal notranslate"><span class="pre">solution_first()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.solvegeodesics.solve_eom.solution_second"><code class="docutils literal notranslate"><span class="pre">solution_second()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-geodesicparams.solvegeodesics.solve_geodesics">geodesicparams.solvegeodesics.solve_geodesics module</a><ul>
+<li><a class="reference internal" href="#geodesicparams.solvegeodesics.solve_geodesics.solve_geodesic_orbit"><code class="docutils literal notranslate"><span class="pre">solve_geodesic_orbit()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.solvegeodesics.solve_geodesics.solve_geodesic_time"><code class="docutils literal notranslate"><span class="pre">solve_geodesic_time()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.solvegeodesics.solve_geodesics.solve_geodesic_worldline"><code class="docutils literal notranslate"><span class="pre">solve_geodesic_worldline()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-geodesicparams.solvegeodesics.substitution">geodesicparams.solvegeodesics.substitution module</a><ul>
+<li><a class="reference internal" href="#geodesicparams.solvegeodesics.substitution.convert_deg3"><code class="docutils literal notranslate"><span class="pre">convert_deg3()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.solvegeodesics.substitution.convert_deg5"><code class="docutils literal notranslate"><span class="pre">convert_deg5()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.solvegeodesics.substitution.convert_degeven"><code class="docutils literal notranslate"><span class="pre">convert_degeven()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.solvegeodesics.substitution.convert_polynomial"><code class="docutils literal notranslate"><span class="pre">convert_polynomial()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-geodesicparams.solvegeodesics">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">GeodesicParams</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">geodesicparams.solvegeodesics package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/geodesicparams.solvegeodesics.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="geodesicparams-solvegeodesics-package">
+<h1>geodesicparams.solvegeodesics package<a class="headerlink" href="#geodesicparams-solvegeodesics-package" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-geodesicparams.solvegeodesics.general_relativity">
+<span id="geodesicparams-solvegeodesics-general-relativity-module"></span><h2>geodesicparams.solvegeodesics.general_relativity module<a class="headerlink" href="#module-geodesicparams.solvegeodesics.general_relativity" title="Link to this heading"></a></h2>
+<p>A collection of functions related to the checking the initial values, orbits, and spacetimes
+as well as defining the four-velocity of a space time.</p>
+<p>The possible orbit types are the following:
+“terminating”, “terminating escape”, “bound”, “inner bound”, middle bound”, “flyby”,
+“crossover flyby”, “transit” (“crossover flyby” and “transit” have not been implemented, tbd).</p>
+<p>As of now, the following spacetimes have been implemented:
+Schwarzschild, Reissner Nordstrom, Kerr, Kerr-Newman, Schwarzschild-de Sitter,
+Reissner Nordstrom-de Sitter, Kerr-de Sitter, and Kerr-Newman-de Sitter.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.solvegeodesics.general_relativity.check_orbit_types">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.solvegeodesics.general_relativity.</span></span><span class="sig-name descname"><span class="pre">check_orbit_types</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">orbittype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">particle_light</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spacetime</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/solvegeodesics/general_relativity.html#check_orbit_types"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.solvegeodesics.general_relativity.check_orbit_types" title="Link to this definition"></a></dt>
+<dd><p>Check if an orbittype is possible in a given spacetime, raise exception if it is not.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>orbittype</strong> (<em>string</em>) – A string representing the type of orbit to be modelled.</p></li>
+<li><p><strong>particle_light</strong> (<em>integer</em>) – An integer, either 1 (for timelike geodesics) or 0 (for null geodesics).</p></li>
+<li><p><strong>spacetime</strong> (<em>string</em>) – The spacetime to be checked against the orbittype.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.solvegeodesics.general_relativity.check_rinitials">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.solvegeodesics.general_relativity.</span></span><span class="sig-name descname"><span class="pre">check_rinitials</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initial_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orbittype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">types</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/solvegeodesics/general_relativity.html#check_rinitials"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.solvegeodesics.general_relativity.check_rinitials" title="Link to this definition"></a></dt>
+<dd><p>Checks or sets the initial values for the r motion as necessairy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>initial_values</strong> (<em>list</em>) – A list of two elements, the first being the initial mino time, the second being the
+initial r coordinate value.</p></li>
+<li><p><strong>orbittype</strong> (<em>string</em>) – A string encoding the orbit to be computed.</p></li>
+<li><p><strong>types</strong> (<em>list</em>) – A list of strings representing the possible orbit types.</p></li>
+<li><p><strong>bounds</strong> (<em>list</em>) – A list of boundaries for each orbit type, where each boundary is a list
+containing a minimal and maximal value for each orbit type.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>initial_values</strong> – A list of containing the initial values: if they were correct/not empty, they
+were returned unchanged. Otherwise, they were set to the default values:
+0 as the first element, then either the maximal r value if the orbit does not reach
+infinite, or the minimal r value.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.solvegeodesics.general_relativity.check_thetainitials">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.solvegeodesics.general_relativity.</span></span><span class="sig-name descname"><span class="pre">check_thetainitials</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zeros</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/solvegeodesics/general_relativity.html#check_thetainitials"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.solvegeodesics.general_relativity.check_thetainitials" title="Link to this definition"></a></dt>
+<dd><p>Checks or sets the initial values for the theta motion as necessairy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>zeros</strong> (<em>list</em>) – A list of complex or real numbers representing the roots of theta polynomial.</p></li>
+<li><p><strong>initial_values</strong> (<em>list</em>) – A list of two elements, the first being the initial mino time, the second being the
+initial r coordinate value.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>allowed_inits</strong> (<em>list</em>) – A list containing the zeros that could be initial values of nu = cos(theta).</p></li>
+<li><p><strong>init_nu</strong> (<em>list</em>) – A list of containing the initial values: if they were correct/not empty, they
+were returned unchanged. Otherwise, they were set to the default values:
+0 as the first element, then pi/2 if possible or the maximal theta value in
+the nothern hemisphere.</p></li>
+<li><p><strong>bounds_nu</strong> (<em>list</em>) – A list containing the extremal nu values for which init_nu[1] is bounded. Two
+sets of bounds are possible.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.solvegeodesics.general_relativity.classify_spacetime">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.solvegeodesics.general_relativity.</span></span><span class="sig-name descname"><span class="pre">classify_spacetime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eCharge</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cosmo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NUT</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/solvegeodesics/general_relativity.html#classify_spacetime"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.solvegeodesics.general_relativity.classify_spacetime" title="Link to this definition"></a></dt>
+<dd><p>Classify a spacetime based on the parameters entered.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>eCharge</strong> (<em>float</em>) – The electric charge on the larger body.</p></li>
+<li><p><strong>rot</strong> (<em>float</em>) – The rotating parameter on the larger body.</p></li>
+<li><p><strong>cosmo</strong> (<em>float</em>) – The cosmological constant.</p></li>
+<li><p><strong>NUT</strong> (<em>float</em>) – The NUT parameter.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The spacetime defined by the parameters entered.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.solvegeodesics.general_relativity.convert_boundsinit">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.solvegeodesics.general_relativity.</span></span><span class="sig-name descname"><span class="pre">convert_boundsinit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">substitution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zeros_subs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/solvegeodesics/general_relativity.html#convert_boundsinit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.solvegeodesics.general_relativity.convert_boundsinit" title="Link to this definition"></a></dt>
+<dd><p>Convert a set of boundaries and initial values by applying &lt;substitution&gt;.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bounds</strong> (<em>list</em>) – A list of boundaries for orbit types to be converted, where each boundary is a list
+containing a minimal and maximal value for each orbit type.</p></li>
+<li><p><strong>initial_values</strong> (<em>list</em>) – A list of two elements, the first being the initial mino time, the second being
+a spacetime coordinate.</p></li>
+<li><p><strong>position</strong> (<em>integer</em>) – An index such that bounds[position][0] &lt; initial_values[1] &lt; bounds[position][1].</p></li>
+<li><p><strong>substitution</strong> (<em>symbolic</em>) – A symbolic statement, the substitution created by convert_polynomial.</p></li>
+<li><p><strong>zeros_subs</strong> (<em>list</em>) – A list of complex or real numbers, the zeros converted by convert_polynomial.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>bounds_converted</strong> (<em>list</em>) – A list containing the converted bounds for each orbit type.</p></li>
+<li><p><strong>init_converted</strong> (<em>list</em>) – A list of containing the converted initial values.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.solvegeodesics.general_relativity.four_velocity">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.solvegeodesics.general_relativity.</span></span><span class="sig-name descname"><span class="pre">four_velocity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">b_mass</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eCharge</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cosmo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NUT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mCharge</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">speed_light</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grav_const</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">perm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">particle_light</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ang_mom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">carter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_mass</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/solvegeodesics/general_relativity.html#four_velocity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.solvegeodesics.general_relativity.four_velocity" title="Link to this definition"></a></dt>
+<dd><p>Compute the four velocity of a spacetime. The eigentime is also computed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>b_mass</strong> (<em>float</em>) – A positive non-zero float representing the mass of the larger body.</p></li>
+<li><p><strong>rot</strong> (<em>float</em>) – A postive float representing the rotation of the larger body.</p></li>
+<li><p><strong>eCharge</strong> (<em>float</em>) – A float representing the electric charge of the larger body.</p></li>
+<li><p><strong>cosmo</strong> (<em>float</em>) – A float representing the cosmological constant.</p></li>
+<li><p><strong>NUT</strong> (<em>float</em>) – A float representing the NUT parameter.</p></li>
+<li><p><strong>mCharge</strong> (<em>float</em>) – A float representing the magnetic charge of the larger body.</p></li>
+<li><p><strong>speed_light</strong> (<em>float</em>) – A float representing the speed of light.</p></li>
+<li><p><strong>grav_const</strong> (<em>float</em>) – A float representing the universal gravitational constant.</p></li>
+<li><p><strong>perm</strong> (<em>float</em>) – A float representing the permittivity of free space.</p></li>
+<li><p><strong>particle_light</strong> (<em>integer</em>) – An integer, either 1 (for timelike geodesics) or 0 (for null geodesics).</p></li>
+<li><p><strong>energy</strong> (<em>float</em>) – A float representing the energy of the smaller body.</p></li>
+<li><p><strong>ang_mom</strong> (<em>float</em>) – A float reperesenting the angular momentum of the smaller body.</p></li>
+<li><p><strong>carter</strong> (<em>float</em>) – A float representing the carter constant.</p></li>
+<li><p><strong>p_mass</strong> (<em>float</em>) – A positive float representing the mass of the smaller body.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The 4-velocity defined by the parameters entered. The phi and t coordinates are
+returned as a list, each containing two components: the r and theta components.
+The eigentime is also return as the 4 element.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.solvegeodesics.general_relativity.get_allowed_orbits">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.solvegeodesics.general_relativity.</span></span><span class="sig-name descname"><span class="pre">get_allowed_orbits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">polynomial</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isnegativeallowed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/solvegeodesics/general_relativity.html#get_allowed_orbits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.solvegeodesics.general_relativity.get_allowed_orbits" title="Link to this definition"></a></dt>
+<dd><p>Determine the possible orbit types from a given polynomial as well as
+their respective boundaries.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>polynomial</strong> (<em>symbolic</em>) – A symbolic statement representing the polynomial to be converted.</p></li>
+<li><p><strong>deg</strong> (<em>integer</em>) – The degree of &lt;polynomial&gt;.</p></li>
+<li><p><strong>isnegativeallowed</strong> (<em>boolean, optional</em>) – If set to True, negative radial values are allowed, meaning that transit and
+crossover flyby orbits are possible, and terminating orbits are not possible.
+(transit and crossover flyby orbits have not been implemented yet, tbd).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>types</strong> (<em>list</em>) – A list of strings representing the possible orbit types for &lt;polynomial&gt;.</p></li>
+<li><p><strong>bounds</strong> (<em>list</em>) – A list containing the bounds for each orbit type.</p></li>
+<li><p><strong>zeros</strong> (<em>list</em>) – A list of complex or real numbers representing the zeros of &lt;polynomial&gt;.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-geodesicparams.solvegeodesics.solve_eom">
+<span id="geodesicparams-solvegeodesics-solve-eom-module"></span><h2>geodesicparams.solvegeodesics.solve_eom module<a class="headerlink" href="#module-geodesicparams.solvegeodesics.solve_eom" title="Link to this heading"></a></h2>
+<p>Procedures for inverting and solving the equations of motion for a variety of spacetimes.</p>
+<p>Equations of motion used by these procedures are required to be in standard form, which can
+be achieved through convert_polynomial and solve_geodesic_orbit. Period matrices are required
+for each procedure (except for when the equation of motion is a degree 2 polynomial), and are
+either computed through the period_matrices modules in riemannsurfaces, or provided directly.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.solvegeodesics.solve_eom.check_initNewton">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.solvegeodesics.solve_eom.</span></span><span class="sig-name descname"><span class="pre">check_initNewton</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">physical_comp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initNewton</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modified_init</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/solvegeodesics/solve_eom.html#check_initNewton"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.solvegeodesics.solve_eom.check_initNewton" title="Link to this definition"></a></dt>
+<dd><p>Determine the summation bound for computing the fourier series of the genus 2
+hyperelliptic theta function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>physical_comp</strong> (<em>int</em>) – An integer, either 1 or 0, representing the component of the theta divisor which
+corresponds to physical values (i.e. to the component of the vector of holomorphic
+differentials dz = [1/sqrt(P(z), z/sqrt(P(z))], where P(z) = &lt;polynomial&gt;).</p></li>
+<li><p><strong>initNewton</strong> (<em>complex</em>) – The initial value of the Newton method.</p></li>
+<li><p><strong>initial_values</strong> (<em>list</em>) – The initial values [gammain, xin] with gamma and x as in &lt;invert_eom&gt;.</p></li>
+<li><p><strong>modified_init</strong> (<em>complex</em>) – A complex constant = &lt;initial_values[1]&gt; + integration constant (computed in
+&lt;invert_eom&gt;)</p></li>
+<li><p><strong>eps</strong> (<em>float</em>) – The accuracy of the Newton method.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>Max</strong> – A natural number in the range 5 &lt;= Max &lt;= 30.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.solvegeodesics.solve_eom.compute_secondkind_periods">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.solvegeodesics.solve_eom.</span></span><span class="sig-name descname"><span class="pre">compute_secondkind_periods</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zeros</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">periodMatrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datafile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digits</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/solvegeodesics/solve_eom.html#compute_secondkind_periods"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.solvegeodesics.solve_eom.compute_secondkind_periods" title="Link to this definition"></a></dt>
+<dd><p>Computes the period matrices of the second kind for a genus 2 Riemann surface (i.e the
+integral of the vector of canonical meromorphic differentials along the contours
+connecting the branch cuts and the contours looping around the branch cuts).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>zeros</strong> (<em>list</em>) – A list of complex or real numbers representing the zeros of the polynomial defining
+the genus 2 Riemann surface.</p></li>
+<li><p><strong>eps</strong> (<em>float</em>) – A small error epsilon to handle divergence.</p></li>
+<li><p><strong>periodMatrix</strong> (<em>matrix</em>) – A 2x4 matrix representing the periods of the first kind (integral of the vector of
+canonical holomorphic diffentials along the same contours above).</p></li>
+<li><p><strong>datafile</strong> (<em>string</em>) – A string containing the name of a file to store the periods and epsilon error.</p></li>
+<li><p><strong>digits</strong> (<em>int</em>) – The number of digits to be used in the computation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>secondkindperiods</strong> (<em>matrix</em>) – A 2x4 matrix containing the period matrices of the second kind.</p></li>
+<li><p><strong>r1</strong> (<em>list</em>) – A list representing the coefficients of the first element of the vector of
+canonical meromorphic differentials.</p></li>
+<li><p><strong>r2</strong> (<em>list</em>) – A list representing the coefficients of the second elment of the vector of
+canonical meromorphic differentials.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.solvegeodesics.solve_eom.integrate_elliptic_third">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.solvegeodesics.solve_eom.</span></span><span class="sig-name descname"><span class="pre">integrate_elliptic_third</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">integrand</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datafile</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/solvegeodesics/solve_eom.html#integrate_elliptic_third"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.solvegeodesics.solve_eom.integrate_elliptic_third" title="Link to this definition"></a></dt>
+<dd><p>Computes the integral of 1 / (weierstrass(mino time) - pole)^n, where n is either 1 or 2
+(NOTE: n = 2 has not been implemented yet, tbd).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>integrand</strong> (<em>symbolic</em>) – The integrand to be computed, containing a simple pole, or double pole (NOTE: double
+poles have yet to be implemented, tbd).</p></li>
+<li><p><strong>datafile</strong> (<em>string</em>) – The name of the file containing the period matrix, elliptic invariants, initial
+values, etc.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The function that computes the integration, taking a list of values or a single
+value as input (list is faster for more points than single).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>callable</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.solvegeodesics.solve_eom.integrate_eom">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.solvegeodesics.solve_eom.</span></span><span class="sig-name descname"><span class="pre">integrate_eom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">polynomial</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zeros</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">substitution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integrand</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datafile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digits</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/solvegeodesics/solve_eom.html#integrate_eom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.solvegeodesics.solve_eom.integrate_eom" title="Link to this definition"></a></dt>
+<dd><p>Procedure for integrating equations of motion of trigonometric, elliptic, and
+hyperelliptic type for various spacetimes. Specifically</p>
+<p>The polynomial utilized is expected to be in standard form, converted by convert_polynomial.
+Unless provided, the period matrices have to be computed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>polynomial</strong> (<em>symbolic</em>) – A symbolic statement representing the polynomial in standard form.</p></li>
+<li><p><strong>zeros</strong> (<em>list</em>) – A list of complex or real numbers representing the converted zeros of &lt;polynomial&gt;.</p></li>
+<li><p><strong>integrand</strong> (<em>symbolic</em>) – The integrand in the equation above (different from invert_eom).</p></li>
+<li><p><strong>datafile</strong> (<em>string</em>) – A file name (including the ending, i.e .npy, etc) containing information about the
+computation, such as the period matrix. This is required for the integration.</p></li>
+<li><p><strong>digits</strong> (<em>int</em>) – The number of decimal digits to be used in the computation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The solution function for the integral.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>callable</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ol class="arabic simple">
+<li><p>Fix partial fraction decomposition bug in genus 2 equations of motion.</p></li>
+</ol>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.solvegeodesics.solve_eom.integrate_hyperelliptic_first">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.solvegeodesics.solve_eom.</span></span><span class="sig-name descname"><span class="pre">integrate_hyperelliptic_first</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datafile</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/solvegeodesics/solve_eom.html#integrate_hyperelliptic_first"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.solvegeodesics.solve_eom.integrate_hyperelliptic_first" title="Link to this definition"></a></dt>
+<dd><p>Procedure for inverting equations of motion of trigonometric, elliptic, and
+hyperelliptic type for various spacetimes. Specifically</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>physical_comp</strong> (<em>int</em>) – An integer, either 1 or 0, representing the component of the theta divisor which
+corresponds to physical values (i.e. to the component of the vector of holomorphic
+differentials dz = [1/sqrt(P(z), z/sqrt(P(z))], where P(z) = &lt;polynomial&gt;).</p></li>
+<li><p><strong>datafile</strong> (<em>string</em>) – The name of the file containing the data generated by &lt;orbitdata&gt; and
+&lt;invert_hyperelliptic_first&gt;</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>result</strong> – The result of the integration.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.solvegeodesics.solve_eom.integrate_hyperelliptic_third">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.solvegeodesics.solve_eom.</span></span><span class="sig-name descname"><span class="pre">integrate_hyperelliptic_third</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zeros</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integrand</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datafile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digits</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/solvegeodesics/solve_eom.html#integrate_hyperelliptic_third"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.solvegeodesics.solve_eom.integrate_hyperelliptic_third" title="Link to this definition"></a></dt>
+<dd><p>Integrates a hyperelliptic integral of the third kind.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>zeros</strong> (<em>list</em>) – A list of complex or real numbers representing the zeros of the polynomial defining
+the genus 2 Riemann surface.</p></li>
+<li><p><strong>r1</strong> (<em>list</em>) – A list representing the coefficients of the first element of the vector of
+canonical meromorphic differentials.</p></li>
+<li><p><strong>r2</strong> (<em>list</em>) – A list representing the coefficients of the second elment of the vector of
+canonical meromorphic differentials.</p></li>
+<li><p><strong>eta</strong> (<em>matrix</em>) – A 2x2 matrix containing the first 2x2 part of the period matrix of the second kind.</p></li>
+<li><p><strong>integrand</strong> (<em>symbolic</em>) – The integrand containg the pole.</p></li>
+<li><p><strong>datafile</strong> (<em>string</em>) – The name of the file (not including the . extension that is storing the periods of
+the second kind).</p></li>
+<li><p><strong>digits</strong> (<em>int</em>) – The number of digits to be used in the computation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The solution function that performs the integration, taking in either a list of
+values or a single value (list of values is faster).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>callable</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.solvegeodesics.solve_eom.invert_elliptic_first">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.solvegeodesics.solve_eom.</span></span><span class="sig-name descname"><span class="pre">invert_elliptic_first</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">polynomial</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">int_sign</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constant</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">substitution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">periodM</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datafile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/solvegeodesics/solve_eom.html#invert_elliptic_first"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.solvegeodesics.solve_eom.invert_elliptic_first" title="Link to this definition"></a></dt>
+<dd><p>Inverts an equation of motion of elliptic type and first kind.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>polynomial</strong> (<em>symbolic</em>) – A symbolic statement representing the polynomial in standard form.</p></li>
+<li><p><strong>initial_values</strong> (<em>list</em>) – The initial values converted by the same substitution used to convert &lt;polynomial&gt;.</p></li>
+<li><p><strong>int_sign</strong> (<em>int</em>) – The sign of square root in the differential equation, either +1 or -1. The
+signs must have also been converted by the same substitution used to convert
+&lt;polynomial&gt;.</p></li>
+<li><p><strong>substitution</strong> (<em>callable</em>) – A lambda function that computes the substitution that casted &lt;polynomial&gt; into
+standard form.</p></li>
+<li><p><strong>constant</strong> (<em>real</em>) – The constant in front of the differential equation.</p></li>
+<li><p><strong>periodM</strong> (<em>matrix, optional</em>) – A 1x2 list representing the period matricex of a genus 1 Riemann surface.</p></li>
+<li><p><strong>datafile</strong> (<em>string, optional</em>) – A file name to store information pertaining to the computation, such as the
+initial values. This is optional, unlike solve_eom.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The solution function for the differential equation.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>callable</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.solvegeodesics.solve_eom.invert_eom">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.solvegeodesics.solve_eom.</span></span><span class="sig-name descname"><span class="pre">invert_eom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">polynomial</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zeros</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integrand</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">int_sign</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">substitution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">periodM</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datafile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/solvegeodesics/solve_eom.html#invert_eom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.solvegeodesics.solve_eom.invert_eom" title="Link to this definition"></a></dt>
+<dd><p>Procedure for inverting equations of motion of trigonometric, elliptic, and
+hyperelliptic type for various spacetimes. Specifically</p>
+<p>The polynomial utilized is expected to be in standard form, converted by convert_polynomial.
+Unless provided, the period matrices have to be computed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>polynomial</strong> (<em>symbolic</em>) – A symbolic statement representing the polynomial in standard form.</p></li>
+<li><p><strong>zeros</strong> (<em>list</em>) – A list of complex or real numbers representing the converted zeros of &lt;polynomial&gt;.</p></li>
+<li><p><strong>integrand</strong> (<em>symbolic</em>) – The integrand in the equation above.</p></li>
+<li><p><strong>initial_values</strong> (<em>list</em>) – The initial values converted by the same substitution used to convert &lt;polynomial&gt;.</p></li>
+<li><p><strong>int_sign</strong> (<em>int</em>) – The sign of square root in the differential equation, either +1 or -1. The
+signs must have also been converted by the same substitution used to convert
+&lt;polynomial&gt;.</p></li>
+<li><p><strong>substitution</strong> (<em>callable</em>) – The substitution used to convert &lt;polynomial&gt; as a callable lambda function.</p></li>
+<li><p><strong>periodM</strong> (<em>list, optional</em>) – Either a 1x2 list for elliptic equations of motion, representing the period
+matrices of a genus 1 Riemann surface, or a 2x4 mpmath matrix, representing the
+period matrix of a genus 2 Riemann surface.</p></li>
+<li><p><strong>digits</strong> (<em>int</em>) – The number of digits to be used in the computation.</p></li>
+<li><p><strong>datafile</strong> (<em>string, optional</em>) – A file name to store information pertaining to the computation, such as the
+period matrix. This is optional, unlike solve_eom.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The solution function for the differential equation.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>callable</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.solvegeodesics.solve_eom.invert_hyperelliptic_first">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.solvegeodesics.solve_eom.</span></span><span class="sig-name descname"><span class="pre">invert_hyperelliptic_first</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zeros</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">physical_comp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">int_sign</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constant</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">substitution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">periodM</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datafile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/solvegeodesics/solve_eom.html#invert_hyperelliptic_first"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.solvegeodesics.solve_eom.invert_hyperelliptic_first" title="Link to this definition"></a></dt>
+<dd><p>Inverts an equation of motion of hyperelliptic type and first kind. The majority
+of the computation is performed by &lt;orbitdata&gt;.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>polynomial</strong> (<em>symbolic</em>) – A symbolic statement representing the polynomial in standard form.</p></li>
+<li><p><strong>zeros</strong> (<em>list</em>) – A list of complex or real numbers representing the converted zeros of &lt;polynomial&gt;.</p></li>
+<li><p><strong>physical_comp</strong> (<em>int</em>) – An integer, either 1 or 0, representing the component of the theta divisor which
+corresponds to physical values (i.e. to the component of the vector of holomorphic
+differentials dz = [1/sqrt(P(z), z/sqrt(P(z))], where P(z) = &lt;polynomial&gt;).</p></li>
+<li><p><strong>initial_values</strong> (<em>list</em>) – The initial values converted by the same substitution used to convert &lt;polynomial&gt;.</p></li>
+<li><p><strong>int_sign</strong> (<em>int</em>) – The sign of square root in the differential equation, either +1 or -1. The
+signs must have also been converted by the same substitution used to convert
+&lt;polynomial&gt;. NOTE: this has yet to be implemented for hyperelliptic differential
+equations (i.e. this function).</p></li>
+<li><p><strong>substitution</strong> (<em>callable</em>) – The substitution used to convert &lt;polynomial&gt; as a callable lambda function.</p></li>
+<li><p><strong>periodM</strong> (<em>list, optional</em>) – A 2x4 mpmath matrix, representing the period matrix of a genus 2 Riemann surface.
+If not provided, it will be computed.</p></li>
+<li><p><strong>digits</strong> (<em>int</em>) – The number of digits to be used in the computation.</p></li>
+<li><p><strong>datafile</strong> (<em>string, optional</em>) – A file name to store information pertaining to the computation, such as the
+period matrix. This is optional, unlike solve_eom.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The solution function for the differential equation.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>callable</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.solvegeodesics.solve_eom.invert_trigonometric_first">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.solvegeodesics.solve_eom.</span></span><span class="sig-name descname"><span class="pre">invert_trigonometric_first</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">polynomial</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">int_sign</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constant</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datafile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/solvegeodesics/solve_eom.html#invert_trigonometric_first"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.solvegeodesics.solve_eom.invert_trigonometric_first" title="Link to this definition"></a></dt>
+<dd><p>Inverts an equation of motion of trigonometric type (&lt;= 2nd degree polynomial).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>polynomial</strong> (<em>symbolic</em>) – A symbolic statement representing the polynomial in standard form.</p></li>
+<li><p><strong>initial_values</strong> (<em>list</em>) – The initial values converted by the same substitution used to convert &lt;polynomial&gt;.</p></li>
+<li><p><strong>int_sign</strong> (<em>int</em>) – The sign of square root in the differential equation, either +1 or -1. The
+signs must have also been converted by the same substitution used to convert
+&lt;polynomial&gt;.</p></li>
+<li><p><strong>constant</strong> (<em>real</em>) – The constant in front of the differential equation.</p></li>
+<li><p><strong>datafile</strong> (<em>string, optional</em>) – A file name to store information pertaining to the computation, such as the
+initial values. This is optional, unlike solve_eom.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The solution function for the differential equation.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>callable</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.solvegeodesics.solve_eom.orbitdata">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.solvegeodesics.solve_eom.</span></span><span class="sig-name descname"><span class="pre">orbitdata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initial_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modified_init</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">affine_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">substitution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initNewton</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minMax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">physical_comp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datafile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/solvegeodesics/solve_eom.html#orbitdata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.solvegeodesics.solve_eom.orbitdata" title="Link to this definition"></a></dt>
+<dd><p>Organizes the solution calculations for a given &lt;affine_list&gt; of values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>initial_values</strong> (<em>list</em>) – A list of initial values containing [gammain, xin] where gamma is the mino time and
+x is a spacetime coordinate.</p></li>
+<li><p><strong>modified_init</strong> (<em>complex</em>) – A complex value = &lt;initial_values[1]&gt; + integration constant (computed by &lt;invert_eom&gt;)</p></li>
+<li><p><strong>affine_list</strong> (<em>list</em>) – List of affine parameters / mino time values.</p></li>
+<li><p><strong>substitution</strong> (<em>callable</em>) – The substitution used to cast the original equation of motion into its standard form.</p></li>
+<li><p><strong>initNewton</strong> (<em>complex</em>) – The initial value of the Newton method.</p></li>
+<li><p><strong>eps</strong> (<em>float</em>) – The accuracy of computation.</p></li>
+<li><p><strong>minMax</strong> (<em>int</em>) – A natural number in the range 5 &lt;= minMax &lt;= 30 used to compute the summation bounds
+on the hyperelliptic theta and Kleinian sigma function.</p></li>
+<li><p><strong>physical_comp</strong> – An integer, either 1 or 0, representing the component of the theta divisor which
+corresponds to physical values (i.e. to the component of the vector of holomorphic
+differentials dz = [1/sqrt(P(z), z/sqrt(P(z))], where P(z) = &lt;polynomial&gt;).</p></li>
+<li><p><strong>datafile</strong> (<em>string, optional</em>) – A file name to store information pertaining to the computation, such as the
+divisor list, coordinates, etc. This is optional, unlike solve_eom.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The solution values for the differential equation.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.solvegeodesics.solve_eom.sigma_ln">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.solvegeodesics.solve_eom.</span></span><span class="sig-name descname"><span class="pre">sigma_ln</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">omega1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">omega3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/solvegeodesics/solve_eom.html#sigma_ln"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.solvegeodesics.solve_eom.sigma_ln" title="Link to this definition"></a></dt>
+<dd><p>Computes the value of ln(weierstrass_sigma(x-y) / weierstrass_sigma(x+y)) while
+accounting the change in branches, ensuring the function remains continuous.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>list</em>) – A list of numbers to be evaluated as a parameter.</p></li>
+<li><p><strong>y</strong> (<em>complex</em>) – A potentially complex or real number.</p></li>
+<li><p><strong>omega1</strong> (<em>complex</em>) – The first half period in the period lattice.</p></li>
+<li><p><strong>omega3</strong> (<em>complex</em>) – The second half period in the period lattice.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>value</strong> – The result of the evaluated function.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>complex</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.solvegeodesics.solve_eom.sigma_ln_numerical">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.solvegeodesics.solve_eom.</span></span><span class="sig-name descname"><span class="pre">sigma_ln_numerical</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">omega1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">omega3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/solvegeodesics/solve_eom.html#sigma_ln_numerical"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.solvegeodesics.solve_eom.sigma_ln_numerical" title="Link to this definition"></a></dt>
+<dd><p>Computes the value of ln(weierstrass_sigma(x - y) / weierstrass_sigma(x + y)) numerically.</p>
+<p>When the imaginary part of the result is 0, then the result becomes
+integral(weierstrass_zeta(x - y) - weierstrass_zeta(x + y), from 0 to x).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>complex</em>) – A complex or real number.</p></li>
+<li><p><strong>y</strong> (<em>complex</em>) – A potentially complex or real number.</p></li>
+<li><p><strong>omega1</strong> (<em>complex</em>) – The first half period in the period lattice.</p></li>
+<li><p><strong>omega3</strong> (<em>complex</em>) – The second half period in the period lattice.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>value</strong> – The result of the evaluated function.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>complex</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.solvegeodesics.solve_eom.solution">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.solvegeodesics.solve_eom.</span></span><span class="sig-name descname"><span class="pre">solution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">affineParameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initNewton</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minMax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">physical_comp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/solvegeodesics/solve_eom.html#solution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.solvegeodesics.solve_eom.solution" title="Link to this definition"></a></dt>
+<dd><p>Computes the unphysical component of the theta divisor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>affineParameter</strong> (<em>complex</em>) – The affine parameter gamma for which the solution for the hyperelliptic differential
+equation should be computed.</p></li>
+<li><p><strong>initNewton</strong> (<em>complex</em>) – The initial value of the Newton method.</p></li>
+<li><p><strong>eps</strong> (<em>float</em>) – The accuracy of the Newton method.</p></li>
+<li><p><strong>minMax</strong> (<em>int</em>) – The summation bound for the hyperelliptic theta function.</p></li>
+<li><p><strong>physical_comp</strong> (<em>int</em>) – An integer, either 1 or 0, representing the component of the theta divisor which
+corresponds to physical values (i.e. to the component of the vector of holomorphic
+differentials dz = [1/sqrt(P(z), z/sqrt(P(z))], where P(z) = &lt;polynomial&gt;).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list containing either two or three elements: if the Newton method failed, the list
+has two elements, where the first is a list of the steps taken by the iteration
+and the second the value of the theta function at the last iteration. If the iteration
+process was successful the list has three elements, where the first is the solution of
+the hyperelliptic differential equation at &lt;affineParameter&gt;, the second the redundant
+unphysical component of the theta divisor used to compute the first element,
+and the third (2*omega)*(the element of the thetadivisor used to compute the first
+element), where omega is the first 2x2 part of the period matrix of first kind.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.solvegeodesics.solve_eom.solution_first">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.solvegeodesics.solve_eom.</span></span><span class="sig-name descname"><span class="pre">solution_first</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">affineParameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initNewton</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minMax</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/solvegeodesics/solve_eom.html#solution_first"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.solvegeodesics.solve_eom.solution_first" title="Link to this definition"></a></dt>
+<dd><p>Computes the unphysical component of the theta divisor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>affineParameter</strong> (<em>complex</em>) – The affine parameter gamma for which the solution for the hyperelliptic differential
+equation should be computed.</p></li>
+<li><p><strong>initNewton</strong> (<em>complex</em>) – The initial value of the Newton method.</p></li>
+<li><p><strong>eps</strong> (<em>float</em>) – The accuracy of the Newton method.</p></li>
+<li><p><strong>minMax</strong> (<em>int</em>) – The summation bound for the hyperelliptic theta function.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list containing either two or three elements: if the Newton method failed, the list
+has two elements, where the first is a list of the steps taken by the iteration
+and the second the value of the theta function at the last iteration. If the iteration
+process was successful the list has three elements, where the first is the solution of
+the hyperelliptic differential equation at &lt;affineParameter&gt;, the second the redundant
+unphysical component of the theta divisor used to compute the first element,
+and the third (2*omega)*(the element of the thetadivisor used to compute the first
+element), where omega is the first 2x2 part of the period matrix of first kind.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.solvegeodesics.solve_eom.solution_second">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.solvegeodesics.solve_eom.</span></span><span class="sig-name descname"><span class="pre">solution_second</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">affineParameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initNewton</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minMax</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/solvegeodesics/solve_eom.html#solution_second"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.solvegeodesics.solve_eom.solution_second" title="Link to this definition"></a></dt>
+<dd><p>Computes the unphysical component of the theta divisor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>affineParameter</strong> (<em>complex</em>) – The affine parameter gamma for which the solution for the hyperelliptic differential
+equation should be computed.</p></li>
+<li><p><strong>initNewton</strong> (<em>complex</em>) – The initial value of the Newton method.</p></li>
+<li><p><strong>eps</strong> (<em>float</em>) – The accuracy of the Newton method.</p></li>
+<li><p><strong>minMax</strong> (<em>int</em>) – The summation bound for the hyperelliptic theta function.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list containing either two or three elements: if the Newton method failed, the list
+has two elements, where the first is a list of the steps taken by the iteration
+and the second the value of the theta function at the last iteration. If the iteration
+process was successful the list has three elements, where the first is the solution of
+the hyperelliptic differential equation at &lt;affineParameter&gt;, the second the redundant
+unphysical component of the theta divisor used to compute the first element,
+and the third (2*omega)*(the element of the thetadivisor used to compute the first
+element), where omega is the first 2x2 part of the period matrix of first kind.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-geodesicparams.solvegeodesics.solve_geodesics">
+<span id="geodesicparams-solvegeodesics-solve-geodesics-module"></span><h2>geodesicparams.solvegeodesics.solve_geodesics module<a class="headerlink" href="#module-geodesicparams.solvegeodesics.solve_geodesics" title="Link to this heading"></a></h2>
+<p>Top level procedure for computing the solutions functions for the r, theta, and phi
+components of the geodesic equation in Plebanski-Demianski spacetimes.</p>
+<p>As of now, solutions have been implemented for the following spacetimes:
+Schwarzschild, Reissner Nordstrom, Kerr, Kerr-Newman, Schwarzschild-de Sitter,
+Reissner Nordstrom-de Sitter, Kerr-de Sitter, and Kerr-Newman-de Sitter.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.solvegeodesics.solve_geodesics.solve_geodesic_orbit">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.solvegeodesics.solve_geodesics.</span></span><span class="sig-name descname"><span class="pre">solve_geodesic_orbit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">b_mass</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eCharge</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cosmo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NUT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mCharge</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">speed_light</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grav_const</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">perm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">particle_light</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ang_mom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">carter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_mass</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orbittype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_directions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">periodM</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/solvegeodesics/solve_geodesics.html#solve_geodesic_orbit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.solvegeodesics.solve_geodesics.solve_geodesic_orbit" title="Link to this definition"></a></dt>
+<dd><p>Computes the r, theta, and phi coordinates of the geodesic equation as
+a function of mino time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>b_mass</strong> (<em>float</em>) – A positive non-zero float representing the mass of the larger body.</p></li>
+<li><p><strong>rot</strong> (<em>float</em>) – A postive float representing the rotation of the larger body.</p></li>
+<li><p><strong>eCharge</strong> (<em>float</em>) – A float representing the electric charge of the larger body.</p></li>
+<li><p><strong>cosmo</strong> (<em>float</em>) – A float representing the cosmological constant.</p></li>
+<li><p><strong>NUT</strong> (<em>float</em>) – A float representing the NUT parameter.</p></li>
+<li><p><strong>mCharge</strong> (<em>float</em>) – A float representing the magnetic charge of the larger body.</p></li>
+<li><p><strong>speed_light</strong> (<em>float</em>) – A float representing the speed of light.</p></li>
+<li><p><strong>grav_const</strong> (<em>float</em>) – A float representing the universal gravitational constant.</p></li>
+<li><p><strong>perm</strong> (<em>float</em>) – A float representing the permittivity of free space.</p></li>
+<li><p><strong>particle_light</strong> (<em>integer</em>) – An integer, either 1 (for timelike geodesics) or 0 (for null geodesics).</p></li>
+<li><p><strong>energy</strong> (<em>float</em>) – A float representing the energy of the smaller body.</p></li>
+<li><p><strong>ang_mom</strong> (<em>float</em>) – A float reperesenting the angular momentum of the smaller body.</p></li>
+<li><p><strong>carter</strong> (<em>float</em>) – A float representing the carter constant.</p></li>
+<li><p><strong>p_mass</strong> (<em>float</em>) – A positive float representing the mass of the smaller body.</p></li>
+<li><p><strong>orbittype</strong> (<em>string</em>) – A string representing the type of orbit to be modelled.</p></li>
+<li><p><strong>config</strong> (<em>list</em>) – A list containing either 2 or 3 elements: a string, the path to
+the working directory; a string, the current date (in any format);
+and an integer, the binary precision. The working directory and date strings
+are required, while the default binary precision is 53.</p></li>
+<li><p><strong>initial_values</strong> (<em>list, optional</em>) – A list of floats representing the initial values: the initial mino time,
+r value, theta value, and phi value.</p></li>
+<li><p><strong>initial_directions</strong> (<em>list, optional</em>) – A list of 2 integers, either +1 or -1, representing the initial directions
+of the r and theta components of the 4-velocity. -1 as the r value means the
+smaller body initially moves towards the larger body, while +1 means the smaller
+body initially moves away.</p></li>
+<li><p><strong>time</strong> (<em>bool, optional</em>) – A boolean encoding whether or not the coordinate time component of the geodesic
+equation should be computed (True meaning yes, False meanign no). NOTE: NOT
+IMPLEMENTED, TBD.</p></li>
+<li><p><strong>periodM</strong> (<em>list, optional</em>) – A list of two matrices, each 1x2 when the cosmological constant is 0 (cosmo = 0) or
+2x4 when the cosmological constant isn’t 0 (cosmo != 0), representing the period
+matrices of the riemann surfaces defined by the r and theta components of the
+4-velocity. When cosmo = 0, the first element of th</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>A list of 3 lambda functions: the r, theta, and phi components of the geodesic
+equation as a function of mino time. The arguments of these lambda functions can
+vary, however; they can either be an individual number, or a list of numbers. This
+depends on the spacetimes and specific coordinate:</p>
+<p>1. The phi coordinate, regardless of spacetime, always accepts a list of numbers
+as an argument.
+2. For spacetimes with vanishing cosmological constants (cosmo = 0) both the r and theta
+coordinates accept individual numbers as arguments.
+3. For spacetimes with non-vanishing cosmological constants (cosmo != 0), the r coordinate
+accepts a list of numbers as an argument, while the theta coordinate accepts individual values
+as an argument.</p>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.solvegeodesics.solve_geodesics.solve_geodesic_time">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.solvegeodesics.solve_geodesics.</span></span><span class="sig-name descname"><span class="pre">solve_geodesic_time</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/solvegeodesics/solve_geodesics.html#solve_geodesic_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.solvegeodesics.solve_geodesics.solve_geodesic_time" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.solvegeodesics.solve_geodesics.solve_geodesic_worldline">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.solvegeodesics.solve_geodesics.</span></span><span class="sig-name descname"><span class="pre">solve_geodesic_worldline</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/solvegeodesics/solve_geodesics.html#solve_geodesic_worldline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.solvegeodesics.solve_geodesics.solve_geodesic_worldline" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-geodesicparams.solvegeodesics.substitution">
+<span id="geodesicparams-solvegeodesics-substitution-module"></span><h2>geodesicparams.solvegeodesics.substitution module<a class="headerlink" href="#module-geodesicparams.solvegeodesics.substitution" title="Link to this heading"></a></h2>
+<p>Helper functions for converting polynomials in hyperelliptic and elliptic differential
+equations into standard form.</p>
+<p>Functions include convert_deg5, which converts a 5th degree polynomial into standard form
+(y^5 + a4 * y^4 + a3 + … + a1 * y + a0, where a1, a2, … , a4 are real numbers);
+convert_deg3, which converts a 3rd degree polynomial into the weierstrass standard form
+(4z^3 - g2z - g3); and convert_degeven, which either converts a 6th degree polynomial to a
+5th degree polynomial, or a 4th degree polynomial to a 3rd degree, which can then be passed
+to convert_deg5 or convert_deg3. convert_polynomial encapsulates all these behaviours depending
+on the degree of the polynomial. As of now, polynomials with multiple zeroes have yet to be
+implemented.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.solvegeodesics.substitution.convert_deg3">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.solvegeodesics.substitution.</span></span><span class="sig-name descname"><span class="pre">convert_deg3</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">polynomial</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zeros</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/solvegeodesics/substitution.html#convert_deg3"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.solvegeodesics.substitution.convert_deg3" title="Link to this definition"></a></dt>
+<dd><p>Convert a 3rd degree polynomial to its standard form, using the substitution
+y = 1/b3 * (4*z - b2/3).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>polynomial</strong> (<em>symbolic</em>) – A symbolic statement representing the polynomial to be converted.</p></li>
+<li><p><strong>zeros</strong> (<em>list</em>) – A list of 3 complex or real numbers representing the zeros of &lt;polynomial&gt;.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>p_standard</strong> (<em>symbolic</em>) – The polynomial converted to standard form.</p></li>
+<li><p><strong>constant</strong> (<em>integer</em>) – The prefactor infront of the converted polynomial in the differential equation
+(always 1).</p></li>
+<li><p><em>callabe</em> – The substitution used in the conversion as a callable lambda function.</p></li>
+<li><p><strong>substitution</strong> (<em>symbolic</em>) – The substitution used in the conversion as a symbolic statement.</p></li>
+<li><p><strong>sign</strong> (<em>integer</em>) – The sign, either +1 or -1, depending on the initial direction of motion.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.solvegeodesics.substitution.convert_deg5">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.solvegeodesics.substitution.</span></span><span class="sig-name descname"><span class="pre">convert_deg5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">polynomial</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zeros</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/solvegeodesics/substitution.html#convert_deg5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.solvegeodesics.substitution.convert_deg5" title="Link to this definition"></a></dt>
+<dd><p>Convert a 5th degree polynomial to its standard form, using the substitution y = - z
+or y = z, such that the leading coefficient is positive.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>polynomial</strong> (<em>symbolic</em>) – A symbolic statement representing the polynomial to be converted.</p></li>
+<li><p><strong>zeros</strong> (<em>list</em>) – A list of 5 complex or real numbers representing the zeros of &lt;polynomial&gt;.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>p_standard</strong> (<em>symbolic</em>) – The polynomial converted to standard form.</p></li>
+<li><p><strong>constant</strong> (<em>float or symbolic</em>) – The prefactor infront of the converted polynomial in the differential equation.</p></li>
+<li><p><em>callabe</em> – The substitution used in the conversion as a callable lambda function.</p></li>
+<li><p><strong>substitution</strong> (<em>symbolic</em>) – The substitution used in the conversion as a symbolic statement.</p></li>
+<li><p><strong>sign</strong> (<em>integer</em>) – The sign, either +1 or -1, depending on the initial direction of motion
+(not implemented yet).</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.solvegeodesics.substitution.convert_degeven">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.solvegeodesics.substitution.</span></span><span class="sig-name descname"><span class="pre">convert_degeven</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">polynomial</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zeros</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">badzeros</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/solvegeodesics/substitution.html#convert_degeven"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.solvegeodesics.substitution.convert_degeven" title="Link to this definition"></a></dt>
+<dd><p>Convert a 4th degree polynomial to a 3rd degree polynomial or a 6th degree to a 5th
+degree.</p>
+<p>Using the substitution y = 1/z + ei, where ei is one of the roots of &lt;polynomial&gt;, the degree
+of the is reduced by polynomial by 1. If the degree of the polynomial was 6, then the prefactor
+is given by f(z) = z^2.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>polynomial</strong> (<em>symbolic</em>) – A symbolic statement representing the polynomial to be converted.</p></li>
+<li><p><strong>zeros</strong> (<em>list</em>) – A list of 4 or 6 complex or real numbers representing the zeros of &lt;polynomial&gt;.</p></li>
+<li><p><strong>badzeros</strong> (<em>list</em>) – A list of complex or real numbers representing the roots of &lt;polynomial&gt; that are
+not to be used in the conversion.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>p_standard</strong> (<em>symbolic</em>) – The original polynomial converted to standard form.</p></li>
+<li><p><strong>constant</strong> (<em>float or symbolic</em>) – The prefactor infront of the converted polynomial in the differential equation.</p></li>
+<li><p><em>callabe</em> – The substitution used in the conversion as a callable lambda function.</p></li>
+<li><p><strong>substitution</strong> (<em>symbolic</em>) – The substitution used in the conversion as a symbolic statement.</p></li>
+<li><p><strong>sign</strong> (<em>integer</em>) – The sign, either +1 or -1, depending on the initial direction of motion.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.solvegeodesics.substitution.convert_polynomial">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.solvegeodesics.substitution.</span></span><span class="sig-name descname"><span class="pre">convert_polynomial</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">polynomial</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">degree</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zeros</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">badzeros</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/solvegeodesics/substitution.html#convert_polynomial"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.solvegeodesics.substitution.convert_polynomial" title="Link to this definition"></a></dt>
+<dd><p>Convert a polynomial used in a hyperelliptic or elliptic differential equation into
+standard form.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>polynomial</strong> (<em>symbolic</em>) – A symbolic statement representing the polynomial to be converted.</p></li>
+<li><p><strong>degree</strong> (<em>integer</em>) – The degree of the polynomial.</p></li>
+<li><p><strong>zeros</strong> (<em>list</em>) – A list of 4 or 6 complex or real numbers representing the zeros of &lt;polynomial&gt;.</p></li>
+<li><p><strong>badzeros</strong> (<em>list, optional</em>) – A list of complex or real numbers representing the roots of &lt;polynomial&gt; that are
+not to be used in the conversion.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>p_standard</strong> (<em>symbolic</em>) – The original polynomial converted to standard form.</p></li>
+<li><p><strong>constant</strong> (<em>float or symbolic</em>) – The prefactor infront of the converted polynomial in the differential equation.</p></li>
+<li><p><em>callabe</em> – The substitution used in the conversion as a callable lambda function.</p></li>
+<li><p><strong>substitution</strong> (<em>symbolic</em>) – The substitution used in the conversion as a symbolic statement.</p></li>
+<li><p><strong>sign</strong> (<em>integer</em>) – The sign, either +1 or -1, depending on the initial direction of motion.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-geodesicparams.solvegeodesics">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-geodesicparams.solvegeodesics" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Alexander Abesteh.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,243 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>geodesicparams.riemannsurfaces.integrations package &mdash; GeodesicParams 0.2.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=66b59bf7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=37f418d5"></script>
+      <script src="_static/doctools.js?v=9a2dae69"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            GeodesicParams
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">geodesicparams.riemannsurfaces.integrations package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-geodesicparams.riemannsurfaces.integrations.integrate_hyperelliptic">geodesicparams.riemannsurfaces.integrations.integrate_hyperelliptic module</a><ul>
+<li><a class="reference internal" href="#geodesicparams.riemannsurfaces.integrations.integrate_hyperelliptic.int_genus2_complex"><code class="docutils literal notranslate"><span class="pre">int_genus2_complex()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.riemannsurfaces.integrations.integrate_hyperelliptic.int_genus2_complex_exp"><code class="docutils literal notranslate"><span class="pre">int_genus2_complex_exp()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.riemannsurfaces.integrations.integrate_hyperelliptic.int_genus2_complex_second"><code class="docutils literal notranslate"><span class="pre">int_genus2_complex_second()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.riemannsurfaces.integrations.integrate_hyperelliptic.int_genus2_real_exp"><code class="docutils literal notranslate"><span class="pre">int_genus2_real_exp()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.riemannsurfaces.integrations.integrate_hyperelliptic.myint_genus2"><code class="docutils literal notranslate"><span class="pre">myint_genus2()</span></code></a></li>
+<li><a class="reference internal" href="#geodesicparams.riemannsurfaces.integrations.integrate_hyperelliptic.myint_genus2_second"><code class="docutils literal notranslate"><span class="pre">myint_genus2_second()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-geodesicparams.riemannsurfaces.integrations">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">GeodesicParams</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">geodesicparams.riemannsurfaces.integrations package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/geodesicparams.riemannsurfaces.integrations.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="geodesicparams-riemannsurfaces-integrations-package">
+<h1>geodesicparams.riemannsurfaces.integrations package<a class="headerlink" href="#geodesicparams-riemannsurfaces-integrations-package" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-geodesicparams.riemannsurfaces.integrations.integrate_hyperelliptic">
+<span id="geodesicparams-riemannsurfaces-integrations-integrate-hyperelliptic-module"></span><h2>geodesicparams.riemannsurfaces.integrations.integrate_hyperelliptic module<a class="headerlink" href="#module-geodesicparams.riemannsurfaces.integrations.integrate_hyperelliptic" title="Link to this heading"></a></h2>
+<p>Procedures for performing integrations of holomorphic and meromorphic differentials.</p>
+<p>NOTE: fix some things here like the precision and documentation. Also integration method
+for periods of second kind will be changed soon (hopefully).</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.riemannsurfaces.integrations.integrate_hyperelliptic.int_genus2_complex">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.riemannsurfaces.integrations.integrate_hyperelliptic.</span></span><span class="sig-name descname"><span class="pre">int_genus2_complex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zeros</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">realPart</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imaPart</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digits</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/riemannsurfaces/integrations/integrate_hyperelliptic.html#int_genus2_complex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.riemannsurfaces.integrations.integrate_hyperelliptic.int_genus2_complex" title="Link to this definition"></a></dt>
+<dd><p>Integrates the vector of canonical holomorphic differentials dz = [1 / sqrt(P(z),
+z / sqrt(P(z))] from the real part &lt;realPart&gt; of a complex zero of the polynomial P(z) to
+the complex zero &lt;realPart&gt; + I*&lt;imaPart&gt; of P(z), where I is the imaginary unit.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>zeros</strong> (<em>list</em>) – The zeros of the polynomial P.</p></li>
+<li><p><strong>realPart</strong> (<em>float</em>) – The lower bound of the integration.</p></li>
+<li><p><strong>imaPart</strong> (<em>float</em>) – The upper bound of the integration (assumed to be positive).</p></li>
+<li><p><strong>position</strong> (<em>int</em>) – The index at which &lt;realPart&gt; - I*&lt;imaPart&gt; is in &lt;zeros&gt;.</p></li>
+<li><p><strong>branch</strong> (<em>int</em>) – The branch of the sqrt(P).</p></li>
+<li><p><strong>digits</strong> (<em>int</em>) – The number of digits used in the computation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The values of the integrals as a 2x1 mpmath matrix.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>matrix</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.riemannsurfaces.integrations.integrate_hyperelliptic.int_genus2_complex_exp">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.riemannsurfaces.integrations.integrate_hyperelliptic.</span></span><span class="sig-name descname"><span class="pre">int_genus2_complex_exp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zeros</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">realPart</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imaPart</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exponent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digits</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/riemannsurfaces/integrations/integrate_hyperelliptic.html#int_genus2_complex_exp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.riemannsurfaces.integrations.integrate_hyperelliptic.int_genus2_complex_exp" title="Link to this definition"></a></dt>
+<dd><p>Integrates a differential of the form It**j dt/ sqrt(P(&lt;realPart&gt; + It)) from t = 0 to
+t = &lt;imaPart&gt;, where I is the imaginary unit.</p>
+<p>This is needed to integrate canonical differentials of first and second kind.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>zeros</strong> (<em>list</em>) – The zeros of the polynomial P.</p></li>
+<li><p><strong>realPart</strong> (<em>float</em>) – The lower bound of the integration.</p></li>
+<li><p><strong>imaPart</strong> (<em>float</em>) – The upper bound of the integration (assumed to be positive).</p></li>
+<li><p><strong>position</strong> (<em>int</em>) – The index at which &lt;realPart&gt; - I*&lt;imaPart&gt; is in &lt;zeros&gt;.</p></li>
+<li><p><strong>exponent</strong> (<em>int</em>) – The exponent j in the differential It**j dt/ sqrt(P(&lt;realPart&gt; + It)), where j = 0
+or 1.</p></li>
+<li><p><strong>branch</strong> (<em>int</em>) – The branch of the sqrt(P).</p></li>
+<li><p><strong>digits</strong> (<em>int</em>) – The number of digits used in the computation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The value of the integral.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>complex</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.riemannsurfaces.integrations.integrate_hyperelliptic.int_genus2_complex_second">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.riemannsurfaces.integrations.integrate_hyperelliptic.</span></span><span class="sig-name descname"><span class="pre">int_genus2_complex_second</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zeros</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">differential</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">realPart</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imaPart</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digits</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/riemannsurfaces/integrations/integrate_hyperelliptic.html#int_genus2_complex_second"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.riemannsurfaces.integrations.integrate_hyperelliptic.int_genus2_complex_second" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.riemannsurfaces.integrations.integrate_hyperelliptic.int_genus2_real_exp">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.riemannsurfaces.integrations.integrate_hyperelliptic.</span></span><span class="sig-name descname"><span class="pre">int_genus2_real_exp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zeros</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exponent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digits</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/riemannsurfaces/integrations/integrate_hyperelliptic.html#int_genus2_real_exp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.riemannsurfaces.integrations.integrate_hyperelliptic.int_genus2_real_exp" title="Link to this definition"></a></dt>
+<dd><p>Integrates a holomorphic differential z**j / sqrt(P(z)) from &lt;lower&gt; to &lt;upper&gt;,
+where at least one of &lt;lower&gt; or &lt;upper&gt; is a real zero of the polynomial P(z).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>zeros</strong> (<em>list</em>) – The zeros of the polynomial P(z).</p></li>
+<li><p><strong>lower</strong> (<em>float</em>) – The lower bound of the integration.</p></li>
+<li><p><strong>upper</strong> (<em>float</em>) – The upper bound of the integration.</p></li>
+<li><p><strong>exponent</strong> (<em>int</em>) – The exponent j in the differential z**j / sqrt(P(z)), where j = 0 or 1.</p></li>
+<li><p><strong>branch</strong> (<em>int</em>) – The branch of the sqrt(P(z)).</p></li>
+<li><p><strong>digits</strong> (<em>int</em>) – The number of digits used in the computation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The value of the integral.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>complex</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.riemannsurfaces.integrations.integrate_hyperelliptic.myint_genus2">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.riemannsurfaces.integrations.integrate_hyperelliptic.</span></span><span class="sig-name descname"><span class="pre">myint_genus2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zeros</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digits</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/riemannsurfaces/integrations/integrate_hyperelliptic.html#myint_genus2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.riemannsurfaces.integrations.integrate_hyperelliptic.myint_genus2" title="Link to this definition"></a></dt>
+<dd><p>Integrates the vector of canonical holomorphic differentials dz = [1 / sqrt(P(z),
+z / sqrt(P(z))] from &lt;lower&gt; to &lt;upper&gt;, where at least one of &lt;lower&gt; or &lt;upper&gt; is
+a real zero of the polynomial P(z).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>zeros</strong> (<em>list</em>) – The zeros of the polynomial P(z).</p></li>
+<li><p><strong>lower</strong> (<em>float</em>) – The lower bound of the integration.</p></li>
+<li><p><strong>upper</strong> (<em>float</em>) – The upper bound of the integration.</p></li>
+<li><p><strong>branch</strong> (<em>int</em>) – The branch of the sqrt(P(z)).</p></li>
+<li><p><strong>digits</strong> (<em>int</em>) – The number of digits used in the computation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The values of the integrals as a 2x1 mpmath matrix.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>matrix</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geodesicparams.riemannsurfaces.integrations.integrate_hyperelliptic.myint_genus2_second">
+<span class="sig-prename descclassname"><span class="pre">geodesicparams.riemannsurfaces.integrations.integrate_hyperelliptic.</span></span><span class="sig-name descname"><span class="pre">myint_genus2_second</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zeros</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">differential</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digits</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geodesicparams/riemannsurfaces/integrations/integrate_hyperelliptic.html#myint_genus2_second"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geodesicparams.riemannsurfaces.integrations.integrate_hyperelliptic.myint_genus2_second" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-geodesicparams.riemannsurfaces.integrations">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-geodesicparams.riemannsurfaces.integrations" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Alexander Abesteh.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
