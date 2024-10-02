@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """
+A collection of helper functions used to compute the various algorithms involved in computing
+the hyperelliptic theta function on a genus 2 Riemann surface.
 
+Algorithms for the naive theta function, high-precision theta function, and Fourier series
+theta function have been implemented.
 
 """
 
@@ -9,28 +13,30 @@ from numpy import matrix, kron, array
 
 def naive_theta_genus2(z, tau, precision = 53):
     """
-
+    Computes the hyperelliptic theta function on a genus 2 Riemann surface using the Naive
+    algorithm found in []. The Riemann matrix <tau> must also be Minkowski-reduced 
+    (Im(tau_3) <= Im(tau_1) <= Im(tau_2)).
 
     Parameters
     ----------
     z : list
-
-    riemannM : matrix
-
-    derivatives : list, optional
-
-    minMax : natural, optional
-        
-
+        A list containing two complex numbers.
+    tau : matrix
+        An mpmath matrix, the Riemann matrix of the Riemann surface. The Riemann matrix
+        should also satisfy Im(tau_3) <= Im(tau_1) <= Im(tau_2) (Minkowski-reduced).
+    precision : int, optional
+        The binary precision of the computation.
+    
     Returns
     -------
     result : complex
+        The value of the hyperelliptic theta function evaluated at <z> with Riemann matrix
+        <tau>.
 
     """
 
     mp.prec = precision
    
-    # Assume 2 Im(tau_3) <= Im(tau_1) <= Im(tau_2) (Minkowski-reduced)
     B = 2 * precision * mp.log(10) / mp.pi + 3
 
     q1 = mp.exp(mp.j * mp.pi * tau[0, 0])
@@ -54,7 +60,7 @@ def naive_theta_genus2(z, tau, precision = 53):
     r1mminus1 = 2
     when_to_stop = int(mp.ceil(mp.sqrt(B / mp.im(tau[0, 0]))) + 3)
 
-    for m in range(1, when_to_stop + 1):
+    for _ in range(1, when_to_stop + 1):
         result += r1m
         q12mminus2timesq1 = q12mminus2 * q1
         bubu = r1m
@@ -95,7 +101,7 @@ def naive_theta_genus2(z, tau, precision = 53):
         alphazmminus1 = betas[1][1]
         alphaprimezmminus1 = betaprimes[1][1]
 
-        for m in range(1, int(when_to_stop) + 1):
+        for _ in range(1, int(when_to_stop) + 1):
 
             term = alphazm + alphaprimezm
             result += term
@@ -130,22 +136,28 @@ def naive_theta_genus2(z, tau, precision = 53):
 
 def theta_char(z, tau, char, precision = 53):
     """
-
+    Computes the hyperelliptic theta function on a genus 2 Riemann surface with characteristics
+    <char> using the Naive algorithm found in []. The Riemann matrix <tau> must also be 
+    Minkowski-reduced (Im(tau_3) <= Im(tau_1) <= Im(tau_2)).
 
     Parameters
     ----------
     z : list
-
-    riemannM : matrix
-
-    derivatives : list, optional
-
-    minMax : natural, optional
-        
-
+        A list containing two complex numbers.
+    tau : matrix
+        An mpmath matrix, the Riemann matrix of the Riemann surface. The Riemann matrix
+        should also satisfy Im(tau_3) <= Im(tau_1) <= Im(tau_2) (Minkowski-reduced).
+    char : list
+        A list containing two lists of length 2. These lists represent the g and h 
+        characteristics of the theta function (the elements of these lists are either 0 or 1/2). 
+    precision : int, optional
+        The binary precision of the computation.
+    
     Returns
     -------
     result : complex
+        The value of the hyperelliptic theta function evaluated at <z> with Riemann matrix
+        <tau> and characteristics <char>.
 
     """
 
@@ -159,27 +171,33 @@ def theta_char(z, tau, char, precision = 53):
 
     return result
 
-def theta_genus2(n, z, t, precision = 53):
+def theta_genus2(n, z, tau, precision = 53):
     """
-
+    Computes the hyperelliptic theta function on a genus 2 Riemann surface with characteristics
+    determined by <n> using the Naive algorithm found in []. The Riemann matrix <tau> must also 
+    be Minkowski-reduced (Im(tau_3) <= Im(tau_1) <= Im(tau_2)).
 
     Parameters
     ----------
+    n : int
+        An integer from 0 <= n <= 15 that determines the characteristics of the theta function.
     z : list
-
-    riemannM : matrix
-
-    derivatives : list, optional
-
-    minMax : natural, optional
-        
+        A list containing two complex numbers.
+    tau : matrix
+        An mpmath matrix, the Riemann matrix of the Riemann surface. The Riemann matrix
+        should also satisfy Im(tau_3) <= Im(tau_1) <= Im(tau_2) (Minkowski-reduced).
+    precision : int, optional
+        The binary precision of the computation.
 
     Returns
     -------
-    result : complex
-
+    complex
+        The value of the hyperelliptic theta function evaluated at <z> with Riemann matrix
+        <tau> and characteristics determined by <n>.
+        
     """
 
+    # Determine characteristics from <n>
     vec = [mp.mpf(0/2), mp.mpf(0/2), mp.mpf(0/2), mp.mpf(0/2)]
     vec[3] = mp.mpf(f"{round(n % 2)}") / 2
     n = round((n - (n % 2)) / 2)
@@ -190,26 +208,28 @@ def theta_genus2(n, z, t, precision = 53):
     vec[0] = mp.mpf(f"{round(n % 2)}") / 2
     char = [vec[0:2], vec[2:4]]
 
-    return theta_char(z, t, char, precision)
+    return theta_char(z, tau, char, precision)
 
-def sign_theta(n, z, t):
+def sign_theta(n, z, tau):
     """
-
+    Computes the sign of the hyperelliptic theta function on a genus 2 Riemann surface with 
+    characteristics determined by <n> using the Naive algorithm found in []. The Riemann 
+    matrix <tau> must also be Minkowski-reduced (Im(tau_3) <= Im(tau_1) <= Im(tau_2)).
 
     Parameters
     ----------
+    n : int
+        An integer from 0 <= n <= 15 that determines the characteristics of the theta function.
     z : list
-
-    riemannM : matrix
-
-    derivatives : list, optional
-
-    minMax : natural, optional
-        
-
+        A list containing two complex numbers.
+    tau : matrix
+        An mpmath matrix, the Riemann matrix of the Riemann surface. The Riemann matrix
+        should also satisfy Im(tau_3) <= Im(tau_1) <= Im(tau_2) (Minkowski-reduced).
+    
     Returns
     -------
-    result : complex
+    int
+        The sign of the theta function, either +1 or -1.
 
     """
 
@@ -217,7 +237,7 @@ def sign_theta(n, z, t):
     mp.dps = 20
 
     z_matrix = mp.matrix([mp.mpc(f"{mp.re(z[0])}", f"{mp.im(z[0])}"), mp.mpc(f"{mp.re(z[1])}", f"{mp.im(z[1])}")])
-    t_matrix = mp.matrix([[mp.mpc(f"{mp.re(t[0, 0])}",f"{mp.im(t[0, 0])}"), mp.mpc(f"{mp.re(t[0, 1])}", f"{mp.im(t[0, 1])}")], [mp.mpc(f"{mp.re(t[1, 0])}",f"{mp.im(t[1, 0])}"), mp.mpc(f"{mp.re(t[1, 1])}", f"{mp.im(t[1, 1])}")]])
+    t_matrix = mp.matrix([[mp.mpc(f"{mp.re(tau[0, 0])}",f"{mp.im(tau[0, 0])}"), mp.mpc(f"{mp.re(tau[0, 1])}", f"{mp.im(tau[0, 1])}")], [mp.mpc(f"{mp.re(tau[1, 0])}",f"{mp.im(tau[1, 0])}"), mp.mpc(f"{mp.re(tau[1, 1])}", f"{mp.im(tau[1, 1])}")]])
 
     num = theta_genus2(n, z_matrix, t_matrix, mp.prec)
     den = theta_genus2(0, z_matrix, t_matrix, mp.prec)
@@ -231,22 +251,20 @@ def sign_theta(n, z, t):
 
 def hadamard_matrix(fi, n):
     """
-
+    Computes the nth order Hadamard matrix with the precision determined by the number of 
+    bits in <fi>.
 
     Parameters
     ----------
-    z : list
-
-    riemannM : matrix
-
-    derivatives : list, optional
-
-    minMax : natural, optional
-        
+    fi : complex
+        A complex number to be used for determining the current working binary precision.
+    n : int
+        The order of the Hadamard matrix
 
     Returns
     -------
-    result : complex
+    result : matrix
+        The nth order Hadamard matrix.
 
     """
 
@@ -257,31 +275,36 @@ def hadamard_matrix(fi, n):
     mp.prec = prec
     
     # Initialize the result as the base matrix
-    res = m
-    # Compute the n-th order Hadamard matrix using kronecker product
-    for i in range(2, n + 1):
-        res = kron(res, m)
+    result = m
 
-    return res
+    # Compute the nth order Hadamard matrix using kronecker product
+    for _ in range(2, n + 1):
+        result = kron(result, m)
+
+    return result
 
 def f(a, b, z, t):
     """
-
+    Computes the function F in [], which returns the theta functions <a> and constants <b>
+    evaluated with 2*t instead of t.
 
     Parameters
     ----------
+    a : list
+        A list containing the four theta functions squared from n = 0 to n = 3 evaluated at z.
+    b : list
+        A list containing the four theta constants squared from n = 0 to n = 3.
     z : list
-
-    riemannM : matrix
-
-    derivatives : list, optional
-
-    minMax : natural, optional
-        
+        A list containing the values of the vector z.
+    t : matrix
+        The riemann matrix tau of the Riemann surface.
 
     Returns
     -------
-    result : complex
+    result_mults : list
+        A list containing the 4 theta functions evaluated with 2*t.
+    result_squares : list
+        A list containing the 4 theta constants evaluated with 2*t.
 
     """
 
@@ -306,22 +329,27 @@ def f(a, b, z, t):
 
 def f_infinity(a, b, z, t):
     """
+    Computes the sequence of functions F**n in [] as n approaches infinity.
 
+    This gives the limits of the sequences a'_{i} and b'_{i}, where 0 <= i <= 3 which can be used 
+    to determine lambda and mu in [].
 
     Parameters
     ----------
+    a : list
+        A list containing the four theta functions squared from n = 0 to n = 3 evaluated at z.
+    b : list
+        A list containing the four theta constants squared from n = 0 to n = 3. 
     z : list
-
-    riemannM : matrix
-
-    derivatives : list, optional
-
-    minMax : natural, optional
-        
+        A list containing the values of the vector z.
+    t : matrix
+        The riemann matrix tau of the Riemann surface.
 
     Returns
     -------
-    result : complex
+    res : list
+        A list containing two lists: the first list contains the limits of a'_{i}, while
+        the second contains the limits of b'_{i}, where 0 <= i <= 3.
 
     """
 
@@ -341,85 +369,86 @@ def f_infinity(a, b, z, t):
 
     return res
 
-def Pow2PowN(x, n):
+def pow2_powN(x, n):
     """
-
+    Raises <x> to the power of 2 <n> times.
 
     Parameters
     ----------
-    z : list
-
-    riemannM : matrix
-
-    derivatives : list, optional
-
-    minMax : natural, optional
-        
+    x : complex
+        The complex number to be squared.
+    n : int
+        Raise <x> to the 2nd power <n> times.
 
     Returns
     -------
     result : complex
+        The value of <x> raised to the 2nd power <n> times.
 
     """
 
     r = x
+
     for _ in range(n):
         r = r**2
+
     return r
 
 def agm_prime(a, b, z, t):
     """
+    Computes lambda and mu variables in [] from the theta functions and constants.
 
+    This is called by to_inverse to computed the Riemann matrix tau and z at a higher 
+    precision.
 
     Parameters
     ----------
+    a : list
+        A list containing the four theta functions squared from n = 0 to n = 3 evaluated at z.
+    b : list
+        A list containing the four theta constants squared from n = 0 to n = 3. 
     z : list
-
-    riemannM : matrix
-
-    derivatives : list, optional
-
-    minMax : natural, optional
+        A list containing the values of the vector z.
+    t : matrix
+        The riemann matrix tau of the Riemann surface.
         
-
     Returns
     -------
-    result : complex
+    lambda_ : complex
+        The complex number lambda in [].
+    mu : complex
+        The complex number mu in [].
 
     """
-
 
     R = f_infinity(a, b, z, t)
     mu = R[-1][1][0]  # R[-1] is the last [r,s]; R[-1][1] is the second element (s)
     qu = R[-1][0][0] / R[-1][1][0]
-    lambda_ = Pow2PowN(qu, len(R) - 1) * R[-1][1][0]
+    lambda_ = pow2_powN(qu, len(R) - 1) * mu
     return lambda_, mu
 
 def all_duplication(a, b):
     """
-
+    Computes theta_{a, b}(z, t) given theta_{0, b}(z, t) and theta_{0, b}(0, t) (the theta
+    functions and theta constants, see []).
 
     Parameters
     ----------
-    z : list
-
-    riemannM : matrix
-
-    derivatives : list, optional
-
-    minMax : natural, optional
-        
+    a : list
+        A list containing the four theta functions squared from n = 0 to n = 3 evaluated at z
+        divided by the theta function squared at n = 0 (the first element is therefore always
+        1).
+    b : list
+        A list containing the four theta constants squared from n = 0 to n = 3 divided by the 
+        theta constant squared at n = 0 (the first element is therefore always 1).
 
     Returns
     -------
-    result : complex
+    thetaProducts : list
+        A list containing 16 elements, theta_{a, b}(z, t).
 
     """
 
-    # Given theta_{0,b}(z,t) and theta_{0,b}(0,t) compute theta_{a,b}(z,t)
-    # Explicit formulas for genus 2 are found in Cosset
-    
-    # Calculate ThetaProducts matrix
     thetaProducts = matrix([
         [a[0] * b[0], a[0] * b[1], a[0] * b[2], a[0] * b[3]],
         [a[1] * b[1], a[1] * b[0], a[1] * b[3], a[1] * b[2]],
@@ -431,7 +460,6 @@ def all_duplication(a, b):
     thetaProducts =  [item for sublist in thetaProducts for item in sublist]
     thetaProducts = [elem / 4 for elem in thetaProducts]
    
-    #print(ThetaProducts)
     # Apply the sign change for the odd theta-constants
     for i in [5, 7, 10, 11, 13, 14]:
         thetaProducts[i] = -thetaProducts[i]
@@ -440,26 +468,32 @@ def all_duplication(a, b):
 
 def to_inverse(a, b, z, t):
     """
-
+    Computes the values of z and tau at a high precision given the theta constants, theta
+    functions (evaluated at z), z, and the Riemann matrix tau.
 
     Parameters
     ----------
+    a : list
+        A list containing the four theta functions squared from n = 0 to n = 3 evaluated at z
+        divided by the theta function squared at n = 0 (the first element is therefore always
+        1).
+    b : list
+        A list containing the four theta constants squared from n = 0 to n = 3 divided by the 
+        theta constant squared at n = 0 (the first element is therefore always 1).
     z : list
-
-    riemannM : matrix
-
-    derivatives : list, optional
-
-    minMax : natural, optional
-        
+        A list containing the values of the vector z.
+    t : matrix
+        The riemann matrix tau of the Riemann surface.
 
     Returns
     -------
-    result : complex
+    list
+        A list containing 6 elements: the first two are the values of 1/the computed z1 and
+        1/the computed z2, the third is 1/the third formula in [], and the last three are
+        the computed values of the Riemann matrix tau1, tau2, and tau3.
 
     """
 
-    # Given theta_i/theta_0 (z and 0), compute lambda1, lambda2, lambda3, mu1, mu2, mu3
     n = len(a)
 
     # First step: compute 1/theta00(z)**2, 1/theta00(0)**2
@@ -521,30 +555,46 @@ def to_inverse(a, b, z, t):
     # Newton on lambda to avoid computing logs
     computedz1 = lambda1 * (-mp.j * 2 * computedtau1 * sixteenThetas[8])
     computedz2 = lambda2 * (-mp.j * 2 * computedtau2 * sixteenThetas[4])
-        
-    det2tau = 1 / (-mu3 * sixteenThetaConstants[0])  # don't forget we're still working with 2tau at this point
-    thirdformula = lambda3 * det2tau * sixteenThetas[0]  # 2 x 2truc/4det(tau) = i pi
+       
+    # Don't forget we're still working with 2*tau at this point
+    det2tau = 1 / (-mu3 * sixteenThetaConstants[0]) 
+    thirdformula = lambda3 * det2tau * sixteenThetas[0]  
 
     return [1 / computedz1, 1 / computedz2, 1 / thirdformula, computedtau1, computedtau2, computedtau3]
 
 def diff_finies_one_step(a, b, z, t, lambda_iwant, det_iwant):
     """
+    Computes the changes in the theta functions <a> and theta constants <b>.
 
+    This is done by computing the Jacobian matrix of the to_inverse base results, as well as 
+    perturbations determined by to_inverse with small epsilon additions.
 
     Parameters
     ----------
+    a : list
+        A list containing the four theta functions squared from n = 0 to n = 3 evaluated at z
+        divided by the theta function squared at n = 0 (the first element is therefore always
+        1).
+    b : list
+        A list containing the four theta constants squared from n = 0 to n = 3 divided by the 
+        theta constant squared at n = 0 (the first element is therefore always 1).
     z : list
-
-    riemannM : matrix
-
-    derivatives : list, optional
-
-    minMax : natural, optional
-        
+        A list containing the values of the vector z.
+    t : matrix
+        The riemann matrix tau of the Riemann surface.
+    lambda_iwant : list
+        A list containing the 3 values of lambda to be computed (the ones that produce the
+        results we wish to find). 
+    det_iwant : complex
+        The determinant of the Riemann matrix to be computed in the process.
 
     Returns
     -------
-    result : complex
+    new_a : list
+        A list containing the four theta functions from n = 0 to n = 3 evaluated at z after
+        the updates.
+    new_b : list
+        A list containing the four theta constants from n = 0 to n = 3 after the updates.
 
     """
 
@@ -635,6 +685,7 @@ def diff_finies_one_step(a, b, z, t, lambda_iwant, det_iwant):
         to_inverse_base[4] - t[1, 1],
         to_inverse_base[5] - det_iwant
     ]])
+
     changement = changement * (jacobian.T)**-1
     
     # Return the new a and b matrices with updated values
@@ -651,11 +702,30 @@ def diff_finies_one_step(a, b, z, t, lambda_iwant, det_iwant):
         my_b_of_size_3[1] - changement[0, 4],
         my_b_of_size_3[2] - changement[0, 5]
     ])
-    
-    mp.prec = prec  # Reset precision
+   
+    # Reset precision
+    mp.prec = prec
+
     return new_a, new_b
 
 def derivative_factor(derivatives):
+    """
+    Computes the 2*pi*1j factor in front of the Fourier series definition of the theta function
+    after taking partial derivatives.
+
+    Parameters
+    ----------
+    derivatives : list
+        A list containing the integers representing the derivatives with respect to z1 or z2.
+        A 0 means no derivative is computed, while 1 and 2 represent the derivatives with respect
+        to z1 and z2 respectively.
+
+    Returns
+    -------
+    complex
+        The derivative factor in front of the Fourier series.
+    """
+
     count = 0
 
     for i in derivatives:

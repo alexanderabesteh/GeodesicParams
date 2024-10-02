@@ -7,6 +7,7 @@ In particular, the functions implemented are the hyperelliptic theta function (w
 algorithms), Kleinian sigma function, Kleinian zeta function, Kleinian P function, and the 
 derivatives of the theta function and sigma functions.
 
+TODO: remove unnecessary code and fix precision.
 """
 
 from mpmath import exp, sin, cos, pi, re, im, mp
@@ -15,22 +16,31 @@ from theta_helper import agm_prime, theta_char, theta_genus2, diff_finies_one_st
 
 def hyp_theta_fourier(z, riemannM, char, derivatives = [], minMax = 5):
     """
-
+    Computes the hyperelliptic theta function on a genus 2 Riemann surface using the Fourier
+    series definition of the function. Optional derivatives can be computed.
 
     Parameters
     ----------
     z : list
-
+        A list containing two complex numbers.
     riemannM : matrix
-
+        The Riemann matrix of the Riemann surface.
+    char : list
+        A list containing two lists of length 2. These lists represent the g and h 
+        characteristics of the theta function (the elements of these lists are either 0 or 1/2).
     derivatives : list, optional
-
+        A list containing integers, either 0, 1, or 2. These represent the partial derivatives of the
+        theta function with respect to the first and second components of the vector z, z1 and z2
+        respectively. For example, [1, 2 ,1] computes the partial derivative of the theta function
+        with respect to z1, z2, and finally z1. An integer of 0 means no derivative is computed.
     minMax : natural, optional
-        
+        A natural number from 5 <= minMax <= 30 (the summation bound).
 
     Returns
     -------
     result : complex
+        The value of the hyperelliptic theta function evaluated at <z> with Riemann matrix
+        <riemannM>.
 
     """
 
@@ -79,26 +89,32 @@ def hyp_theta_fourier(z, riemannM, char, derivatives = [], minMax = 5):
 
 def hyp_theta_genus2(z, tau, char, precision = 53):
     """
+    Computes the hyperelliptic theta function on a genus 2 Riemann surface using the Naive
+    algorithm and the high-precision algorithm found in [].
 
+    When the precision is less than 3000 bits, the Naive algorithm is used while the
+    high-precision algorithm is used above 3000 bits.
 
     Parameters
     ----------
     z : list
-
+        A list containing two complex numbers.
     riemannM : matrix
-
-    derivatives : list, optional
-
-    minMax : natural, optional
-        
-
+        An mpmath matrix, the Riemann matrix of the Riemann surface.
+    char : list
+        A list containing two lists of length 2. These lists represent the g and h 
+        characteristics of the theta function (the elements of these lists are either 0 or 1/2).
+    precision : int, optional
+        The binary precision of the computation.
+    
     Returns
     -------
     result : complex
+        The value of the hyperelliptic theta function evaluated at <z> with Riemann matrix
+        <riemannM>.
 
     """
     
-
     LOW_PRECISION = 3000
 
     # Determine initial precision
@@ -121,7 +137,7 @@ def hyp_theta_genus2(z, tau, char, precision = 53):
 
     initA = []
     initB = []
-    flag = 1
+
     if flag == 1:
         return theta_char(z, tau, char, precision)
     else:
@@ -172,30 +188,42 @@ def hyp_theta_genus2(z, tau, char, precision = 53):
 
     return result
 
-def hyp_theta_RR(xR, xI, wR, wI, l, riemannM, minMax = 5):
+def hyp_theta_RR(xR, xI, wR, wI, l, riemannM, char, minMax = 5):
     """
-
+    Computes the partial derivative of the real part of the hyperelliptic theta function
+    with respect <xR> or <wR>, depending on <l>. The vector z of the theta function is split
+    into two complex variables <x> and <w> (i.e. z = [xR + 1j * xI, wR + 1j * xI]).
 
     Parameters
     ----------
-    z : list
-
-    riemannM : matrix
-
-    derivatives : list, optional
-
+    xR : real
+        The real part of the first component of z. 
+    xI : real
+        The imaginary part of the first component of z. 
+    wR : real
+        The real part of the second component of z. 
+    wI : real
+        The imaginary part of the second component of z. 
+    l : int
+        An integer, either 1 or 2 representing the partial derivative with respect to 
+        <xR> for <l> = 1 and <wR> for <l> = 2.
+    char : list
+        A list containing two lists of length 2. These lists represent the g and h 
+        characteristics of the theta function (the elements of these lists are either 0 or 1/2).
     minMax : natural, optional
-        
-
+        A natural number from 5 <= minMax <= 30 (the summation bound).
+    
     Returns
     -------
     result : complex
+        The partial deriative of the real part of the theta function with respect to <xR> or
+        <wR>.
 
     """
 
-
-    g = [1/2, 1/2]
-    h = [0, 1/2]
+    g, h = char
+    #g = [1/2, 1/2]
+   # h = [0, 1/2]
     result = 0
     varR = [xR, wR]
     varI = [xI, wI]
@@ -212,6 +240,7 @@ def hyp_theta_RR(xR, xI, wR, wI, l, riemannM, minMax = 5):
                 tau_sumI = 0
                 tau_sumR = 0
 
+                # Riemann matrix contributions
                 for j in range(2):
                     tau_sumI += -riemannI[i, j] * (m[j] + g[j])
                     tau_sumR += riemannR[i, j] * (m[j] + g[j])
@@ -222,28 +251,41 @@ def hyp_theta_RR(xR, xI, wR, wI, l, riemannM, minMax = 5):
             result -= (exp(pi * char_sumExp) * sin(pi * char_sumSin) * 2 * pi * (m[l] + g[l]))
     return result
  
-def hyp_theta_IR(xR, xI, wR, wI, l, riemannM, minMax = 5):
+def hyp_theta_IR(xR, xI, wR, wI, l, riemannM, char, minMax = 5):
     """
-
+    Computes the partial derivative of the imaginary part of the hyperelliptic theta function
+    with respect <xR> or <wR>, depending on <l>. The vector z of the theta function is split
+    into two complex variables <x> and <w> (i.e. z = [xR + 1j * xI, wR + 1j * xI]).
 
     Parameters
     ----------
-    z : list
-
-    riemannM : matrix
-
-    derivatives : list, optional
-
+    xR : real
+        The real part of the first component of z. 
+    xI : real
+        The imaginary part of the first component of z. 
+    wR : real
+        The real part of the second component of z. 
+    wI : real
+        The imaginary part of the second component of z. 
+    l : int
+        An integer, either 1 or 2 representing the partial derivative with respect to 
+        <xR> for <l> = 1 and <wR> for <l> = 2.
+    char : list
+        A list containing two lists of length 2. These lists represent the g and h 
+        characteristics of the theta function (the elements of these lists are either 0 or 1/2).
     minMax : natural, optional
-        
-
+        A natural number from 5 <= minMax <= 30 (the summation bound).
+    
     Returns
     -------
     result : complex
+        The partial deriative of the real part of the theta function with respect to <xR> or
+        <wR>.
 
     """
 
-    g = [1/2, 1/2]; h = [0, 1/2]
+    g, h = char
+    # g = [1/2, 1/2]; h = [0, 1/2]
     result = 0
     varR = [xR, wR]
     varI = [xI, wI]
@@ -260,6 +302,7 @@ def hyp_theta_IR(xR, xI, wR, wI, l, riemannM, minMax = 5):
                 tau_sumI = 0
                 tau_sumR = 0
 
+                # Riemann matrix contributions
                 for j in range(2):
                     tau_sumI += -riemannI[i, j] * (m[j] + g[j])
                     tau_sumR += riemannR[i, j] * (m[j] + g[j])
@@ -272,19 +315,28 @@ def hyp_theta_IR(xR, xI, wR, wI, l, riemannM, minMax = 5):
 
 def kleinian_sigma(z, omega, eta, char, riemannM):
     """
-
+    Evaluates the Kleinian sigma function at <z> with Riemann matrix <riemannM>.
 
     Parameters
     ----------
     z : list
-
+        A list containing two complex numbers.
+    omega : matrix
+        The period matrix = the contour integral of the vector of canonical holomorphic 
+        differentials taken along the contours that encircle the branch cuts.
+    eta : matrix
+        The period matrix = the contour integral of the vector of canonical meromorphic
+        differentials taken along the contours that encircle the branch cuts.   
+    char : list
+        A list containing two lists of length 2. These lists represent the g and h 
+        characteristics of the theta function (the elements of these lists are either 0 or 1/2).
     riemannM : matrix
-
-        
+        An mpmath matrix, the Riemann matrix of the Riemann surface.
 
     Returns
     -------
     result : complex
+        The Kleinian sigma function evaluated at <z>.
 
     """
 
@@ -296,22 +348,33 @@ def kleinian_sigma(z, omega, eta, char, riemannM):
 
 def kleinian_zeta(z, omega, eta, char, riemannM, derivatives, minMax = 5):
     """
-
+    Evaluates the Kleinian zeta function at <z> with derivatives. 
 
     Parameters
     ----------
     z : list
-
+        A list containing two complex numbers.
+    omega : matrix
+        The period matrix = the contour integral of the vector of canonical holomorphic 
+        differentials taken along the contours that encircle the branch cuts.
+    eta : matrix
+        The period matrix = the contour integral of the vector of canonical meromorphic
+        differentials taken along the contours that encircle the branch cuts.   
+    char : list
+        A list containing two lists of length 2. These lists represent the g and h 
+        characteristics of the theta function (the elements of these lists are either 0 or 1/2).
     riemannM : matrix
-
+        An mpmath matrix, the Riemann matrix of the Riemann surface.
     derivatives : list
-
+        A list = either [1] or [2], where 1 is the partial derivative with respect to the 
+        first component of z, and 2 is with respect to the second component.
     minMax : natural, optional
-        
+        A natural number from 5 <= minMax <= 30 (the summation bound).
 
     Returns
     -------
     result : complex
+        The value of the Kleinian zeta function at <z> with derivatives.
 
     """
 
@@ -322,35 +385,50 @@ def kleinian_zeta(z, omega, eta, char, riemannM, derivatives, minMax = 5):
 
 def kleinian_P(z, omega, eta, char, riemannM, derivatives, minMax = 5):
     """
-
-
+    Evaluates the Kleinian P function at <z> with three partial derivatives.
+    
     Parameters
     ----------
     z : list
-
+        A list containing two complex numbers.
+    omega : matrix
+        The period matrix = the contour integral of the vector of canonical holomorphic 
+        differentials taken along the contours that encircle the branch cuts.
+    eta : matrix
+        The period matrix = the contour integral of the vector of canonical meromorphic
+        differentials taken along the contours that encircle the branch cuts.   
+    char : list
+        A list containing two lists of length 2. These lists represent the g and h 
+        characteristics of the theta function (the elements of these lists are either 0 or 1/2).
     riemannM : matrix
-
+        An mpmath matrix, the Riemann matrix of the Riemann surface.
     derivatives : list
-
+        A list containing three integers, where each integer = 1 or 2. An integer of 1 means the
+        partial derivative with respect to the first component of z, while 2 means with respect to
+        the second component of z.
     minMax : natural, optional
-        
+        A natural number from 5 <= minMax <= 30 (the summation bound).
 
     Returns
     -------
     result : complex
+        The Kleinian P function evaluated at <z> with three partial derivatives.
 
     """
 
     sigma = kleinian_sigma(z, omega, eta, char, riemannM)
 
+    # First partial derivatives
     sigmai = hyp_theta_fourier(z, riemannM, char, [derivatives[0], 0, 0], minMax)  
     sigmaj = hyp_theta_fourier(z, riemannM, char, [0, derivatives[1], 0], minMax)  
     sigmak = hyp_theta_fourier(z, riemannM, char, [0, 0, derivatives[2]], minMax)  
 
+    # Second partial derivatives
     sigmaij = hyp_theta_fourier(z, riemannM, char, [derivatives[0], derivatives[1]], minMax) 
     sigmaik = hyp_theta_fourier(z, riemannM, char, [derivatives[0], 0, derivatives[2]], minMax)  
     sigmajk = hyp_theta_fourier(z, riemannM, char, [0, derivatives[1], derivatives[2]], minMax)
 
+    # Third partial derivative
     sigmaijk = hyp_theta_fourier(z, riemannM, char, derivatives, minMax)
 
     result = (sigmai * sigmaj * sigmak) - (sigmaij * sigmak * sigma) - (sigmaik * sigmaj * sigma) - (sigmajk * sigmai * sigma) + (sigmaijk * sigma)
