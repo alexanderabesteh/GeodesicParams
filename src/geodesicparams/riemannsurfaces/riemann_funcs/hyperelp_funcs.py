@@ -346,7 +346,7 @@ def kleinian_sigma(z, omega, eta, char, riemannM):
 
     return exp_part * theta_part
 
-def kleinian_zeta(z, omega, eta, char, riemannM, derivatives, minMax = 5):
+def kleinian_zeta(z, omega, eta, char, riemannM, derivative, minMax = 5):
     """
     Evaluates the Kleinian zeta function at <z> with derivatives. 
 
@@ -365,8 +365,8 @@ def kleinian_zeta(z, omega, eta, char, riemannM, derivatives, minMax = 5):
         characteristics of the theta function (the elements of these lists are either 0 or 1/2).
     riemannM : matrix
         An mpmath matrix, the Riemann matrix of the Riemann surface.
-    derivatives : list
-        A list = either [1] or [2], where 1 is the partial derivative with respect to the 
+    derivative : int
+        An integer = 1 or 2, where 1 is the partial derivative with respect to the 
         first component of z, and 2 is with respect to the second component.
     minMax : natural, optional
         A natural number from 5 <= minMax <= 30 (the summation bound).
@@ -379,7 +379,7 @@ def kleinian_zeta(z, omega, eta, char, riemannM, derivatives, minMax = 5):
     """
 
     sigma = kleinian_sigma(z, omega, eta, char, riemannM)
-    result = hyp_theta_fourier(z, riemannM, char, derivatives, minMax) 
+    result = hyp_theta_fourier(z, riemannM, char, [derivative], minMax) 
 
     return result / sigma
 
