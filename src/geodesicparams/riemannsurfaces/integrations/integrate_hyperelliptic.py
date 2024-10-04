@@ -1,6 +1,7 @@
-from mpmath import quad, matrix, exp, pi, atan2, cos, sin, mpc, mpf, binomial
-from sympy import re, Symbol, collect, degree, lambdify, sqrt
+from mpmath import quad, matrix, exp, pi, atan2, cos, sin, mpc, mpf, binomial, fabs, mp
+from sympy import re, im, Symbol, collect, degree, lambdify, sqrt, oo
 
+from ..riemann_funcs.hyperelp_funcs import kleinian_zeta, kleinian_P
 from ...utilities import inlist, separate_zeros
 
 def int_genus2_real_exp(zeros, lower, upper, exponent, branch, digits):
@@ -247,6 +248,177 @@ def int_genus2_complex(zeros, realPart, imaPart, position, branch, digits):
     b = int_genus2_complex_exp(zeros, realPart, imaPart, position, 1, branch, digits)
  
     return matrix([a, realPart * a + 1j * b])
+
+def eval_period(m, n, realNS, zeros, omega, component = 0):
+    
+    lange = len(zeros)
+
+    if lange == 5:
+        if len(realNS) == 3:
+            if (im(zeros[1]) != 0 and im(zeros[2]) != 0): 
+                e = [zeros[1], zeros[2], zeros[0], zeros[3], zeros[4]]
+            elif (im(zeros[3]) != 0 and im(zeros[4]) != 0): 
+                e = [zeros[0], zeros[1], zeros[3], zeros[4], zeros[2]]
+            else:
+                e = zeros
+        elif len(realNS) == 1:
+            if im(zeros[0]) == 0: 
+                e = [zeros[1], zeros[2], zeros[3], zeros[4], zeros[0]]
+            elif im(zeros[2]) == 0: 
+                e  = [zeros[0], zeros[1], zeros[3], zeros[4], zeros[2]]
+            else:
+                e = zeros
+        else:
+            e = zeros
+
+    if m > n:
+        k = n
+        l = m
+        sign = -1
+    else:
+        k = m
+        l = n
+        sign = 1
+
+    if k == -oo:
+        k = l
+        l = oo
+        sign = -sign
+
+    K = inlist(realNS[k], e)
+
+    if l < len(realNS):
+        L = inlist(realNS[l], e)
+    else:
+        L = lange
+
+    if component != 0 and component != 1:
+        print(f"WARNING in eval_period: illegal component {component} changed to 1")
+        component = 0
+
+    periodlist = [omega[component, 0], omega[component, 2] - omega[component, 3], omega[component, 1], omega[component, 3], -omega[component,0] - omega[component, 1]]
+    result = 0
+    for i in range(K, L):
+        result += periodlist[i]
+    result = sign * result
+
+    return result
+
+def branch_list_genus2(zeros, num_realNS):
+    if num_realNS == 5:
+        erg = [[1, zeros[0], 1], [1, zeros[1], 0], [0, zeros[2], 0], [0, zeros[3], 1], [1, zeros[4], 1]]
+    elif num_realNS == 3:
+        if im(zeros[0]) != 0:
+            erg = [[1, zeros[0], 1], [1, zeros[1], 0], [0, zeros[2], 0], [0, zeros[3], 1], [1, zeros[4], 1]]
+        elif im(zeros[1]) != 0:
+            erg = [["tbd", zeros[0], 0], [1, zeros[1], "tbd"], ["tbd", zeros[2], 0], [0, zeros[3], 1], [1, zeros[4], 1]]
+        elif im(zeros[2]) != 0:
+            rea1 = re(zeros[2])
+            if ((rea1-zeros[0]) * (rea1-zeros[1]) + (rea1-zeros[1]) * (rea1-zeros[4]) + (rea1-zeros[4]) * (rea1-zeros[0])).evalf() < 0:
+                erg = [[1, zeros[0], 1], [1, zeros[1], 0], [0, zeros[2], 1], [1, zeros[3], 1], [1, zeros[4], 1]]
+            else:
+                erg = [[1, zeros[0], 1], [1, zeros[1], 0], [0, zeros[2], 0], [0, zeros[3], 1], [1, zeros[4], 1]]
+        elif im(zeros[3]) != 0:
+            erg = [[1, zeros[0], 1], [1, zeros[1], 0], ["tbd", zeros[2], 1], [1, zeros[3], "tbd"], ["tbd", zeros[4], 1]]
+    elif num_realNS == 1:
+        if im(zeros[4]) == 0:
+            rea1 = re(zeros[0]); rea2 = re(zeros[2])
+            ima1 = fabs(im(zeros[0]))
+            if ((rea2-rea1)**2 + ima1**2 + 2 * (rea2-rea1) * (rea2-zeros[4])).evalf() < 0:
+                erg = [[1, zeros[0], 1], [1, zeros[1], 0], [0, zeros[2], 1], [1, zeros[3], 1], [1, zeros[4], 1]]
+            else:
+                erg = [[1, zeros[0], 1], [1, zeros[1], 0], [0, zeros[2], 0], [0, zeros[3], 1], [1, zeros[4], 1]]
+        elif im(zeros[0]) == 0:
+            erg = [["tbd", zeros[0], 1], [1, zeros[1], "tbd"], ["tbd", zeros[2], 1], [1, zeros[3], "tbd"], ["tbd", zeros[4], 1]]
+        elif im(zeros[2]) == 0:
+            erg = [[1, zeros[0], 1], [1, zeros[1], 0], ["tbd", zeros[2], 1], [1, zeros[3], "tbd"], ["tbd", zeros[4], 1]]
+    else:
+        raise ValueError("Wrong number of real zeros.")
+    return erg
+
+def int_genus2_first(zeros, lower, upper, digits, period_matrix):
+    if len(zeros) != 5:
+        raise Exception("Invalid use; number of zeros has to be 5.")
+
+    e = sorted(zeros, key = lambda x : re(x))
+    realNS, complexNS = separate_zeros(e)
+    
+    if im(lower) != 0 and im(upper) != 0:
+        raise ValueError("Invalid use; only real integration bounds are feasible")
+
+    if lower == upper:
+        return 0
+    elif lower > upper:
+        sign = -1
+        lb = upper
+        ub = lower
+    else:
+        sign = 1
+        lb = lower
+        ub = upper
+
+    if inlist(lb, realNS) + 1 == inlist(ub, realNS):
+        if inlist(lb, e) + 1 == inlist(ub, e):
+            tags = (lb + ub) / 2
+        else:
+            tags = re(e[inlist(lb, e) + 1])
+        branch_list = branch_list_genus2(e, len(realNS))
+
+        return sign * (myint_genus2(e, lb, tags, branch_list[inlist(lb, e)][2], digits) + myint_genus2(e, tags, ub, branch_list[inlist(ub, e)][0], digits))
+
+    elif inlist(lb, realNS) >= 0 or inlist(ub, realNS) >= 0:
+        if inlist(lb, realNS) == -1:
+            if inlist(lb, sorted([lb] + realNS, key = lambda x : re(x))) == inlist(ub, realNS):
+                return sign * myint_genus2(e, lb, ub, branch_list_genus2(e, len(realNS))[inlist(ub, e)][0], digits)
+            else:
+                raise ValueError("Invalid bounds")
+        elif inlist(ub, realNS) == -1:
+            if inlist(ub, sorted([ub] + realNS, key = lambda x : re(x))) == inlist(lb, realNS) + 1:
+                return sign * myint_genus2(e, lb, ub, branch_list_genus2(e, len(realNS))[inlist(lb, e)][2], digits)
+            else:
+                raise ValueError("Invalid bounds")
+        else:
+            raise ValueError("Invalid bounds")
+    else:
+        if inlist(lb, sorted([lb] + realNS, key = lambda x : re(x))) == inlist(ub, sorted([ub] + realNS, key = lambda x : re(x))):
+            if ub == oo:
+                return sign * (myint_genus2(e, lb, realNS[-1], branch_list_genus2(e, len(realNS))[inlist(realNS[-1], e)][2], digits) + 
+                matrix([eval_period(len(realNS) - 1,oo,realNS,e,period_matrix,0), eval_period(len(realNS) - 1,oo,realNS,e,period_matrix,1)]))
+            else:
+                p = lambda x : (x - e[0]) * (x - e[1]) * (x - e[2]) * (x - e[3]) * (x - e[4])
+                sign = sign * exp(pi * 1j * branch_list_genus2(e, len(realNS))[inlist(lb, sorted(e + [lb], key = lambda x : re(x)))][2])
+                return matrix([sign * quad(lambda x : 1 / mpc(sqrt(p(x))), [lb, ub]), sign * quad(lambda x : x / mpc(sqrt(p(x))), [lb, ub])])
+        else:
+            raise ValueError("Invalid bounds")
+
+def int_second_genus2(zeros, periods_first, periods_second, upper, digits, minMax = 5):
+    """
+    
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+    list
+        
+
+    """
+
+    mp.digits = digits
+
+    riemann_const = [[1/2, 1/2], [0, 1/2]]
+    u = int_genus2_first(zeros, oo, upper, digits, periods_first)
+    omega = periods_first[0:2, 0:2]
+    eta = periods_second[0:2, 0:2]
+    eta_prime = periods_second[0:2, 2:4]
+
+    sym_funcs = matrix([kleinian_P(u, omega, eta, riemann_const, [2, 2, 2], minMax), 0])
+
+    zeta = matrix([kleinian_zeta(u, omega, eta, riemann_const, i, minMax) for i in range(1, 3)])
+    eta_char = eta_prime*matrix(riemann_const[0]) - eta*matrix(riemann_const[1]) 
+
+    return -zeta + (2 * eta_char) + (1/2 * sym_funcs)
 
 def myint_genus2_second(zeros, differential, lower, upper, branch, digits):
     result = 0
