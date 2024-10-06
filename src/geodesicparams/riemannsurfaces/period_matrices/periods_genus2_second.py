@@ -1,10 +1,79 @@
-from mpmath import quad, matrix, fabs
+#!/usr/bin/env python3
+"""
+Procedure for computing the periods matrices of the second kind for a genus 2 Riemann surface.
+
+This procedure utilizes a formula found in [], involving the matrix kappa.
+
+"""
+
+from mpmath import quad, matrix, fabs, mp, pi
 from sympy import re, im, Symbol, collect, lambdify, sqrt
 
-from ...utilities import inlist, separate_zeros
+from ...utilities import inlist
+from ..riemann_funcs.hyperelp_funcs import hyp_theta_fourier, hyp_theta_genus2
 from ..integrations.integrate_hyperelliptic import myint_genus2_second, int_genus2_complex_second
 
-def periods_second(dr1, dr2, realNS, complexNS, digits):
+def periods_second(zeros, periods_first, digits, minMax = 5):
+    """
+    Computes the period matrices of the second kind.
+
+    This is done by using a formula in [] that involves the Kleinian P function, the periods of
+    the first kind, and computing the derivatives of the theta function.
+
+    Parameters
+    ----------
+    zeros : list
+        The zeros of the Riemann surface defined by a 5th degree polynomial. 
+    periods_first : matrix
+        A 2x4 mpmath matrix, where the first 2x2 entry is the period matrix from the integral of
+        the vector of canonical holomorphic differentials along the contours encircling the branch
+        cuts, while the second 2x2 entry is taken along the contours connecting branch cuts.
+    digits : int
+        The number of digits used in the computation.
+    minMax : natural
+        A natural number from 0 <= minMax <= 30, the summation bound of the theta function.
+
+    Returns
+    -------
+    eta : matrix
+        A 2x4 matrix containing the integral of the vector of canonical meromorphic differentials.
+        The first 2x2 entry is the period matrix from the integral of the vector of canonical 
+        meromorphic differentials along the contours encircling the branch cuts, while the 
+        second 2x2 entry is taken along the contours connecting branch cuts.
+
+    """
+    
+    mp.digits = digits
+    char = matrix([1/2, 1/2], [1/2, 1/2])
+    omega = periods_first[0:2, 0:2]
+    omega_inv = omega**(-1)
+    tau = omega_inv * periods_first[0:2, 2:4]
+    e1, e2, e3, e4, e5 = zeros
+
+    theta_matrix = matrix(2)
+    for i in range(1, 3):
+        theta_matrix[i, i] = hyp_theta_fourier(0, tau, char, [i, i], minMax)
+    theta_matrix[0, 1] = hyp_theta_fourier(0, tau, char, [1, 2], minMax)
+    theta_matrix[1, 0] = theta_matrix[0, 1]
+
+    # Kleinian P function of characteristics of the branch points (e1, e2)
+    klein_symmetric = matrix(2)
+    klein_symmetric[0, 0] = e1*e2 * (e3 + e4 + e5) + e3*e4*e5
+    klein_symmetric[0, 1] = -e1 * e2
+    klein_symmetric[1, 0] = klein_symmetric[0, 1]
+    klein_symmetric[1, 1] = e1 + e2
+
+    kappa = -1/2 * klein_symmetric - 1/2 * (1/2 * omega_inv).T * 1/hyp_theta_genus2(0, tau, char, mp.prec) * ( 
+        theta_matrix * (1/2 * omega_inv))
+
+    # Periods from kappa
+    eta = matrix(2, 4)
+    eta[0:2, 0:2] = 2 * kappa * omega
+    eta[0:2, 2:4] = 2 * kappa * periods_first[0:2, 2:4] - (1j*pi/2) * (periods_first[0:2, 2:4]).T
+
+    return periods_second
+
+def periods_second2(dr1, dr2, realNS, complexNS, digits):
 
     if len(realNS) + len(complexNS) != 5:
         raise ValueError(f"Invalid use: len({realNS}) + len({complexNS}) has to be 5")
