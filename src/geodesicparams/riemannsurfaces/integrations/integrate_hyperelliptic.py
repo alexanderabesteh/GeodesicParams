@@ -391,34 +391,58 @@ def int_genus2_first(zeros, lower, upper, digits, period_matrix):
         else:
             raise ValueError("Invalid bounds")
 
-def int_second_genus2(zeros, periods_first, periods_second, upper, digits, minMax = 5):
+def int_second_genus2(zeros, pole, periods_first, periods_second, digits, minMax = 5):
     """
-    
+    Integrates the vector of canonical meromorphic differentials from the pole in a 
+    hyperelliptic integral of the third on the negative branch of the sqrt(P(pole)) to the
+    pole on the positive branch of the sqrt(P(pole)), where P(x) is the 5th degree polynomial
+    defining the Riemann surface.
 
     Parameters
     ----------
+    zeros : list
+        The zeros of the Riemann surface defined by a 5th degree polynomial. 
+    periods_first : matrix
+        A 2x4 mpmath matrix, where the first 2x2 entry is the period matrix from the integral of
+        the vector of canonical holomorphic differentials along the contours encircling the branch
+        cuts, while the second 2x2 entry is taken along the contours connecting branch cuts.
+    periods_second : matrix
+        A 2x4 mpmath matrix, where the first 2x2 entry is the period matrix from the integral of
+        the vector of canonical meromorphic differentials along the contours encircling the branch
+        cuts, while the second 2x2 entry is taken along the contours connecting branch cuts.
+    digits : int
+        The number of digits used in the computation.
+    minMax : natural, optional
+        A natural number from 0 <= minMax <= 30, the summation bound of the theta function.
 
     Returns
     -------
     list
-        
+        The vector containing the integration of the canonical meromorphic differentials.
 
     """
 
     mp.digits = digits
 
+    # Constants
     riemann_const = [[1/2, 1/2], [0, 1/2]]
-    u = int_genus2_first(zeros, oo, upper, digits, periods_first)
     omega = periods_first[0:2, 0:2]
     eta = periods_second[0:2, 0:2]
     eta_prime = periods_second[0:2, 2:4]
+    u = int_genus2_first(zeros, zeros[1], pole, digits, periods_first) + matrix(riemann_const)
 
-    sym_funcs = matrix([kleinian_P(u, omega, eta, riemann_const, [2, 2, 2], minMax), 0])
+    # P(pole)
+    pole_zeros = 1
+    for i in zeros:
+        pole_zeros *= (pole - i)
+
+    sym_funcs = sqrt(pole_zeros) / (pole - zeros[3])
+    #sym_funcs = matrix([kleinian_P(u, omega, eta, riemann_const, [2, 2, 2], minMax), 0])
 
     zeta = matrix([kleinian_zeta(u, omega, eta, riemann_const, i, minMax) for i in range(1, 3)])
     eta_char = eta_prime*matrix(riemann_const[0]) - eta*matrix(riemann_const[1]) 
 
-    return -zeta + (2 * eta_char) + (1/2 * sym_funcs)
+    return -2*zeta + (4 * eta_char) + sym_funcs
 
 def myint_genus2_second(zeros, differential, lower, upper, branch, digits):
     result = 0
