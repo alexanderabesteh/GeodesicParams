@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Top level procedure for computing the solutions functions for the r, theta, and phi
 components of the geodesic equation in Plebanski-Demianski spacetimes.

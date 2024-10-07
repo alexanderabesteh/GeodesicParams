@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Procedure that translates and normalises a set of 2D homogeneous points so that their 
 centroid is at the origin and their mean distance from the origin is sqrt(2). 

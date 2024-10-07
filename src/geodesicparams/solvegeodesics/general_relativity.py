@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 A collection of functions related to the checking the initial values, orbits, and spacetimes
 as well as defining the four-velocity of a space time.

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Procedures for inverting and solving the equations of motion for a variety of spacetimes.
 

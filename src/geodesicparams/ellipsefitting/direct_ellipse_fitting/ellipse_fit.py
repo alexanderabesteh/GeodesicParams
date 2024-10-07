@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Procedure for computing the coefficents of an ellipse using the direct ellipse fitting
 algorithm (see references).

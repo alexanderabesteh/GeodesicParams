@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Procedures for fitting an ellipse to three dimensional cartesian data points using
 the guaranteed ellipse fitting method and rodrigues rotation to project the 3D data points

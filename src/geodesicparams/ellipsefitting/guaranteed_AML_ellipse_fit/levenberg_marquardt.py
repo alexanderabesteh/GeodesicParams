@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 This function is used in the main loop of guaranteedEllipseFit in the process of minimizing an 
 approximate maximum likelihood cost function of an ellipse fit to data. 

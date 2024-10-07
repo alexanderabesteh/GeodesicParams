@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Helper functions for converting polynomials in hyperelliptic and elliptic differential
 equations into standard form.

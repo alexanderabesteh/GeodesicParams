@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Procedures for computing the periods of the first kind (the half periods in the 
 period lattice) from the elliptic invariants g2 and g3 from the Weierstrass cubic

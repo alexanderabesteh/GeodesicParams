@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Procedures for computing the periods of the first kind for a genus 2 Riemann surface.
 
