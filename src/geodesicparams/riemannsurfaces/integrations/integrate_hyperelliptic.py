@@ -7,6 +7,9 @@ for periods of second kind will be changed soon (hopefully).
 
 """
 
+from mpmath import quad, matrix, exp, pi, atan2, cos, sin, mpc, mpf, binomial, mp
+from sympy import re, Symbol, collect, degree, lambdify, sqrt
+
 from ..riemann_funcs.hyperelp_funcs import kleinian_zeta, kleinian_P
 from ...utilities import inlist, separate_zeros
 
