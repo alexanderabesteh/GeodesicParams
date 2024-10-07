@@ -10,7 +10,7 @@ for periods of second kind will be changed soon (hopefully).
 from mpmath import quad, matrix, exp, pi, atan2, cos, sin, mpc, mpf, binomial, mp, im, fabs
 from sympy import re, Symbol, collect, degree, lambdify, sqrt, oo
 
-from ..riemann_funcs.hyperelp_funcs import kleinian_zeta, kleinian_P
+from ..riemann_funcs.hyperelp_funcs import kleinian_zeta
 from ...utilities import inlist, separate_zeros
 
 def int_genus2_real_exp(zeros, lower, upper, exponent, branch, digits):

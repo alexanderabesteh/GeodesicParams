@@ -9,10 +9,10 @@ NOTE: fix some things here like the precision and documentation.
 
 """
 
-from mpmath import quad, matrix, fabs, eig, exp, pi, mpc
-from sympy import re, im, Symbol, collect, lambdify, oo, sqrt
+from mpmath import quad, matrix, fabs, eig
+from sympy import re, im, Symbol, collect, lambdify, sqrt
 
-from ...utilities import inlist, separate_zeros
+from ...utilities import inlist
 from ..integrations.integrate_hyperelliptic import myint_genus2, int_genus2_complex
 
 def periods(realNS, complexNS, digits):
