@@ -4,17 +4,12 @@
 
 """
 
-from mpmath import sqrt, cos, sin, linspace, matrix, exp, re, nstr
-from .ellipsefitting import fit_ellipse_3d, conv_coeffs_to_axis
-from scipy.optimize import minimize
-from numpy import percentile, diff, vectorize
+from mpmath import sqrt, cos, sin
+from numpy import percentile, diff, vectorize, inf
 from emcee import EnsembleSampler
-from .utilities import clear_directory, separate_zeros, eval_roots, inlist
-from numpy import load, isfinite, inf
-from .solvegeodesics import solve_geodesic_orbit, four_velocity, classify_spacetime, get_allowed_orbits 
-#from corner import corner
-from sympy import sin as spsin, cos as spcos, symbols, solve, degree, Poly, re as spre, pprint
-from lmfit import minimize as lmminimize
+from scipy.optimize import minimize
+
+from ..ellipsefitting import fit_ellipse_3d, conv_coeffs_to_axis
 
 c = 6.3283e4 #299792 #9.454e+12
 G = 39.46#6.674e-20
