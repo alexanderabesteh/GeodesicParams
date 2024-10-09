@@ -4,15 +4,12 @@
 
 """
 
-from mpmath import sqrt, cos, sin, linspace, matrix, exp, re, nstr
-from .ellipsefitting import fit_ellipse_3d, conv_coeffs_to_axis
-from scipy.optimize import minimize
-from .utilities import clear_directory, separate_zeros, eval_roots, inlist
+from mpmath import linspace, matrix, re
 from numpy import load, isfinite, inf
-from .solvegeodesics import solve_geodesic_orbit, four_velocity, classify_spacetime, get_allowed_orbits 
-#from corner import corner
-from sympy import sin as spsin, cos as spcos, symbols, solve, degree, Poly, re as spre, pprint
-from lmfit import minimize as lmminimize
+from sympy import degree, Poly, re as spre, pprint
+
+from ..utilities import clear_directory, separate_zeros, eval_roots, inlist
+from ..solvegeodesics import solve_geodesic_orbit, four_velocity, classify_spacetime, get_allowed_orbits 
 
 def check_r_theta(theta):
     """
