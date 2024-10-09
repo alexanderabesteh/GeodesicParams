@@ -1,3 +1,9 @@
+#!/usr/bin/env python3
+"""
+
+
+"""
+
 from mpmath import sqrt, cos, sin, linspace, matrix, exp, re, nstr
 from .ellipsefitting import fit_ellipse_3d, conv_coeffs_to_axis
 from scipy.optimize import minimize
@@ -25,199 +31,20 @@ sin = vectorize(sin, "D")
 cosmo = 0
 q_m = 0
 
-def conv_schwarzs_cart(r_list, theta_list, phi_list, digits):
-
-    x = r_list * cos(phi_list) * sin(theta_list) 
-    y = r_list * sin(phi_list) * sin(theta_list)
-    z = r_list * cos(theta_list)
-   
-    for i in range(len(x)):
-        x[i] = float(nstr(re(x[i]), digits))
-        y[i] = float(nstr(re(y[i]), digits))
-        z[i] = float(nstr(re(z[i]), digits))
-
-    return x, y, z
-
-def conv_celestial_to_cartesian(distance, ra, dec):
-
-    x = (distance * cos(dec)) * cos(ra)
-    y = (distance * cos(dec)) * sin(ra)
-    z = distance * sin(dec)
-
-    return x, y, z
-
-def conv_real_to_apparent(x, y, orbit_elements):
-    inc, arg_peri, node = orbit_elements
-
-    a = cos(node) * cos(arg_peri) - sin(node) * sin(arg_peri) * cos(inc) 
-    b = sin(node) * cos(arg_peri) + cos(node) * sin(arg_peri) * cos(inc)
-    c = sin(arg_peri) * sin(inc)
-    f = - cos(node) * sin(arg_peri) - sin(node) * cos(arg_peri) * cos(inc) 
-    g = - sin(node) * sin(arg_peri) + cos(node) * cos(arg_peri) * cos(inc)
-    h = cos(arg_peri) * sin(inc)
-
-    x_apparent = b * x + g * y 
-    y_apparent = a * x + f * y
-    z_apparent = c * x + h * y
-
-    return x_apparent, y_apparent, z_apparent
-
-def compute_initials(x_init, y_init, z_init):
-    r, theta, phi = symbols("r theta phi", positive = True)
-
-    inits = list(solve([r * spcos(phi) * spsin(theta) - x_init, r * spsin(phi) * spsin(theta) - y_init, r * spcos(theta) - z_init], [r, theta, phi])[0])
-
-    return inits
-
-def check_r_theta(theta):
-    M, J, q_e, m, K, E, L = theta
-    spacetime = classify_spacetime(q_e, J, cosmo, NUT)
-
-    p_r, p_nu = four_velocity(M, J, q_e, cosmo, NUT, q_m, c, G, eps_0, 1, E, L, K, m)[0:2]
-    deg_p = degree(p_r)
-    pprint(p_r)
-    pprint(p_nu)
-    if J == 0:
-        types, bounds, zeros_p = get_allowed_orbits(p_r, deg_p)
-    else:
-        types, bounds, zeros_p = get_allowed_orbits(p_r, deg_p, True)
-
-    realNS, complexNS = separate_zeros(sorted(eval_roots(Poly(p_nu).all_roots()), key = lambda y : spre(y)))
-    allowed_zeros = []
-
-    if inlist("bound", types) != -1:
-        orbit = types[inlist("bound", types)]
-    else:
-        orbit = types[0]
-
-    for i in range(len(realNS)):
-        if (realNS[i] >= -1 and realNS[i] <= 1):
-            allowed_zeros.append(realNS[i])
-    
-    print(allowed_zeros)
-    if len(realNS) == 0 or len(allowed_zeros) == 0 or inlist("transit", types) != -1:
-        return 1e10
-    else:
-        return orbit
-
-def log_likelihood_scipy(theta, x_real, y_real, z_real, ecc, semi_maj, config):
-    workdir, date, digits = config
-
-    M, J, q_e, m, K, E, L = theta
-
-    #mu = G * (M + m)
-  #  L = m * sqrt(mu * semi_maj * (1 - ecc**2))
-   # E = -G * M * m / (2 * semi_maj)
-
-    possible_orbit = check_r_theta(theta)
-    if type(possible_orbit) == float:
-        return 1e20
-
-    inits = compute_initials(x_real[0], y_real[0], z_real[0])
-
-    sol = solve_geodesic_orbit(M, J, q_e, cosmo, NUT, q_m, c, G, eps_0, 1, E, L, K, m, possible_orbit, config, [0] + inits, inits_dir)
-    sol_r, sol_theta, sol_phi = sol
-    
-    if cosmo != 0:
-        periodMatrix = load(workdir + "temp/rdata_" + date + ".npy", allow_pickle = True)[0]
-        period = matrix(periodMatrix)[1, 0] / 2
-    else:
-        periodMatrix = load(workdir + "temp/rdata_" + date + ".npy", allow_pickle = True)[0]
-        period = periodMatrix[0]
-
-    mino = linspace(0, 2 * re(period), 500)
-
-    r_list = []
-    theta_list = []
-
-    for i in mino:
-        r_list.append(sol_r(i))
-        theta_list.append(sol_theta(i))
-    phi_list = sol_phi(mino)
-    
-    clear_directory(workdir + "temp/") 
-
-    x_theo, y_theo, z_theo = conv_schwarzs_cart(r_list, theta_list, phi_list, digits)
-
-    sum = 0
-    for i in range(len(mino)):
-        x_sum = x_real[i] - x_theo[i]
-        y_sum = y_real[i] - y_theo[i]
-        z_sum = z_real[i] - z_theo[i]
-
-        sum += x_sum**2 + y_sum**2 + z_sum**2
-
-    print("sum = ", -sum)
-    return - sum * 1e-7
-
-
-def log_likelihood_emcee(theta, x_real, y_real, z_real, E, L, config):
-    workdir, date, digits = config
-
-    M, J, q_e, m, K, L, E = theta
- 
-    inits = compute_initials(x_real[0], y_real[0], z_real[0])
-
-    sol = solve_geodesic_orbit(M, J, q_e, cosmo, NUT, q_m, c, G, eps_0, 1, E, L, K, m, "bound", config, inits, inits_dir)
-    sol_r, sol_theta, sol_phi = sol
-   
-    if cosmo != 0:
-        periodMatrix = load(workdir + "temp/rdata_" + date + ".npy", allow_pickle = True)[0]
-        period = matrix(periodMatrix)[1, 0] / 2
-    else:
-        periodMatrix = load(workdir + "temp/rdata_" + date + ".npy", allow_pickle = True)[0]
-        period = periodMatrix[0]
-
-    mino = linspace(0, 2 * period, 1000)
-    clear_directory(workdir + "temp/") 
-
-    r_list = []
-    theta_list = []
-
-    for i in mino:
-        r_list.append(sol_r(i))
-        theta_list.append(sol_theta(i))
-    phi_list = sol_phi(mino)
-
-    x_theo, y_theo, z_theo = conv_schwarzs_cart(r_list, theta_list, phi_list)
-
-    sum = 0
-    for i in range(len(mino)):
-        x_sum = x_real[i] - x_theo[i]
-        y_sum = y_real[i] - y_theo[i]
-        z_sum = z_real[i] - z_theo[i]
-
-        sum += x_sum**2 + y_sum**2 + z_sum**2
-
-    return - sum
-
-def log_priors(theta, E, L):
-    M, J, q_e, m, K = theta
-    
-    if M <= 0 or J < 0 or K < 0 or m <= 0:
-        return - inf
-    
-    possible = check_r_theta(theta, E)
-
-    if not isfinite(possible):
-        return - inf
-    else:
-        return 0.0 
-
-def log_probability(theta, x, y, z, ecc, semi_maj, config):
-    M, J, q_e, m, K, E = theta
-
-    mu = G * (M + m)
-    #E = - m * mu / (2 * semi_maj)#m * c**2
-    #L = m * sqrt(mu * semi_maj * (1 - ecc**2))
-
-    lp = log_priors(theta, E, L)
-    
-    if not isfinite(lp):
-        return - inf
-    return lp + log_likelihood_emcee(theta, x, y, z, L, config)
-
 def fit_geodesic_orbit(data_points, init_theta, steps, config):
+    """
+
+
+    Parameters
+    ----------
+
+
+    Returns
+    -------
+
+
+    """
+
     nPoints = 500
 
     xyz, coeffs = fit_ellipse_3d(data_points, nPoints)
