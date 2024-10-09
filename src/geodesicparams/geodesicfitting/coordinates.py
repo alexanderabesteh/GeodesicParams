@@ -7,12 +7,15 @@ orbits to apparent orbits, and cartesian to polar coordinates.
 
 """
 
-from mpmath import cos, sin, re, nstr
+from mpmath import cos, sin, re, nstr, atan2, sqrt
+from numpy import vectorize
 
 cos = vectorize(cos, "D")
 sin = vectorize(sin, "D")
+atan2 = vectorize(atan2, "D")
+sqrt = vectorize(sqrt, "D")
 
-def conv_schwarzs_cart(r_list, theta_list, phi_list, digits):
+def conv_schwarzs_to_cart(r_list, theta_list, phi_list, digits):
     """
     Convert a set of Schwarzschild coordinates (r, theta, phi) to cartesian coordinates
     (x, y, z).
@@ -128,22 +131,33 @@ def conv_real_to_apparent(x, y, orbit_elements):
 
     return x_apparent, y_apparent, z_apparent
 
-def compute_initials(x_init, y_init, z_init):
+def conv_cartesian_to_schwarzs(x_list, y_list, z_list):
     """
-
+    Convert a set of cartesian coordinates (x, y, z) to Schwarzschild coordinates (r, theta, 
+    phi). 
 
     Parameters
     ----------
-
+    x_list : list
+        A list of x values.
+    y_list : list
+        A list of y values.
+    z_list : list
+        A list of z values.
 
     Returns
     -------
-
+    r_list : list
+        The corresponding r values
+    theta_list : list
+        The corresponding theta values
+    phi_list : list
+        The corresponding phi values.
 
     """
-    
-    r, theta, phi = symbols("r theta phi", positive = True)
+   
+    r_list = sqrt(x_list**2 + y_list**2 + z_list**2)
+    theta_list = atan2(sqrt(x_list**2 + y_list**2), z_list)
+    phi_list = atan2(y_list, x_list)
 
-    inits = list(solve([r * spcos(phi) * spsin(theta) - x_init, r * spsin(phi) * spsin(theta) - y_init, r * spcos(theta) - z_init], [r, theta, phi])[0])
-
-    return inits
+    return r_list, theta_list, phi_list
