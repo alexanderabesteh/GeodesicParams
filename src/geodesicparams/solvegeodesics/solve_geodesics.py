@@ -22,7 +22,8 @@ def solve_geodesic_orbit(b_mass, rot, eCharge, cosmo, NUT, mCharge, speed_light,
                    initial_values = [], initial_directions = [], time = False, periodM = None):
     """
     Computes the r, theta, and phi coordinates of the geodesic equation as 
-    a function of mino time.
+    a function of mino time. The coordinate time t and proper time tau can be optionally 
+    computed as well.
     
     Parameters
     ----------
@@ -63,7 +64,8 @@ def solve_geodesic_orbit(b_mass, rot, eCharge, cosmo, NUT, mCharge, speed_light,
         are required, while the default binary precision is 53.
     initial_values : list, optional
         A list of floats representing the initial values: the initial mino time,
-        r value, theta value, and phi value.
+        r value, theta value, and phi value. If <time> = True, then the initial t and
+        tau values may be specified as well.
     initial_directions : list, optional
         A list of 2 integers, either +1 or -1, representing the initial directions
         of the r and theta components of the 4-velocity. -1 as the r value means the 
@@ -71,8 +73,7 @@ def solve_geodesic_orbit(b_mass, rot, eCharge, cosmo, NUT, mCharge, speed_light,
         body initially moves away.
     time : bool, optional
         A boolean encoding whether or not the coordinate time component of the geodesic
-        equation should be computed (True meaning yes, False meanign no). NOTE: NOT 
-        IMPLEMENTED, TBD.
+        equation should be computed (True meaning yes, False meaning no).
     periodM : list, optional
         A list of two matrices, each 1x2 when the cosmological constant is 0 (cosmo = 0) or 
         2x4 when the cosmological constant isn't 0 (cosmo != 0), representing the period 
@@ -95,8 +96,6 @@ def solve_geodesic_orbit(b_mass, rot, eCharge, cosmo, NUT, mCharge, speed_light,
         accepts a list of numbers as an argument, while the theta coordinate accepts individual values
         as an argument.
 
-
-        
     """ 
 
     # Catch wrong inputs
@@ -116,6 +115,28 @@ def solve_geodesic_orbit(b_mass, rot, eCharge, cosmo, NUT, mCharge, speed_light,
     else:
         raise Exception("Invalid declaration of config")
 
+    # Determine initial values for phi, t, and tau
+    if initial_values == []:
+        init_phi = 0
+    else: 
+        init_phi = initial_values[3]
+
+    if time:
+        if initial_values == []:
+            init_t = 0
+            init_tau = 0
+        else:
+            init_t = initial_values[4]
+            init_tau = initial_values[5]
+    
+    # Define initial directions
+    if initial_directions == []:
+        r_dir = 1
+        theta_dir = 1
+    else:
+        r_dir = initial_directions[0]
+        theta_dir = initial_directions[1]
+
     # Set precision
     mp.prec = prec
     digits = mp.dps
@@ -125,8 +146,8 @@ def solve_geodesic_orbit(b_mass, rot, eCharge, cosmo, NUT, mCharge, speed_light,
 
     check_orbit_types(orbittype, particle_light, spacetime)
 
-    p_r, p_nu, phi_integrands = four_velocity(b_mass, rot, eCharge, cosmo, NUT, mCharge, speed_light, grav_const, perm, particle_light, energy, ang_mom, carter, p_mass)[0:3]
-    x, y, r = symbols("x y r")
+    p_r, p_nu, phi_integrands, t_integrands, proper_integrands = four_velocity(b_mass, rot, eCharge, cosmo, NUT, mCharge, speed_light, grav_const, perm, particle_light, energy, ang_mom, carter, p_mass)
+    x, y = symbols("x y")
     ############################# r Equation ################################
     # ----------- Define rhs of (dr/dgamma)**2 = p(r)
     deg_p = degree(p_r)
@@ -147,14 +168,6 @@ def solve_geodesic_orbit(b_mass, rot, eCharge, cosmo, NUT, mCharge, speed_light,
         raise Exception(f"Invalid declaration of initial_values {initial_values}.")
     if len(initial_directions) != 0 and len(initial_directions) != 2:
         raise Exception(f"Invalid declaration of initial directions {initial_directions}")
-
-    # Define initial directions
-    if initial_directions == []:
-        r_dir = 1
-        theta_dir = 1
-    else:
-        r_dir = initial_directions[0]
-        theta_dir = initial_directions[1]
 
     # Check initial r value
     if initial_values == []:
@@ -187,6 +200,20 @@ def solve_geodesic_orbit(b_mass, rot, eCharge, cosmo, NUT, mCharge, speed_light,
         sol_phir = 0
     else:
         sol_phir = integrate_eom(p_converted[0], zeros_converted, p_converted[3], phir_integrand, workdir + "temp/rdata_" + date, digits)
+   
+    # Compute time components if selected
+    if time:
+        ############################# t Equation, r Integral ################################
+        # Define rhs of dt/dgamma = tr_integrand - tnu_integrand
+        tr_integrand = t_integrands[0] / sqrt(p_converted[1]).simplify()
+
+        sol_tr = integrate_eom(p_converted[0], zeros_converted, p_converted[3], tr_integrand, workdir + "temp/rdata_" + date, digits)
+
+        ############################# Tau Equation, r Integral ################################
+        # Define rhs of dtau/dgamma = taur_integrand - taunu_integrand
+        taur_integrand = proper_integrands[0] / sqrt(p_converted[1]).simplify()
+
+        sol_taur = integrate_eom(p_converted[0], zeros_converted, p_converted[3], taur_integrand, workdir + "temp/rdata_" + date, digits)
 
     ############################# theta Equation ################################
     # ----------- Define rhs of (dnu/dgamma)**2 = p(nu), nu = cos(theta)
@@ -225,12 +252,22 @@ def solve_geodesic_orbit(b_mass, rot, eCharge, cosmo, NUT, mCharge, speed_light,
     # Define rhs of dphi/dgamma = phir_integrand - phinu_integrand
     phinu_integrand = phi_integrands[1] / sqrt(p_converted[1])#.simplify()
     sol_phinu = integrate_eom(p_converted[0], zeros_converted, p_converted[3], phinu_integrand, workdir + "temp/thetadata_" + date, digits)
-    
-    if initial_values == []:
-        init_phi = 0
-    else: 
-        init_phi = initial_values[3]
+   
+    # Compute time components if selected
+    if time:
+        ############################# t Equation, theta Integral ################################
+        # Define rhs of dt/dgamma = tr_integrand - tnu_integrand
+        tnu_integrand = t_integrands[1] / sqrt(p_converted[1]).simplify()
 
+        sol_tnu = integrate_eom(p_converted[0], zeros_converted, p_converted[3], tnu_integrand, workdir + "temp/rdata_" + date, digits)
+
+        ############################# Tau Equation, r Integral ################################
+        # Define rhs of dtau/dgamma = taur_integrand - taunu_integrand
+        taunu_integrand = proper_integrands[1] / sqrt(p_converted[1]).simplify()
+
+        sol_taunu = integrate_eom(p_converted[0], zeros_converted, p_converted[3], taunu_integrand, workdir + "temp/rdata_" + date, digits)
+
+    # Phi coordinate solution
     def sol_phi(s):
         if sol_phir == 0:
             phir = 0
@@ -250,13 +287,39 @@ def solve_geodesic_orbit(b_mass, rot, eCharge, cosmo, NUT, mCharge, speed_light,
             return result[0]
         else:
             return result
+  
+    # If time components were selected
+    if time:
+        # Coordinate time solution
+        def sol_t(s):
+            tr = list(sol_tr(s))
+
+            tnu = list(sol_tnu(s))
+
+            s = list(s)
+       
+            result = [init_t + re(tr[i] - tnu[i]) for i in range(len(tr))]
+
+            if len(result) == 1:
+                return result[0]
+            else:
+                return result
+
+        # Proper time solution
+        def sol_tau(s):
+            taur = list(sol_taur(s))
+
+            taunu = list(sol_taunu(s))
+
+            s = list(s)
+       
+            result = [init_tau + re(taur[i] - taunu[i]) for i in range(len(taur))]
+
+            if len(result) == 1:
+                return result[0]
+            else:
+                return result
+
+        return [sol_r, sol_theta, lambda s : sol_phi(s), lambda s : sol_t(s), lambda s : sol_tau(s)]
 
     return [sol_r, sol_theta, lambda s : sol_phi(s)]
-
-
-def solve_geodesic_time():
-    return 0
-
-def solve_geodesic_worldline():
-
-    return 0
