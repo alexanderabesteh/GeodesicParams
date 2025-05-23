@@ -2,15 +2,19 @@
 """
 Procedures for computing orbital elements in a two-body system.
 
-These procedures include the mean anomaly, orbital period, mean motion, etc. A procedure for 
-converting from the Newtonian parametrization of a geodesic to its integrals of motion 
+These procedures include the mean anomaly, orbital period, mean motion, etc. A procedure for
+converting from the Newtonian parametrization of a geodesic to its integrals of motion
 counterpart has also been implemented.
 
 """
 
-from mpmath import acos, tan, atan, sqrt, sin, pi, cos
+from mpmath import acos, atan, cos, pi, sin, sqrt, tan
 
-from ..ellipsefitting.guaranteed_AML_ellipse_fit.ellipse_estimates import parametric_rep, conv_coeffs_to_init_pos
+from ..ellipsefitting.guaranteed_AML_ellipse_fit.ellipse_estimates import (
+    conv_coeffs_to_init_pos,
+    parametric_rep,
+)
+
 
 def ellipse_middle(ecc, semi_maj):
     """
@@ -39,12 +43,13 @@ def ellipse_middle(ecc, semi_maj):
 
     return x_mid, y_mid
 
-def parametric_t(ecc, semi_maj, x_mid, y_mid, rot_angle): 
+
+def parametric_t(ecc, semi_maj, x_mid, y_mid, rot_angle):
     """
     Computes a lambda function that returns the t value of the parametric functions
     X(t) and Y(t) given a pair of x,y coordinates.
 
-    Note that the t value returned by the lambda function needs to be corrected by 
+    Note that the t value returned by the lambda function needs to be corrected by
     integer multiples of pi.
 
     Parameters
@@ -58,12 +63,12 @@ def parametric_t(ecc, semi_maj, x_mid, y_mid, rot_angle):
     y_mid : float
         The y coordinate of the center of the ellipse.
     rot_angle : float
-        The rotation angle of the ellipse in radians. 
+        The rotation angle of the ellipse in radians.
 
     Returns
     -------
     callable
-        A lambda function that returns the t coordinate in the parametric functions 
+        A lambda function that returns the t coordinate in the parametric functions
         X(t) and Y(t) from a given pair of x,y coordinates.
 
     """
@@ -75,10 +80,11 @@ def parametric_t(ecc, semi_maj, x_mid, y_mid, rot_angle):
     c1 = a * sin(rot_angle)
     d1 = b * cos(rot_angle)
 
-    x_comp = lambda x, y : (y - y_mid + (d1 * (x - x_mid) / b1)) / (c1 + (d1 * a1 / b1))
-    y_comp = lambda x, y : 1/b1 * (a1 * x_comp(x, y) - (x - x_mid))
-    
-    return lambda x, y : atan(y_comp(x, y) / x_comp(x, y))
+    x_comp = lambda x, y: (y - y_mid + (d1 * (x - x_mid) / b1)) / (c1 + (d1 * a1 / b1))
+    y_comp = lambda x, y: 1 / b1 * (a1 * x_comp(x, y) - (x - x_mid))
+
+    return lambda x, y: atan(y_comp(x, y) / x_comp(x, y))
+
 
 def correct_t(t, x, y, x_mid):
     """
@@ -110,6 +116,7 @@ def correct_t(t, x, y, x_mid):
         return t + pi
 
     return t
+
 
 def convert_parametric_to_newton(coeffs, x1, y1, x2, y2, ecc, semi_maj):
     """
@@ -165,9 +172,10 @@ def convert_parametric_to_newton(coeffs, x1, y1, x2, y2, ecc, semi_maj):
 
     return x_t1, y_t1, x_t2, y_t2
 
+
 def mean_anomaly(x1, y1, x2, y2, ecc, semi_maj):
     """
-    Given 2 pairs of x,y coordinates in a Kepler orbit, return the mean anomaly at 
+    Given 2 pairs of x,y coordinates in a Kepler orbit, return the mean anomaly at
     both points.
 
     Parameters
@@ -196,7 +204,7 @@ def mean_anomaly(x1, y1, x2, y2, ecc, semi_maj):
 
     dist1 = sqrt(x1**2 + y1**2)
     dist2 = sqrt(x2**2 + y2**2)
-    true_anomaly = lambda x : acos(((semi_maj * (1 - ecc**2) / x) - 1) / ecc)
+    true_anomaly = lambda x: acos(((semi_maj * (1 - ecc**2) / x) - 1) / ecc)
 
     """
     Compute the true anomalies of the points given the distances dist1 and dist2 from 
@@ -209,7 +217,7 @@ def mean_anomaly(x1, y1, x2, y2, ecc, semi_maj):
         nu1 = true_anomaly(-dist1 + 2 * semi_maj) + pi
     else:
         nu1 = true_anomaly(dist1)
-    
+
     if y2 < 0:
         nu2 = true_anomaly(-dist2 + 2 * semi_maj) + pi
     else:
@@ -217,15 +225,16 @@ def mean_anomaly(x1, y1, x2, y2, ecc, semi_maj):
 
     # Compute eccentric anomalies
     denom = sqrt((1 + ecc) / (1 - ecc))
-    ecc_anomaly = lambda nu : 2 * atan(tan(nu / 2) / denom)
+    ecc_anomaly = lambda nu: 2 * atan(tan(nu / 2) / denom)
     ecc_anom1 = ecc_anomaly(nu1)
     ecc_anom2 = ecc_anomaly(nu2)
 
-    mean_anomaly = lambda x : x - ecc * sin(x)
+    mean_anomaly = lambda x: x - ecc * sin(x)
     mean1 = mean_anomaly(ecc_anom1)
     mean2 = mean_anomaly(ecc_anom2)
 
     return mean1, mean2
+
 
 def orbital_elements(ecc, semi_maj, x1, y1, x2, y2, t1, t2):
     """
@@ -266,14 +275,17 @@ def orbital_elements(ecc, semi_maj, x1, y1, x2, y2, t1, t2):
 
     """
 
-    mean1, mean2 = mean_anomaly(x1, y1, x2, y2, ecc, semi_maj) 
+    mean1, mean2 = mean_anomaly(x1, y1, x2, y2, ecc, semi_maj)
     n = (mean2 - mean1) / (t2 - t1)
     standard_grav = semi_maj**3 * n**2
     orbital_period = 2 * pi * sqrt(semi_maj**3 / standard_grav)
 
     return n, standard_grav, orbital_period
 
-def convert_newtonian(ecc, semi_maj, orbit_inc, sign_ang, b_rot, e_charge, grav_const, speed_light, perm):
+
+def convert_newtonian(
+    ecc, semi_maj, orbit_inc, sign_ang, b_rot, e_charge, grav_const, speed_light, perm
+):
     """
     Convert the Newtonian parametrization of geodesics involving the eccentricity <ecc>, the
     semi major axis <semi_maj>, and orbital inclination <orbit_inc> to its integrals of motion
@@ -317,36 +329,48 @@ def convert_newtonian(ecc, semi_maj, orbit_inc, sign_ang, b_rot, e_charge, grav_
     # Initial parameters
     schwarz_rad = 2 * grav_const / speed_light**2
     char_length = e_charge**2 * grav_const / (4 * pi * perm * speed_light**4)
-    theta_min = (pi/2 - orbit_inc) / sign_ang
-    nu_min2 = cos(theta_min)**2
+    theta_min = (pi / 2 - orbit_inc) / sign_ang
+    nu_min2 = cos(theta_min) ** 2
     p = semi_maj * (1 - ecc**2)
     r_min = p / (1 + ecc)
     r_max = p / (1 - ecc)
-    horizon = lambda r : r**2 - schwarz_rad * r + char_length
-    
-    # Functions used in the conversion procedure
-    f_r = lambda r : r**4 + b_rot**2 * (r * (r + 2) + nu_min2 * horizon(r))
-    g_r = lambda r : 2 * b_rot * r
-    h_r = lambda r : r * (r - 2) + (nu_min2 / (1 - nu_min2)) * horizon(r)
-    d_r = lambda r : (r**2 + b_rot**2 * nu_min2) * horizon(r)
+    horizon = lambda r: r**2 - schwarz_rad * r + char_length
 
-    f1 = f_r(r_min); g1 = g_r(r_min); h1 = h_r(r_min); d1 = d_r(r_min)
-    f2 = f_r(r_max); g2 = g_r(r_max); h2 = h_r(r_max); d2 = d_r(r_max)
+    # Functions used in the conversion procedure
+    f_r = lambda r: r**4 + b_rot**2 * (r * (r + 2) + nu_min2 * horizon(r))
+    g_r = lambda r: 2 * b_rot * r
+    h_r = lambda r: r * (r - 2) + (nu_min2 / (1 - nu_min2)) * horizon(r)
+    d_r = lambda r: (r**2 + b_rot**2 * nu_min2) * horizon(r)
+
+    f1 = f_r(r_min)
+    g1 = g_r(r_min)
+    h1 = h_r(r_min)
+    d1 = d_r(r_min)
+    f2 = f_r(r_max)
+    g2 = g_r(r_max)
+    h2 = h_r(r_max)
+    d2 = d_r(r_max)
 
     # Determinants of the matrices in []
-    kappa =  d1 * h2 - h1 * d2
+    kappa = d1 * h2 - h1 * d2
     epsilon = d1 * g2 - g1 * d2
     rho = f1 * h2 - h1 * f2
     eta = f1 * g2 - g1 * f2
     sigma = g1 * h2 - h1 * g2
 
     # Specific energy squared of the geodesic
-    energy = (kappa * rho + 2*epsilon*sigma + sign_ang * 2 * sqrt(sigma * (
-        sigma*epsilon**2 + rho * epsilon * kappa - eta * kappa**2))) / (rho**2 + 4 * eta * sigma)
+    energy = (
+        kappa * rho
+        + 2 * epsilon * sigma
+        + sign_ang
+        * 2
+        * sqrt(sigma * (sigma * epsilon**2 + rho * epsilon * kappa - eta * kappa**2))
+    ) / (rho**2 + 4 * eta * sigma)
 
     # Specific angular momentum of the geodesic
-    ang_mom = -g1*sqrt(energy)/h1 + sign_ang * sqrt((g1**2 * energy / h1**2) + 
-        (f1*energy - d1) / h1)
+    ang_mom = -g1 * sqrt(energy) / h1 + sign_ang * sqrt(
+        (g1**2 * energy / h1**2) + (f1 * energy - d1) / h1
+    )
 
     # Specific carter constant of the geodesic
     beta = b_rot**2 * (1 - energy)
