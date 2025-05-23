@@ -12,14 +12,212 @@ TODO: remove unnecessary code and fix precision.
 
 from mpmath import cos, exp, im, mp, pi, re, sin
 
-from .theta_helper import (
-    agm_prime,
-    derivative_factor,
-    diff_finies_one_step,
-    sign_theta,
-    theta_char,
-    theta_genus2,
-)
+
+def naive_theta_genus2(z, tau, precision=53):
+    """
+    Computes the hyperelliptic theta function on a genus 2 Riemann surface using the Naive
+    algorithm found in []. The Riemann matrix <tau> must also be Minkowski-reduced
+    (Im(tau_3) <= Im(tau_1) <= Im(tau_2)).
+
+    Parameters
+    ----------
+    z : list
+        A list containing two complex numbers.
+    tau : matrix
+        An mpmath matrix, the Riemann matrix of the Riemann surface. The Riemann matrix
+        should also satisfy Im(tau_3) <= Im(tau_1) <= Im(tau_2) (Minkowski-reduced).
+    precision : int, optional
+        The binary precision of the computation.
+
+    Returns
+    -------
+    result : complex
+        The value of the hyperelliptic theta function evaluated at <z> with Riemann matrix
+        <tau>.
+
+    """
+
+    mp.prec = precision
+
+    B = 2 * precision * mp.log(10) / mp.pi + 3
+
+    q1 = mp.exp(mp.j * mp.pi * tau[0, 0])
+    q1sq = q1**2
+    q2 = mp.exp(mp.j * mp.pi * tau[1, 1])
+    q2sq = q2**2
+    q3 = mp.exp(mp.j * mp.pi * tau[0, 1])
+    q3sq = q3**2
+
+    w1 = mp.exp(mp.j * mp.pi * z[0])
+    w1sq = w1**2
+    w2 = mp.exp(mp.j * mp.pi * z[1])
+    w2sq = w2**2
+
+    result = mp.mpc(1)
+
+    # n=0
+    q12mminus2 = q1sq
+    r1 = w1sq + 1 / w1sq
+    r1m = q1 * r1
+    r1mminus1 = 2
+    when_to_stop = int(mp.ceil(mp.sqrt(B / mp.im(tau[0, 0]))) + 3)
+
+    for _ in range(1, when_to_stop + 1):
+        result += r1m
+        q12mminus2timesq1 = q12mminus2 * q1
+        bubu = r1m
+        r1m = r1 * r1m * q12mminus2timesq1 - r1mminus1 * (q12mminus2**2)
+        r1mminus1 = bubu
+        q12mminus2 *= q1sq
+
+    # m,n >=1
+    q2to2nminus2 = 1
+    q3to2n = q3sq
+    s1 = w2sq + 1 / w2sq
+    w1w2sq = w1sq * w2sq
+    w1invw2sq = w2sq / w1sq
+    q2s1 = q2 * s1
+    q1r1 = q1 * r1
+    q1q2 = q1 * q2
+    betas = [[q1r1, q1q2 * q3sq * (w1w2sq + 1 / w1w2sq)], [mp.mpc(2), q2s1]]
+    betaprimes = [
+        [q1r1, (q1q2 / q3sq) * (w1invw2sq + 1 / w1invw2sq)],
+        [mp.mpc(2), q2s1],
+    ]
+
+    for n in range(1, int(mp.ceil(mp.sqrt(B / mp.im(tau[1, 1])))) + 4):
+        if n > 3:
+            when_to_stop = B - (n - 3) ** 2 * mp.im(tau[1, 1])
+        else:
+            when_to_stop = B
+        if when_to_stop <= 0:
+            when_to_stop = 0
+        when_to_stop = mp.ceil(mp.sqrt(when_to_stop / mp.im(tau[0, 0]))) + 3
+
+        # This squared gives q**(4m-4)
+        q1to2mminus2 = q1sq
+
+        # Not betas + betaprimes (since m = 0 we only add the term once)
+        term = betas[1][1]
+        result += term
+
+        alphazm = betas[0][1]
+        alphaprimezm = betaprimes[0][1]
+        alphazmminus1 = betas[1][1]
+        alphaprimezmminus1 = betaprimes[1][1]
+
+        for _ in range(1, int(when_to_stop) + 1):
+
+            term = alphazm + alphaprimezm
+            result += term
+
+            r1Xq1to2mminus2Xq1 = r1 * q1to2mminus2 * q1
+            bubu = alphazm
+            alphazm = (
+                alphazm * r1Xq1to2mminus2Xq1 * q3to2n
+                - (q1to2mminus2 * q3to2n) ** 2 * alphazmminus1
+            )
+            alphazmminus1 = bubu
+            bubu = alphaprimezm
+            alphaprimezm = (
+                alphaprimezm * r1Xq1to2mminus2Xq1 / q3to2n
+                - (q1to2mminus2 / q3to2n) ** 2 * alphaprimezmminus1
+            )
+            alphaprimezmminus1 = bubu
+
+            q1to2mminus2 *= q1sq
+
+        q2to2nminus2 *= q2sq
+
+        s1Xq2to2nminus2Xq2 = s1 * q2to2nminus2 * q2
+        bubu = [betas[0][1], betas[1][1]]
+        betas[0][1] = (
+            betas[0][1] * s1Xq2to2nminus2Xq2 * q3sq
+            - betas[0][0] * (q2to2nminus2 * q3sq) ** 2
+        )
+        betas[1][1] = betas[1][1] * s1Xq2to2nminus2Xq2 - q2to2nminus2**2 * betas[1][0]
+        betas[0][0] = bubu[0]
+        betas[1][0] = bubu[1]
+        bubu = [betaprimes[0][1], betaprimes[1][1]]
+        betaprimes[0][1] = (
+            betaprimes[0][1] * s1Xq2to2nminus2Xq2 / q3sq
+            - betaprimes[0][0] * (q2to2nminus2 / q3sq) ** 2
+        )
+        betaprimes[1][1] = (
+            betaprimes[1][1] * s1Xq2to2nminus2Xq2 - q2to2nminus2**2 * betaprimes[1][0]
+        )
+        betaprimes[0][0] = bubu[0]
+        betaprimes[1][0] = bubu[1]
+        q3to2n *= q3sq
+
+    result = mp.mpc(f"{mp.re(result)}", f"{mp.im(result)}")
+    return result
+
+
+def theta_char(z, tau, char, precision=53):
+    """
+    Computes the hyperelliptic theta function on a genus 2 Riemann surface with characteristics
+    <char> using the Naive algorithm found in []. The Riemann matrix <tau> must also be
+    Minkowski-reduced (Im(tau_3) <= Im(tau_1) <= Im(tau_2)).
+
+    Parameters
+    ----------
+    z : list
+        A list containing two complex numbers.
+    tau : matrix
+        An mpmath matrix, the Riemann matrix of the Riemann surface. The Riemann matrix
+        should also satisfy Im(tau_3) <= Im(tau_1) <= Im(tau_2) (Minkowski-reduced).
+    char : list
+        A list containing two lists of length 2. These lists represent the g and h
+        characteristics of the theta function (the elements of these lists are either 0 or 1/2).
+    precision : int, optional
+        The binary precision of the computation.
+
+    Returns
+    -------
+    result : complex
+        The value of the hyperelliptic theta function evaluated at <z> with Riemann matrix
+        <tau> and characteristics <char>.
+
+    """
+
+    mp.prec = precision
+
+    z = mp.matrix(z)
+    tau = mp.matrix(tau)
+    g = mp.matrix(char[0])
+    h = mp.matrix(char[1])
+    exp_factor = mp.exp((mp.j * mp.pi * g.T * (tau * g + 2 * z + 2 * h))[0])
+    result = exp_factor * naive_theta_genus2(z + tau * g + h, tau, precision)
+
+    return result
+
+
+def derivative_factor(derivatives):
+    """
+    Computes the 2*pi*1j factor in front of the Fourier series definition of the theta function
+    after taking partial derivatives.
+
+    Parameters
+    ----------
+    derivatives : list
+        A list containing the integers representing the derivatives with respect to z1 or z2.
+        A 0 means no derivative is computed, while 1 and 2 represent the derivatives with respect
+        to z1 and z2 respectively.
+
+    Returns
+    -------
+    complex
+        The derivative factor in front of the Fourier series.
+    """
+
+    count = 0
+
+    for i in derivatives:
+        if i != 0:
+            count += 1
+
+    return (2 * mp.pi * mp.j) ** count
 
 
 def hyp_theta_fourier(z, riemannM, char, derivatives=[], minMax=5):
@@ -81,132 +279,6 @@ def hyp_theta_fourier(z, riemannM, char, derivatives=[], minMax=5):
     derivs_factor = derivative_factor(derivatives)
 
     return derivs_factor * result
-
-
-def hyp_theta_genus2(z, tau, char, precision=53):
-    """
-    Computes the hyperelliptic theta function on a genus 2 Riemann surface using the Naive
-    algorithm and the high-precision algorithm found in [].
-
-    When the precision is less than 3000 bits, the Naive algorithm is used while the
-    high-precision algorithm is used above 3000 bits.
-
-    Parameters
-    ----------
-    z : list
-        A list containing two complex numbers.
-    riemannM : matrix
-        An mpmath matrix, the Riemann matrix of the Riemann surface.
-    char : list
-        A list containing two lists of length 2. These lists represent the g and h
-        characteristics of the theta function (the elements of these lists are either 0 or 1/2).
-    precision : int, optional
-        The binary precision of the computation.
-
-    Returns
-    -------
-    result : complex
-        The value of the hyperelliptic theta function evaluated at <z> with Riemann matrix
-        <riemannM>.
-
-    """
-
-    LOW_PRECISION = 3000
-
-    # Determine initial precision
-    mp.prec = precision
-    lowprec = mp.prec
-
-    flag = 0
-    if lowprec < LOW_PRECISION:
-        flag = 1
-    else:
-        while lowprec > LOW_PRECISION:
-            lowprec = (lowprec // 2) + 10
-
-    # Low precision computation
-    mp.prec = lowprec
-    CC = mp.mpc
-    zerolow = mp.matrix([CC("0"), CC("0")])
-    zlow = mp.matrix(
-        [CC(f"{mp.re(z[0])}", f"{mp.im(z[0])}"), CC(f"{mp.re(z[1])}", f"{mp.im(z[1])}")]
-    )
-    taulow = mp.matrix(
-        [
-            [
-                CC(f"{mp.re(tau[0, 0])}", f"{mp.im(tau[0, 0])}"),
-                CC(f"{mp.re(tau[0, 1])}", f"{mp.im(tau[0, 1])}"),
-            ],
-            [
-                CC(f"{mp.re(tau[1, 0])}", f"{mp.im(tau[1, 0])}"),
-                CC(f"{mp.re(tau[1, 1])}", f"{mp.im(tau[1, 1])}"),
-            ],
-        ]
-    )
-
-    initA = []
-    initB = []
-
-    if flag == 1:
-        return theta_char(z, tau, char, precision)
-    else:
-        for i in range(4):
-            initA.append(theta_genus2(i, zlow, taulow, lowprec))
-            initB.append(theta_genus2(i, zerolow, taulow, lowprec))
-
-        initA = [x**2 for x in initA]
-        initB = [x**2 for x in initB]
-
-    # Computing lambda_iwant and det_iwant
-    z1sq = z[0] ** 2
-    z2sq = z[1] ** 2
-    twoz1z2 = (z[0] + z[1]) ** 2 - z1sq - z2sq
-    det_iwant = tau[0][1] ** 2 - tau[0][0] * tau[1][1]
-    IPI = mp.mpc(0, 1) * mp.pi
-    lambda_iwant = [
-        mp.exp(IPI * z1sq / tau[0][0]),
-        mp.exp(IPI * z2sq / tau[1][1]),
-        mp.exp(
-            IPI
-            * (
-                (z1sq * tau[1][1] + z2sq * tau[0][0] - twoz1z2 * tau[1][0])
-                / (-det_iwant)
-                - 1
-            )
-        ),
-    ]
-    a = [initA[i] / initA[0] for i in range(4)]
-    b = [initB[i] / initB[0] for i in range(4)]
-
-    p = lowprec
-    while p < precision:
-        p = 2 * p
-        mp.prec = p
-        z = [CC(f"{mp.re(x)}", f"{mp.im(x)}") for x in z]
-        tau = [[CC(f"{mp.re(x)}", f"{mp.im(x)}") for x in row] for row in tau]
-        lambda_iwant = [CC(f"{mp.re(x)}", f"{mp.im(x)}") for x in lambda_iwant]
-        det_iwant = CC(f"{mp.re(det_iwant)}", f"{mp.im(det_iwant)}")
-        a, b = diff_finies_one_step(
-            a,
-            b,
-            mp.matrix([z[0], z[1]]),
-            mp.matrix([[tau[0][0], tau[0][1]], [tau[1][0], tau[1][1]]]),
-            lambda_iwant,
-            det_iwant,
-        )
-    # Apply agm_prime to unstick the thetas
-    theta00z = agm_prime(a, b, z, mp.matrix(tau))[0]
-
-    a = [mp.sqrt(a[i] / theta00z) * sign_theta(2, z, mp.matrix(tau)) for i in range(4)]
-
-    z = mp.matrix(z)
-    tau = mp.matrix(tau)
-    g = mp.matrix(char[0])
-    h = mp.matrix(char[1])
-    exp_factor = mp.exp((mp.j * mp.pi * g.T * (tau * g + 2 * z + 2 * h))[0])
-    result = exp_factor * a[0]
-
-    return result
 
 
 def hyp_theta_RR(xR, xI, wR, wI, l, riemannM, char, minMax=5):
@@ -340,149 +412,10 @@ def hyp_theta_IR(xR, xI, wR, wI, l, riemannM, char, minMax=5):
     return result
 
 
-def kleinian_sigma(z, omega, eta, char, riemannM):
-    """
-    Evaluates the Kleinian sigma function at <z> with Riemann matrix <riemannM>.
+def sigma1(z, riemannM, minMax=5):
 
-    Parameters
-    ----------
-    z : list
-        A list containing two complex numbers.
-    omega : matrix
-        The period matrix = the contour integral of the vector of canonical holomorphic
-        differentials taken along the contours that encircle the branch cuts.
-    eta : matrix
-        The period matrix = the contour integral of the vector of canonical meromorphic
-        differentials taken along the contours that encircle the branch cuts.
-    char : list
-        A list containing two lists of length 2. These lists represent the g and h
-        characteristics of the theta function (the elements of these lists are either 0 or 1/2).
-    riemannM : matrix
-        An mpmath matrix, the Riemann matrix of the Riemann surface.
-
-    Returns
-    -------
-    result : complex
-        The Kleinian sigma function evaluated at <z>.
-
-    """
-
-    omega_inv = omega ** (-1)
-    exp_part = exp(-1 / 2 * z.T * eta * omega_inv * z)
-    theta_part = hyp_theta_genus2(omega_inv * z, riemannM, char)
-
-    return exp_part * theta_part
-
-
-def kleinian_zeta(z, omega, eta, char, riemannM, derivative, minMax=5):
-    """
-    Evaluates the Kleinian zeta function at <z> with derivatives.
-
-    Parameters
-    ----------
-    z : list
-        A list containing two complex numbers.
-    omega : matrix
-        The period matrix = the contour integral of the vector of canonical holomorphic
-        differentials taken along the contours that encircle the branch cuts.
-    eta : matrix
-        The period matrix = the contour integral of the vector of canonical meromorphic
-        differentials taken along the contours that encircle the branch cuts.
-    char : list
-        A list containing two lists of length 2. These lists represent the g and h
-        characteristics of the theta function (the elements of these lists are either 0 or 1/2).
-    riemannM : matrix
-        An mpmath matrix, the Riemann matrix of the Riemann surface.
-    derivative : int
-        An integer = 1 or 2, where 1 is the partial derivative with respect to the
-        first component of z, and 2 is with respect to the second component.
-    minMax : natural, optional
-        A natural number from 5 <= minMax <= 30 (the summation bound).
-
-    Returns
-    -------
-    result : complex
-        The value of the Kleinian zeta function at <z> with derivatives.
-
-    """
-
-    sigma = kleinian_sigma(z, omega, eta, char, riemannM)
-    result = hyp_theta_fourier(z, riemannM, char, [derivative], minMax)
-
-    return result / sigma
-
-
-def kleinian_P(z, omega, eta, char, riemannM, derivatives, minMax=5):
-    """
-    Evaluates the Kleinian P function at <z> with three partial derivatives.
-
-    Parameters
-    ----------
-    z : list
-        A list containing two complex numbers.
-    omega : matrix
-        The period matrix = the contour integral of the vector of canonical holomorphic
-        differentials taken along the contours that encircle the branch cuts.
-    eta : matrix
-        The period matrix = the contour integral of the vector of canonical meromorphic
-        differentials taken along the contours that encircle the branch cuts.
-    char : list
-        A list containing two lists of length 2. These lists represent the g and h
-        characteristics of the theta function (the elements of these lists are either 0 or 1/2).
-    riemannM : matrix
-        An mpmath matrix, the Riemann matrix of the Riemann surface.
-    derivatives : list
-        A list containing three integers, where each integer = 1 or 2. An integer of 1 means the
-        partial derivative with respect to the first component of z, while 2 means with respect to
-        the second component of z.
-    minMax : natural, optional
-        A natural number from 5 <= minMax <= 30 (the summation bound).
-
-    Returns
-    -------
-    result : complex
-        The Kleinian P function evaluated at <z> with three partial derivatives.
-
-    """
-
-    sigma = kleinian_sigma(z, omega, eta, char, riemannM)
-
-    # First partial derivatives
-    sigmai = hyp_theta_fourier(z, riemannM, char, [derivatives[0], 0, 0], minMax)
-    sigmaj = hyp_theta_fourier(z, riemannM, char, [0, derivatives[1], 0], minMax)
-    sigmak = hyp_theta_fourier(z, riemannM, char, [0, 0, derivatives[2]], minMax)
-
-    # Second partial derivatives
-    sigmaij = hyp_theta_fourier(
-        z, riemannM, char, [derivatives[0], derivatives[1]], minMax
-    )
-    sigmaik = hyp_theta_fourier(
-        z, riemannM, char, [derivatives[0], 0, derivatives[2]], minMax
-    )
-    sigmajk = hyp_theta_fourier(
-        z, riemannM, char, [0, derivatives[1], derivatives[2]], minMax
-    )
-
-    # Third partial derivative
-    sigmaijk = hyp_theta_fourier(z, riemannM, char, derivatives, minMax)
-
-    result = (
-        (sigmai * sigmaj * sigmak)
-        - (sigmaij * sigmak * sigma)
-        - (sigmaik * sigmaj * sigma)
-        - (sigmajk * sigmai * sigma)
-        + (sigmaijk * sigma)
-    )
-
-    return result / sigma**3
-
-
-"""
-def sigma1(z, riemannM, minMax = 5):
-
-
-    g = [1/2, 1/2]
-    h = [0, 1/2]
+    g = [1 / 2, 1 / 2]
+    h = [0, 1 / 2]
     result = 0
 
     for m1 in range(-minMax, minMax + 1):
@@ -493,18 +426,18 @@ def sigma1(z, riemannM, minMax = 5):
             for i in range(2):
                 tau_sum = 0
                 for j in range(2):
-                    tau_sum += riemannM[i, j] * (m[j] + g[j]) 
+                    tau_sum += riemannM[i, j] * (m[j] + g[j])
                 char_sum += (m[i] + g[i]) * (tau_sum + 2 * z[i] + 2 * h[i])
 
             result += exp(1j * pi * char_sum) * 2 * pi * 1j * (m1 + g[0])
 
     return result
 
-def sigma2(z, riemannM, minMax = 5):
 
+def sigma2(z, riemannM, minMax=5):
 
-    g = [1/2, 1/2]
-    h = [0, 1/2]
+    g = [1 / 2, 1 / 2]
+    h = [0, 1 / 2]
     result = 0
 
     for m1 in range(-minMax, minMax + 1):
@@ -515,10 +448,8 @@ def sigma2(z, riemannM, minMax = 5):
             for i in range(2):
                 tau_sum = 0
                 for j in range(2):
-                    tau_sum += riemannM[i, j] * (m[j] + g[j]) 
+                    tau_sum += riemannM[i, j] * (m[j] + g[j])
                 char_sum += (m[i] + g[i]) * (tau_sum + 2 * z[i] + 2 * h[i])
             result += exp(1j * pi * char_sum) * 2 * pi * 1j * (m2 + g[1])
 
     return result
-
-"""
