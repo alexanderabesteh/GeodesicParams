@@ -10,18 +10,20 @@ The possible orbit types are the following:
 As of now, the following spacetimes have been implemented:
 Schwarzschild, Reissner Nordstrom, Kerr, Kerr-Newman, Schwarzschild-de Sitter,
 Reissner Nordstrom-de Sitter, Kerr-de Sitter, and Kerr-Newman-de Sitter.
- 
+
 """
 
-from sympy import Poly, limit, Symbol, cos, symbols, oo, pi, re
+from mpmath import sqrt
+from sympy import Poly, Symbol, cos, limit, oo, pi, re, symbols
 
-from ..utilities import inlist, separate_zeros, find_next, eval_roots
+from ..utilities import eval_roots, find_next, inlist, separate_zeros
 
-def get_allowed_orbits(polynomial, deg, isnegativeallowed = False):
+
+def get_allowed_orbits(polynomial, deg, isnegativeallowed=False):
     """
     Determine the possible orbit types from a given polynomial as well as
     their respective boundaries.
-    
+
     Parameters
     ----------
     polynomial : symbolic
@@ -32,7 +34,7 @@ def get_allowed_orbits(polynomial, deg, isnegativeallowed = False):
         If set to True, negative radial values are allowed, meaning that transit and
         crossover flyby orbits are possible, and terminating orbits are not possible.
         (transit and crossover flyby orbits have not been implemented yet, tbd).
-        
+
     Returns
     -------
     types : list
@@ -46,7 +48,7 @@ def get_allowed_orbits(polynomial, deg, isnegativeallowed = False):
 
     p = polynomial
 
-    zeros = sorted(eval_roots(Poly(p).all_roots()), key = lambda y : re(y))
+    zeros = sorted(eval_roots(Poly(p).all_roots()), key=lambda y: re(y))
     print("Zeros = ", zeros)
 
     if len(zeros) != deg:
@@ -54,16 +56,16 @@ def get_allowed_orbits(polynomial, deg, isnegativeallowed = False):
 
     realNS, complexNS = separate_zeros(zeros)
 
-   # if len(realNS) == 0:
+    # if len(realNS) == 0:
     #    raise Exception("Underlying polynomial has only complex zeros: this case is not supported.")
-    
+
     # Determine positive real zeros
     pos_zeros = []
 
     for i in range(len(realNS)):
         if realNS[i].evalf() > 0:
             pos_zeros.append(realNS[i])
-    
+
     # ------ Possible orbit types
     k = len(pos_zeros)
     max_coeff = Poly(p).all_coeffs()[0]
@@ -137,14 +139,15 @@ def get_allowed_orbits(polynomial, deg, isnegativeallowed = False):
 
     print("bounds = ", bounds)
     print("Possible orbittypes: ", types)
-#    if inlist(orbittype, types) == -1:
-     #   raise Exception(f"orbittype {orbittype} is not allowed")
+    #    if inlist(orbittype, types) == -1:
+    #   raise Exception(f"orbittype {orbittype} is not allowed")
     return types, bounds, zeros
+
 
 def convert_boundsinit(bounds, initial_values, position, substitution, zeros_subs):
     """
     Convert a set of boundaries and initial values by applying <substitution>.
-    
+
     Parameters
     ----------
     bounds : list
@@ -171,7 +174,7 @@ def convert_boundsinit(bounds, initial_values, position, substitution, zeros_sub
 
     bounds_converted = []
     x = Symbol("x")
-    
+
     # Apply substitution to bounds
     for i in range(len(bounds)):
         try:
@@ -191,17 +194,29 @@ def convert_boundsinit(bounds, initial_values, position, substitution, zeros_sub
         bounds_converted.append([element1, element2])
 
     # Apply substitution to initial values
-    if (initial_values[1] == bounds[position][0] or initial_values[1] == bounds[position][1]):
+    if (
+        initial_values[1] == bounds[position][0]
+        or initial_values[1] == bounds[position][1]
+    ):
         try:
             limit(substitution, x, initial_values[1])
-            init_converted = [initial_values[0], find_next(limit(substitution, x, initial_values[1]), bounds_converted[position])]
+            init_converted = [
+                initial_values[0],
+                find_next(
+                    limit(substitution, x, initial_values[1]),
+                    bounds_converted[position],
+                ),
+            ]
         except:
             print("Numeric exception: division by zero.")
             init_converted = [initial_values[0], oo]
     else:
         try:
             limit(substitution, x, initial_values[1])
-            init_converted = [initial_values[0], limit(substitution, x, initial_values[1])]
+            init_converted = [
+                initial_values[0],
+                limit(substitution, x, initial_values[1]),
+            ]
         except:
             print("Numeric exception: division by zero.")
             init_converted = [initial_values[0], oo]
@@ -209,10 +224,11 @@ def convert_boundsinit(bounds, initial_values, position, substitution, zeros_sub
     print("converted bounds = ", bounds_converted)
     return bounds_converted, init_converted
 
+
 def check_rinitials(initial_values, orbittype, types, bounds):
     """
     Checks or sets the initial values for the r motion as necessairy.
-    
+
     Parameters
     ----------
     initial_values : list
@@ -229,8 +245,8 @@ def check_rinitials(initial_values, orbittype, types, bounds):
     Returns
     -------
     initial_values : list
-        A list of containing the initial values: if they were correct/not empty, they 
-        were returned unchanged. Otherwise, they were set to the default values: 
+        A list of containing the initial values: if they were correct/not empty, they
+        were returned unchanged. Otherwise, they were set to the default values:
         0 as the first element, then either the maximal r value if the orbit does not reach
         infinite, or the minimal r value.
 
@@ -247,8 +263,13 @@ def check_rinitials(initial_values, orbittype, types, bounds):
             return [0, bounds[inlist(orbittype, types)][1] - eps]
 
     # Modify initial values to defaults if incorrect
-    elif not (bounds[inlist(orbittype, types)][0] <= initial_values[1] and initial_values[1] <= bounds[inlist(orbittype, types)][1]):
-        print(f"WARNING in check_rinitials: initial value {initial_values[1]} is not allowed for orbittype {orbittype}; set to default value.")
+    elif not (
+        bounds[inlist(orbittype, types)][0] <= initial_values[1]
+        and initial_values[1] <= bounds[inlist(orbittype, types)][1]
+    ):
+        print(
+            f"WARNING in check_rinitials: initial value {initial_values[1]} is not allowed for orbittype {orbittype}; set to default value."
+        )
         if orbittype in ["flyby", "crossover flyby", "terminating escape"]:
             return [initial_values[0], bounds[inlist(orbittype, types)][0]]
         else:
@@ -256,15 +277,16 @@ def check_rinitials(initial_values, orbittype, types, bounds):
     else:
         return initial_values
 
+
 def check_thetainitials(zeros, initial_values):
     """
     Checks or sets the initial values for the theta motion as necessairy.
-    
+
     Parameters
     ----------
     zeros : list
         A list of complex or real numbers representing the roots of theta polynomial.
-        
+
     initial_values : list
         A list of two elements, the first being the initial mino time, the second being the
         initial r coordinate value.
@@ -274,8 +296,8 @@ def check_thetainitials(zeros, initial_values):
     allowed_inits : list
         A list containing the zeros that could be initial values of nu = cos(theta).
     init_nu : list
-        A list of containing the initial values: if they were correct/not empty, they 
-        were returned unchanged. Otherwise, they were set to the default values: 
+        A list of containing the initial values: if they were correct/not empty, they
+        were returned unchanged. Otherwise, they were set to the default values:
         0 as the first element, then pi/2 if possible or the maximal theta value in
         the nothern hemisphere.
     bounds_nu : list
@@ -283,17 +305,18 @@ def check_thetainitials(zeros, initial_values):
         sets of bounds are possible.
     """
 
-
     realNS, complexNS = separate_zeros(zeros)
     if len(realNS) == 0:
-        raise ValueError("underlying polynomial has only complex zeros; this case is not supported.")
-    
+        raise ValueError(
+            "underlying polynomial has only complex zeros; this case is not supported."
+        )
+
     allowed_inits = []
-    eps = 10**(-6)
+    eps = 10 ** (-6)
 
     # Check for real zeros in between -1 <= 0 <= 1
     for i in range(len(realNS)):
-        if (realNS[i] >= -1 and realNS[i] <= 1):
+        if realNS[i] >= -1 and realNS[i] <= 1:
             allowed_inits.append(realNS[i])
 
     if len(allowed_inits) == 0 or (len(allowed_inits) != 2 and len(allowed_inits) != 4):
@@ -304,7 +327,10 @@ def check_thetainitials(zeros, initial_values):
     if len(allowed_inits) == 2:
         bounds_nu = [[allowed_inits[0], allowed_inits[1]]]
     else:
-        bounds_nu = [[allowed_inits[0], allowed_inits[1]], [allowed_inits[2], allowed_inits[3]]]
+        bounds_nu = [
+            [allowed_inits[0], allowed_inits[1]],
+            [allowed_inits[2], allowed_inits[3]],
+        ]
 
     print("Allowed initial_values for nu=cos(theta) motion: ", bounds_nu[0])
 
@@ -314,21 +340,34 @@ def check_thetainitials(zeros, initial_values):
     # Check if initial values that were entered are correct
     else:
         cos_init = cos(initial_values[2])
-        if len(allowed_inits) == 2 and (cos_init.evalf() < allowed_inits[0] or cos_init.evalf() > allowed_inits[1]):
-            print(f"WARNING in check_thetainitials: initial value {initial_values[2]} for theta motion is not allowed; set to default value {allowed_inits[0]}")
+        if len(allowed_inits) == 2 and (
+            cos_init.evalf() < allowed_inits[0] or cos_init.evalf() > allowed_inits[1]
+        ):
+            print(
+                f"WARNING in check_thetainitials: initial value {initial_values[2]} for theta motion is not allowed; set to default value {allowed_inits[0]}"
+            )
             init_nu = [initial_values[0], allowed_inits[0] + eps]
-        elif len(allowed_inits) == 4 and ((cos_init.evalf() < allowed_inits[0] or cos_init.evalf() > allowed_inits[1]) and (cos_init.evalf() < allowed_inits[2] or cos_init.evalf() > allowed_inits[3])):
-            print(f"WARNING in check_thetainitials: initial value {initial_values[2]} for theta motion is not allowed; set to default value {allowed_inits[0]}")
+        elif len(allowed_inits) == 4 and (
+            (cos_init.evalf() < allowed_inits[0] or cos_init.evalf() > allowed_inits[1])
+            and (
+                cos_init.evalf() < allowed_inits[2]
+                or cos_init.evalf() > allowed_inits[3]
+            )
+        ):
+            print(
+                f"WARNING in check_thetainitials: initial value {initial_values[2]} for theta motion is not allowed; set to default value {allowed_inits[0]}"
+            )
             init_nu = [initial_values[0], allowed_inits[0] + eps]
         else:
             init_nu = [0, cos_init]
 
     return allowed_inits, init_nu, bounds_nu
 
+
 def classify_spacetime(eCharge, rot, cosmo, NUT):
     """
     Classify a spacetime based on the parameters entered.
-    
+
     Parameters
     ----------
     eCharge : float
@@ -339,7 +378,7 @@ def classify_spacetime(eCharge, rot, cosmo, NUT):
         The cosmological constant.
     NUT : float
         The NUT parameter.
-        
+
     Returns
     -------
     string
@@ -380,10 +419,11 @@ def classify_spacetime(eCharge, rot, cosmo, NUT):
     else:
         raise ValueError("unknown space-time.")
 
+
 def check_orbit_types(orbittype, particle_light, spacetime):
     """
     Check if an orbittype is possible in a given spacetime, raise exception if it is not.
-    
+
     Parameters
     ----------
     orbittype : string
@@ -400,37 +440,91 @@ def check_orbit_types(orbittype, particle_light, spacetime):
     """
 
     if spacetime == "Schwarzschild":
-        if orbittype in ["inner bound", "middle bound", "crossover bound", "transit", "crossover flyby"]:
-            raise Exception(f"Orbit type {orbittype} is not possible in the Schwarzschild space-time.")
+        if orbittype in [
+            "inner bound",
+            "middle bound",
+            "crossover bound",
+            "transit",
+            "crossover flyby",
+        ]:
+            raise Exception(
+                f"Orbit type {orbittype} is not possible in the Schwarzschild space-time."
+            )
         if orbittype == "bound" and particle_light == 0:
-            raise Exception(f"Orbit type {orbittype} is not possible for null geodesics in the Schwarzschild space-time.")
+            raise Exception(
+                f"Orbit type {orbittype} is not possible for null geodesics in the Schwarzschild space-time."
+            )
     elif spacetime == "Reissner Nordstrom":
         # Check orbittype
-        if orbittype in ["middle bound", "terminating", "terminating escape", "crossover bound", "transit", "crossover flyby"]:
-            raise Exception(f"Orbit type {orbittype} is not possible in the Reissner-Nordström space-time.")
+        if orbittype in [
+            "middle bound",
+            "terminating",
+            "terminating escape",
+            "crossover bound",
+            "transit",
+            "crossover flyby",
+        ]:
+            raise Exception(
+                f"Orbit type {orbittype} is not possible in the Reissner-Nordström space-time."
+            )
     elif spacetime == "Schwarzschild-de Sitter":
         # Check orbittype
-        if orbittype in ["middle bound", "crossover bound", "transit", "crossover flyby"]:
-            raise Exception(f"Orbit type {orbittype} is not possible in the Schwarzschild-de Sitter space-time.")
+        if orbittype in [
+            "middle bound",
+            "crossover bound",
+            "transit",
+            "crossover flyby",
+        ]:
+            raise Exception(
+                f"Orbit type {orbittype} is not possible in the Schwarzschild-de Sitter space-time."
+            )
     elif spacetime == "Reissner Nordstrom-de Sitter":
         # Check orbittype
-        if orbittype in ["middle bound", "terminating", "terminating escape", "crossover bound", "transit", "crossover flyby"]:
-            raise Exception(f"Orbit type {orbittype} is not possible in the Reissner-Nordström-de Sitter space-time.")
+        if orbittype in [
+            "middle bound",
+            "terminating",
+            "terminating escape",
+            "crossover bound",
+            "transit",
+            "crossover flyby",
+        ]:
+            raise Exception(
+                f"Orbit type {orbittype} is not possible in the Reissner-Nordström-de Sitter space-time."
+            )
 
     # Axially symmetrical space-times
     elif spacetime == "Kerr":
         # Check orbit type
         if orbittype == "middle bound":
-            raise Exception(f"Orbittype {orbittype} is not allowed in the Kerr space-time.")
+            raise Exception(
+                f"Orbittype {orbittype} is not allowed in the Kerr space-time."
+            )
     elif spacetime == "Kerr-Newman":
         # Check orbit type
         if orbittype == "middle bound":
-            raise Exception(f"Orbittype {orbittype} is not allowed in the Kerr-Newman space-time.")
+            raise Exception(
+                f"Orbittype {orbittype} is not allowed in the Kerr-Newman space-time."
+            )
 
-def four_velocity(b_mass, rot, eCharge, cosmo, NUT, mCharge, speed_light, grav_const, perm, particle_light, energy, ang_mom, carter, p_mass):
+
+def four_velocity(
+    b_mass,
+    rot,
+    eCharge,
+    cosmo,
+    NUT,
+    mCharge,
+    speed_light,
+    grav_const,
+    perm,
+    particle_light,
+    energy,
+    ang_mom,
+    carter,
+):
     """
     Compute the four velocity of a spacetime. The eigentime is also computed.
-    
+
     Parameters
     ----------
     b_mass : float
@@ -459,8 +553,6 @@ def four_velocity(b_mass, rot, eCharge, cosmo, NUT, mCharge, speed_light, grav_c
         A float reperesenting the angular momentum of the smaller body.
     carter : float
         A float representing the carter constant.
-    p_mass : float
-        A positive float representing the mass of the smaller body.
 
     Returns
     -------
@@ -473,45 +565,66 @@ def four_velocity(b_mass, rot, eCharge, cosmo, NUT, mCharge, speed_light, grav_c
 
     r, nu = symbols("r nu")
 
-    # Constants 
+    # Constants
     schw_r = 2 * grav_const * b_mass / speed_light**2
     a = rot / b_mass
     rQ = eCharge**2 * grav_const / (4 * pi * perm * speed_light**4)
 
     # Account for particle mass
-    ang_mom = ang_mom / p_mass
-    energy = energy / p_mass
-    carter = carter / p_mass**2
-    particle_light = particle_light * p_mass**2
-    
+    ang_mom = ang_mom
+    energy = energy
+    carter = carter
+    particle_light = particle_light
+
     spacetime = classify_spacetime(eCharge, rot, cosmo, NUT)
 
-    if spacetime in ["Kerr", "Kerr-Newman"] or spacetime not in ["Kerr-de Sitter", "Kerr-Newman-de Sitter"]:
+    if spacetime in ["Kerr", "Kerr-Newman"] or spacetime not in [
+        "Kerr-de Sitter",
+        "Kerr-Newman-de Sitter",
+    ]:
         chi = 1
     else:
         chi = 1 + (a**2 * cosmo) / 3
 
     # Simplifications
-    p_r = energy * (r**2 + a**2 + NUT**2) - a * ang_mom
-    t_nu = energy * (a * (1 - nu**2) + 2 * NUT * nu) - ang_mom
+    p_r = sqrt(energy) * (r**2 + a**2 + NUT**2) - a * ang_mom
+    t_nu = sqrt(energy) * (a * (1 - nu**2) + 2 * NUT * nu) - ang_mom
 
     # Horizon functions
-    delta_r = ((1 - cosmo/3 * r**2 - cosmo * NUT**2) * (r**2 + a**2 - NUT**2) - schw_r * r + rQ + mCharge**2 - 4/3 * cosmo * NUT**2 * r**2).simplify().evalf()
-    delta_nu = 1 + 1/3 * a * cosmo * nu**2 - 4/3 * cosmo * a  * NUT  * nu
-   
+    delta_r = (
+        (
+            (1 - cosmo / 3 * r**2 - cosmo * NUT**2) * (r**2 + a**2 - NUT**2)
+            - schw_r * r
+            + rQ
+            + mCharge**2
+            - 4 / 3 * cosmo * NUT**2 * r**2
+        )
+        .simplify()
+        .evalf()
+    )
+    delta_nu = 1 + 1 / 3 * a * cosmo * nu**2 - 4 / 3 * cosmo * a * NUT * nu
+
     # Coordinate velocities
     r_vel = (chi**2 * p_r**2 - delta_r * (particle_light * r**2 + carter)).expand()
-    nu_vel = (delta_nu * (1 - nu**2) * (carter - particle_light * (NUT - a * nu)**2) - chi**2 * t_nu**2).expand()
+    nu_vel = (
+        delta_nu * (1 - nu**2) * (carter - particle_light * (NUT - a * nu) ** 2)
+        - chi**2 * t_nu**2
+    ).expand()
 
     if NUT == 0:
         nu_vel = nu_vel.subs(nu**6, 0)
 
-    phi_vel = [chi**2 * (a * p_r / delta_r).simplify(), chi**2 * (t_nu / (delta_nu * (1 - nu**2))).simplify()]
-    t_vel = [chi**2 * ((r**2 + a**2 + NUT**2) * p_r / delta_r).simplify(), chi**2 * ((a * (1 - nu**2) + 2 * NUT * nu) * t_nu / (delta_nu * (1 - nu**2))).simplify()]
-    proper_vel = [r**2, ((NUT - a * nu)**2).simplify()] 
+    phi_vel = [
+        chi**2 * (a * p_r / delta_r).simplify(),
+        chi**2 * (t_nu / (delta_nu * (1 - nu**2))).simplify(),
+    ]
+    t_vel = [
+        chi**2 * ((r**2 + a**2 + NUT**2) * p_r / delta_r).simplify(),
+        chi**2
+        * (
+            (a * (1 - nu**2) + 2 * NUT * nu) * t_nu / (delta_nu * (1 - nu**2))
+        ).simplify(),
+    ]
+    proper_vel = [r**2, ((NUT - a * nu) ** 2).simplify()]
 
     return [r_vel, nu_vel, phi_vel, t_vel, proper_vel]
-
-#def compute_phi_vals(spacetime, inverse_substituttion, datafile):
-#
- #   if spacetime == "Schwarzschild":
