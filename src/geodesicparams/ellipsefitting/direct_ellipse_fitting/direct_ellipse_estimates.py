@@ -7,14 +7,15 @@ algorithm after normalizing the coordinates (see references).
 
 from mpmath import matrix, norm
 
-from .ellipse_fit import direct_ellipse_fit
 from ..helper_functions.normalise_2d_pts import norm_2d_pts
+from .ellipse_fit import direct_ellipse_fit
+
 
 def compute_directellipse_estimate(data_points):
     """
     Compute the coefficients of a general ellipse within the Sampson Distance that fits
-    a set of ellipse data (i.e. Ax**2 + Bxy + Cy**2 + Dx + Ey + F = 0, provided that 
-    B**2 - 4ac < 0). 
+    a set of ellipse data (i.e. Ax**2 + Bxy + Cy**2 + Dx + Ey + F = 0, provided that
+    B**2 - 4ac < 0).
 
     Parameters
     ----------
@@ -46,10 +47,15 @@ def compute_directellipse_estimate(data_points):
     # Direct ellipse fit coefficients
     theta = direct_ellipse_fit(norm_data)
     theta = theta / norm(theta)
-    
+
     # Undo coordinate normalization to return the coefficients to their cartesian form
-    a = theta[0, 0]; b = theta[0, 1]; c = theta[0, 2]; d = theta[1, 0]; e = theta[1, 1]; f = theta[1, 2]
-    C = matrix([[a, b / 2, d /2], [b/2, c, e/2], [d/2, e/2, f]])
+    a = theta[0, 0]
+    b = theta[0, 1]
+    c = theta[0, 2]
+    d = theta[1, 0]
+    e = theta[1, 1]
+    f = theta[1, 2]
+    C = matrix([[a, b / 2, d / 2], [b / 2, c, e / 2], [d / 2, e / 2, f]])
 
     C = t.T * C * t
     aa = C[0, 0]
@@ -58,7 +64,7 @@ def compute_directellipse_estimate(data_points):
     cc = C[1, 1]
     ee = C[1, 2] * 2
     ff = C[2, 2]
-    
+
     theta = matrix([aa, bb, cc, dd, ee, ff]).T
     theta = theta / norm(theta)
 

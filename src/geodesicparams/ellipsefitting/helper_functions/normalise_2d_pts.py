@@ -1,21 +1,22 @@
 #!/usr/bin/env python3
 """
-Procedure that translates and normalises a set of 2D homogeneous points so that their 
-centroid is at the origin and their mean distance from the origin is sqrt(2). 
+Procedure that translates and normalises a set of 2D homogeneous points so that their
+centroid is at the origin and their mean distance from the origin is sqrt(2).
 
-This process typically improves the conditioning of any equations used to solve homographies, 
+This process typically improves the conditioning of any equations used to solve homographies,
 fundamental matrices etc.
 
 """
 
 from mpmath import matrix, sqrt
 
-from ..matrix_functions import element_pow, element_div
+from ..matrix_functions import element_div, element_pow
+
 
 def norm_2d_pts(pts):
     """
-    Translates and normalises a set of 2D homogeneous points so that their centroid is at the 
-    origin and their mean distance from the origin is sqrt(2). 
+    Translates and normalises a set of 2D homogeneous points so that their centroid is at the
+    origin and their mean distance from the origin is sqrt(2).
 
     Parameters
     ----------
@@ -25,12 +26,12 @@ def norm_2d_pts(pts):
     Returns
     -------
     newpts : matrix
-        A 3xN mpmatrix of transformed 2D homogeneous coordinates. The scaling parameter 
-        is normalised to 1 unless the point is at infinity. 
+        A 3xN mpmatrix of transformed 2D homogeneous coordinates. The scaling parameter
+        is normalised to 1 unless the point is at infinity.
     t : matrix
         The 3x3 transformation matrix (newpts = t * pts).
-    """ 
-    
+    """
+
     n = pts.cols
 
     # For the finite points ensure homogeneous coords have scale of 1
@@ -54,12 +55,12 @@ def norm_2d_pts(pts):
     newp[0, :] = pts[0, :] - c[0]
     newp[1, :] = pts[1, :] - c[1]
 
-    dist = element_pow(element_pow(newp[0, :], 2) + element_pow(newp[1, :], 2), 1/2)
+    dist = element_pow(element_pow(newp[0, :], 2) + element_pow(newp[1, :], 2), 1 / 2)
     meandist = 0
 
     for i in range(dist.cols):
         meandist += dist[i]
-    
+
     meandist = meandist / dist.cols
     scale = sqrt(2) / meandist
 

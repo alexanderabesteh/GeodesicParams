@@ -2,19 +2,20 @@
 """
 Functions for performing element-wise operations on matrices.
 
-These operations include element-wise exponentiation, multiplication, 
+These operations include element-wise exponentiation, multiplication,
 and division.
 
 """
 
 from mpmath import matrix
 
+
 def element_pow(mat1, mat2):
     """
     Compute the element-wise exponentiation of the matrix <mat1> to the matrix <mat2>
     powers.
 
-    Specifically, the result[i, j] = mat1[i, j] ** mat2[i, j]. <mat2> can be an integer; 
+    Specifically, the result[i, j] = mat1[i, j] ** mat2[i, j]. <mat2> can be an integer;
     in this case, the elements of mat1 will each be raised to the <mat2> power.
 
     Parameters
@@ -29,7 +30,7 @@ def element_pow(mat1, mat2):
     Returns
     -------
     result : matrix
-        An mpmath matrix containing the result of the element-wise exponentiation of 
+        An mpmath matrix containing the result of the element-wise exponentiation of
         <mat1> and <mat2>.
 
     """
@@ -51,6 +52,7 @@ def element_pow(mat1, mat2):
 
     return result
 
+
 def element_mul(mat1, mat2):
     """
     Compute the element-wise multiplication of the matrix <mat1> and the matrix <mat2>.
@@ -67,7 +69,7 @@ def element_mul(mat1, mat2):
     Returns
     -------
     result : matrix
-        An mpmath matrix containing the result of the element-wise multiplication of 
+        An mpmath matrix containing the result of the element-wise multiplication of
         <mat1> and <mat2>.
 
     """
@@ -79,6 +81,7 @@ def element_mul(mat1, mat2):
             result[i, j] = mat1[i, j] * mat2[i, j]
 
     return result
+
 
 def element_div(mat1, mat2):
     """
@@ -96,7 +99,7 @@ def element_div(mat1, mat2):
     Returns
     -------
     result : matrix
-        An mpmath matrix containing the result of the element-wise division of 
+        An mpmath matrix containing the result of the element-wise division of
         <mat1> by <mat2>.
 
     """
