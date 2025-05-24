@@ -4,10 +4,8 @@ A collection of procedures for computing hyperelliptic functions for genus a gen
 surface.
 
 In particular, the functions implemented are the hyperelliptic theta function (with various
-algorithms), Kleinian sigma function, Kleinian zeta function, Kleinian P function, and the
-derivatives of the theta function and sigma functions.
+algorithms), and the derivatives of the theta function and Kleinian sigma functions.
 
-TODO: remove unnecessary code and fix precision.
 """
 
 from mpmath import cos, exp, im, mp, pi, re, sin
