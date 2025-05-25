@@ -37,7 +37,7 @@ from ..riemannsurfaces.period_matrices.periods_genus2_first import (
     periods,
     set_period_globals_genus2,
 )
-from ..riemannsurfaces.period_matrices.periods_genus2_second import periods_second2
+from ..riemannsurfaces.period_matrices.periods_genus2_second import periods_second
 from ..riemannsurfaces.riemann_funcs.elliptic_funcs import (
     inverse_weierstrass_P,
     weierstrass_P,
@@ -1410,7 +1410,7 @@ def compute_secondkind_periods(zeros, eps, periodMatrix, datafile, digits, minMa
 
     print("Computing second kind periods ...")
     # second_kind_periods = periods_second(zeros, periodMatrix, digits, minMax)
-    second_kind_periods = periods_second2(r1, r2, realNS, complexNS, digits)
+    second_kind_periods = periods_second(r1, r2, realNS, complexNS, digits)
 
     eta1 = second_kind_periods[0:2, 0:2]
     eta2 = second_kind_periods[0:2, 2:4]
