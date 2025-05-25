@@ -152,7 +152,7 @@ def naive_theta_genus2(z, tau, precision=53):
     return result
 
 
-def theta_char(z, tau, char, precision=53):
+def hyp_theta_genus2(z, tau, char, precision=53):
     """
     Computes the hyperelliptic theta function on a genus 2 Riemann surface with characteristics
     <char> using the Naive algorithm found in []. The Riemann matrix <tau> must also be
