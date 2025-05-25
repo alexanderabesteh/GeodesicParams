@@ -2,9 +2,6 @@
 """
 Procedures for performing integrations of holomorphic and meromorphic differentials.
 
-NOTE: fix some things here like the precision and documentation. Also integration method
-for periods of second kind will be changed soon (hopefully).
-
 """
 
 from mpmath import (

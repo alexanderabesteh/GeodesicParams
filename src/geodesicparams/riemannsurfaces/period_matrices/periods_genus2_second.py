@@ -2,8 +2,6 @@
 """
 Procedure for computing the periods matrices of the second kind for a genus 2 Riemann surface.
 
-This procedure utilizes a formula found in [], involving the matrix kappa.
-
 """
 
 from mpmath import fabs, matrix, mp, pi, quad
