@@ -7,6 +7,15 @@ of the weierstrass P function. There are also helper functions for conversions
 between the elliptic invariants g2 and g3, the half periods omega1 and 3, and the
 roots of the Weierstrass cubic (4z**3 - g2z - g3) e1, e2, and e3.
 
+References
+----------
+[] T. mpmath development team, mpmath: a Python library for arbitrary-precision floating-point arithmetic
+   (version 1.3.0) (2023), http://mpmath.org/.
+[] M. Abramowitz and I. Stegun, Handbook of Mathematical Functions: With Formulas, Graphs,
+   and Mathematical Tables, Applied mathematics series (Dover Publications, 1965).
+[] D. Zwillinger and A. Jeffrey, Table of Integrals, Series, and Products
+   (Elsevier Science, 2007).
+
 """
 
 from mpmath import (

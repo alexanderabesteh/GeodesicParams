@@ -5,6 +5,15 @@ Provides mini helper procedures utilized throughout various modules.
 Helper functions include sorting procedures for the roots of polynomials,
 clearing directories, checking if a number is in a list, and numerically
 evaluating symbolic numbers in a list.
+
+References
+----------
+[] E. Hackmann, Geodesic equations in black hole space-times with cosmological constant (2010).
+[] A. Meurer, C. P. Smith, M. Paprocki, O. ˇCert´ık, S. B. Kirpichev, M. Rocklin, A. Kumar, S. Ivanov, J. K.
+    Moore, S. Singh, T. Rathnayake, S. Vig, B. E. Granger, R. P. Muller, F. Bonazzi, H. Gupta, S. Vats, F. Johans-
+    son, F. Pedregosa, M. J. Curry, A. R. Terrel, v. Rouˇcka, A. Saboo, I. Fernando, S. Kulal, R. Cimrman, and
+    A. Scopatz, Sympy: symbolic computing in python, PeerJ Computer Science 3, e103 (2017).
+
 """
 
 from os import path, unlink, walk

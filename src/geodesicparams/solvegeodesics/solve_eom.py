@@ -7,6 +7,18 @@ be achieved through convert_polynomial and solve_geodesic_orbit. Period matrices
 for each procedure (except for when the equation of motion is a degree 2 polynomial), and are
 either computed through the period_matrices modules in riemannsurfaces, or provided directly.
 
+References
+----------
+[] E. Hackmann, Geodesic equations in black hole space-times with cosmological constant (2010).
+[] T. mpmath development team, mpmath: a Python library for arbitrary-precision floating-point arithmetic
+    (version 1.3.0) (2023), http://mpmath.org/.
+[] A. Meurer, C. P. Smith, M. Paprocki, O. ˇCert´ık, S. B. Kirpichev, M. Rocklin, A. Kumar, S. Ivanov, J. K.
+    Moore, S. Singh, T. Rathnayake, S. Vig, B. E. Granger, R. P. Muller, F. Bonazzi, H. Gupta, S. Vats, F. Johans-
+    son, F. Pedregosa, M. J. Curry, A. R. Terrel, v. Rouˇcka, A. Saboo, I. Fernando, S. Kulal, R. Cimrman, and
+    A. Scopatz, Sympy: symbolic computing in python, PeerJ Computer Science 3, e103 (2017).
+[] A. Cieslik, E. Hackmann, and P. Mach, Kerr geodesics in terms of weierstrass elliptic functions, Physical Review D
+    108, 10.1103/physrevd.108.024056 (2023).
+
 """
 
 from pickle import dump, load

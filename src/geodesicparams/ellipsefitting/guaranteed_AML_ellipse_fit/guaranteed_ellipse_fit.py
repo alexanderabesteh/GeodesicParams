@@ -3,6 +3,13 @@
 Computations for computing the coefficents of an ellipse within the Sampson Distance that
 fits a set of data.
 
+References
+----------
+[] Z. L. Szpak, W. Chojnacki, and A. van den Hengel, Guaranteed ellipse fitting with the
+   sampson distance, in Computer Vision – ECCV 2012, edited by A. Fitzgibbon, S. Lazebnik,
+   P. Perona, Y. Sato, and C. Schmid (Springer Berlin Heidelberg, Berlin, Heidelberg, 2012)
+   pp. 87–100.
+
 """
 
 from mpmath import eye, fabs, matrix, norm, ones, sqrt, zeros

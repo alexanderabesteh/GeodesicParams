@@ -3,6 +3,10 @@
 Procedure for computing the coefficents of an ellipse using the direct ellipse fitting
 algorithm (see references).
 
+References
+----------
+[] R. H. oy and J. Flusser, Numerically stable direct least squares fitting of ellipses (1998).
+
 """
 
 from mpmath import eig, matrix, norm

@@ -12,6 +12,16 @@ to convert_deg5 or convert_deg3. convert_polynomial encapsulates all these behav
 on the degree of the polynomial. As of now, polynomials with multiple zeroes have yet to be
 implemented.
 
+References
+----------
+[] E. Hackmann, Geodesic equations in black hole space-times with cosmological constant (2010).
+[] T. mpmath development team, mpmath: a Python library for arbitrary-precision floating-point arithmetic
+    (version 1.3.0) (2023), http://mpmath.org/.
+[] A. Meurer, C. P. Smith, M. Paprocki, O. ˇCert´ık, S. B. Kirpichev, M. Rocklin, A. Kumar, S. Ivanov, J. K.
+    Moore, S. Singh, T. Rathnayake, S. Vig, B. E. Granger, R. P. Muller, F. Bonazzi, H. Gupta, S. Vats, F. Johans-
+    son, F. Pedregosa, M. J. Curry, A. R. Terrel, v. Rouˇcka, A. Saboo, I. Fernando, S. Kulal, R. Cimrman, and
+    A. Scopatz, Sympy: symbolic computing in python, PeerJ Computer Science 3, e103 (2017).
+
 """
 
 from mpmath import sign

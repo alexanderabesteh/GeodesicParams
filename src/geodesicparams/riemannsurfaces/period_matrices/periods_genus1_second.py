@@ -5,6 +5,13 @@ meromorphic differentials for a genus 1 Riemann surface).
 
 NOTE: fix some things here like the precision.
 
+References
+----------
+[] T. mpmath development team, mpmath: a Python library for arbitrary-precision floating-point arithmetic
+    (version 1.3.0) (2023), http://mpmath.org/.
+[] M. Abramowitz and I. Stegun, Handbook of Mathematical Functions: With Formulas, Graphs,
+    and Mathematical Tables, Applied mathematics series (Dover Publications, 1965).
+
 """
 
 from mpmath import isinf, jtheta, mpc, pi, qfrom

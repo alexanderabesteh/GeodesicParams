@@ -5,6 +5,11 @@ Functions for performing element-wise operations on matrices.
 These operations include element-wise exponentiation, multiplication,
 and division.
 
+References
+----------
+[] T. mpmath development team, mpmath: a Python library for arbitrary-precision floating-point arithmetic
+    (version 1.3.0) (2023), http://mpmath.org/.
+
 """
 
 from mpmath import matrix

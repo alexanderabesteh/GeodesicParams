@@ -9,6 +9,13 @@ provided that B**2 - 4ac < 0) that fits the data. The other functions are used f
 conversions, such as converting the coefficient representation into a parametric
 representation that can then be used to generate data.
 
+References
+----------
+[] Z. L. Szpak, W. Chojnacki, and A. van den Hengel, Guaranteed ellipse fitting with the
+   sampson distance, in Computer Vision – ECCV 2012, edited by A. Fitzgibbon, S. Lazebnik,
+   P. Perona, Y. Sato, and C. Schmid (Springer Berlin Heidelberg, Berlin, Heidelberg, 2012)
+   pp. 87–100.
+
 """
 
 from mpmath import atan2, cos, matrix, norm, sin, sqrt

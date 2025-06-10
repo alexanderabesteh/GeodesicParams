@@ -4,6 +4,16 @@ Procedures for fitting an ellipse to three dimensional cartesian data points usi
 the guaranteed ellipse fitting method and rodrigues rotation to project the 3D data points
 to the 2D fitting plane.
 
+References
+----------
+[] T. mpmath development team, mpmath: a Python library for arbitrary-precision floating-point arithmetic
+    (version 1.3.0) (2023), http://mpmath.org/.
+[] C. R. Harris, K. J. Millman, S. J. van der Walt, R. Gom-mers, P. Virtanen, D. Cournapeau,
+    E. Wieser, J. Tay-lor, S. Berg, N. J. Smith, R. Kern, M. Picus, S. Hoyer,
+    M. H. van Kerkwijk, M. Brett, A. Haldane, J. F. del R´ıo, M. Wiebe, P. Peterson,
+    P. G´erard-Marchant, K. Shep-pard, T. Reddy, W. Weckesser, H. Abbasi, C. Gohlke, and
+    T. E. Oliphant, Array programming with NumPy, Nature 585, 357 (2020).
+
 """
 
 from mpmath import findroot, linspace, matrix, pi
@@ -18,24 +28,24 @@ from ..guaranteed_AML_ellipse_fit.ellipse_estimates import (
 
 def rodrigues_rot(data_points, n0, n1):
     """
-    Rotates given points based on a starting vector <n0> and ending vector <n1>.
+        Rotates given points based on a starting vector <n0> and ending vector <n1>.
 
-    Parameters
+        Parameters
     ----------
-    data_points : matrix
-         A 2xN mpmath matrix, where the first row represents the x coordinates of the data
-         points, and the second represents the y coordinates of the data points.
-    n0 : list
-        A 1x3 starting vector, which gives the axis k and angle of rotation theta.
-    n1 : list
-        A 1x3 ending vector, which gives the axis k and angle of rotation theta.
+        data_points : matrix
+             A 2xN mpmath matrix, where the first row represents the x coordinates of the data
+             points, and the second represents the y coordinates of the data points.
+        n0 : list
+            A 1x3 starting vector, which gives the axis k and angle of rotation theta.
+        n1 : list
+            A 1x3 ending vector, which gives the axis k and angle of rotation theta.
 
-    Returns
-    -------
-    data_rot : matrix
-        An Nx3 matrix containing the fitted x, y, z data points of N length.
-    inc_angle : float
-        The angle of rotation in the Rodrigues Rotation.
+        Returns
+        -------
+        data_rot : matrix
+            An Nx3 matrix containing the fitted x, y, z data points of N length.
+        inc_angle : float
+            The angle of rotation in the Rodrigues Rotation.
 
     """
 

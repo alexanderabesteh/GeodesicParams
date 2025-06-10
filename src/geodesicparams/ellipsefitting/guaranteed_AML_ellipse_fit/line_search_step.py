@@ -8,6 +8,20 @@ of a Gauss-Newton approximation of the Hessian matrix. It then performs an inexa
 to determine how far to move along the update direction so that the resulting fit is still an
 ellipse.
 
+References
+----------
+[] Z. L. Szpak, W. Chojnacki, and A. van den Hengel, Guaranteed ellipse fitting with the
+   sampson distance, in Computer Vision – ECCV 2012, edited by A. Fitzgibbon, S. Lazebnik,
+   P. Perona, Y. Sato, and C. Schmid (Springer Berlin Heidelberg, Berlin, Heidelberg, 2012)
+   pp. 87–100.
+[] T. mpmath development team, mpmath: a Python library for arbitrary-precision floating-point arithmetic
+    (version 1.3.0) (2023), http://mpmath.org/.
+[] C. R. Harris, K. J. Millman, S. J. van der Walt, R. Gom-mers, P. Virtanen, D. Cournapeau,
+    E. Wieser, J. Tay-lor, S. Berg, N. J. Smith, R. Kern, M. Picus, S. Hoyer,
+    M. H. van Kerkwijk, M. Brett, A. Haldane, J. F. del R´ıo, M. Wiebe, P. Peterson,
+    P. G´erard-Marchant, K. Shep-pard, T. Reddy, W. Weckesser, H. Abbasi, C. Gohlke, and
+    T. E. Oliphant, Array programming with NumPy, Nature 585, 357 (2020).
+
 """
 
 from mpmath import matrix, norm

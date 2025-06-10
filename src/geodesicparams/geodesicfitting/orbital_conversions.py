@@ -6,6 +6,15 @@ These procedures include the mean anomaly, orbital period, mean motion, etc. A p
 converting from the Newtonian parametrization of a geodesic to its integrals of motion
 counterpart has also been implemented.
 
+References
+----------
+[] T. mpmath development team, mpmath: a Python library for arbitrary-precision floating-point arithmetic
+    (version 1.3.0) (2023), http://mpmath.org/.
+[] J. W. Roger R. Bate, Donald D. Mueller, Fundamentals of Astrodynamics
+    (Dover Publications, 1971)
+[] W. Schmidt, Celestial mechanics in kerr spacetime, Classical and Quantum Gravity 19,
+    2743–2764 (2002)
+
 """
 
 from mpmath import acos, atan, cos, pi, sin, sqrt, tan

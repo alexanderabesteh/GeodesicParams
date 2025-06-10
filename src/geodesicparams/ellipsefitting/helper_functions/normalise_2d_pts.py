@@ -6,6 +6,11 @@ centroid is at the origin and their mean distance from the origin is sqrt(2).
 This process typically improves the conditioning of any equations used to solve homographies,
 fundamental matrices etc.
 
+References
+----------
+[] T. mpmath development team, mpmath: a Python library for arbitrary-precision floating-point arithmetic
+    (version 1.3.0) (2023), http://mpmath.org/.
+
 """
 
 from mpmath import matrix, sqrt

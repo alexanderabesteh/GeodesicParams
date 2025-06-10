@@ -6,6 +6,14 @@ surface.
 In particular, the functions implemented are the hyperelliptic theta function (with various
 algorithms), and the derivatives of the theta function and Kleinian sigma functions.
 
+References
+----------
+[] E. Hackmann, Geodesic equations in black hole space-times with cosmological constant (2010).
+[] T. mpmath development team, mpmath: a Python library for arbitrary-precision floating-point arithmetic
+    (version 1.3.0) (2023), http://mpmath.org/.
+[] H. Labrande, Explicit computation of the Abel-Jacobi map and its inverse, Theses,
+    Universit´e de Lorraine (2016).
+
 """
 
 from mpmath import cos, exp, im, mp, pi, re, sin

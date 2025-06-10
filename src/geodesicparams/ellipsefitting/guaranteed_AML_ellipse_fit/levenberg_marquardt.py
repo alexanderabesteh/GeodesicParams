@@ -6,6 +6,16 @@ approximate maximum likelihood cost function of an ellipse fit to data.
 It computes an update for the parameters representing the ellipse, using the method of
 Levenberg-Marquardt for non-linear optimisation.
 
+References
+----------
+[] Z. L. Szpak, W. Chojnacki, and A. van den Hengel, Guaranteed ellipse fitting with the
+   sampson distance, in Computer Vision – ECCV 2012, edited by A. Fitzgibbon, S. Lazebnik,
+   P. Perona, Y. Sato, and C. Schmid (Springer Berlin Heidelberg, Berlin, Heidelberg, 2012)
+   pp. 87–100.
+[] T. mpmath development team, mpmath: a Python library for arbitrary-precision floating-point arithmetic
+    (version 1.3.0) (2023), http://mpmath.org/.
+
+
 """
 
 from mpmath import lu_solve, matrix, norm
