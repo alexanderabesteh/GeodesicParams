@@ -25,6 +25,38 @@ from ..integrations.integrate_hyperelliptic import (
 
 
 def periods_second(dr1, dr2, realNS, complexNS, digits):
+    """
+    Computes the periods of the second kind for a genus 2 Riemann surface.
+
+    This is done by integrating the vector of canonical meromorphic differentials along the
+    contours that encircle the branch cuts and the contours connect the branch cuts.
+
+    Parameters
+    ----------
+    dr1 : list
+        A list representing the coefficients of the first element of the vector of
+        canonical meromorphic differentials.
+    dr2 : list
+        A list representing the coefficients of the second element of the vector of
+        canonical meromorphic differentials.
+    realNS : list
+        A list of real numbers, the real roots of the polynomial defining the Riemann
+        surface.
+    complexNS : list
+        A list of complex numbers, the complex roots of the polynomial defining the Riemann
+        surface.
+    digits : int
+        The number of digits to be used in the computation.
+
+    Returns
+    -------
+    matrix
+        A 2x4 matrix: the first 2x2 matrix represents the period matrix corresponding to the
+        integrations along the contours encircling the branch cuts. The second 2x2 matrix
+        represents the period matrix corresponding to the integrations along the contours
+        connecting the branch cuts.
+
+    """
 
     if len(realNS) + len(complexNS) != 5:
         raise ValueError(f"Invalid use: len({realNS}) + len({complexNS}) has to be 5")
@@ -37,6 +69,34 @@ def periods_second(dr1, dr2, realNS, complexNS, digits):
 
 
 def rea_second(dr1, dr2, realNS, digits):
+    """
+    Computes the periods of the second kind for a genus 2 Riemann surface for the case that
+    all zeros of the polynomial defining the Riemann surface are real.
+
+    Parameters
+    ----------
+    dr1 : list
+        A list representing the coefficients of the first element of the vector of
+        canonical meromorphic differentials.
+    dr2 : list
+        A list representing the coefficients of the second element of the vector of
+        canonical meromorphic differentials.
+    realNS : list
+        A list of real numbers, the real roots of the polynomial defining the Riemann
+        surface.
+    digits : int
+        The number of digits to be used in the computation.
+
+    Returns
+    -------
+    matrix
+        A 2x4 matrix: the first 2x2 matrix represents the period matrix corresponding to the
+        integrations along the contours encircling the branch cuts. The second 2x2 matrix
+        represents the period matrix corresponding to the integrations along the contours
+        connecting the branch cuts.
+
+    """
+
     eta = matrix(2, 4)
 
     # path A1: realNS[1]..realNS[2], negative branch
@@ -63,6 +123,38 @@ def rea_second(dr1, dr2, realNS, digits):
 
 
 def ima_second(dr1, dr2, realNS, complexNS, digits):
+    """
+    Computes the periods of the second kind for a genus 2 Riemann surface for the case that
+    the zeros of the polynomial defining the Riemann surface are complex. <ima2Per> is
+    called if there are two complex zeros, and <ima4Per> is called when there are 4 complex
+    zeros.
+
+    Parameters
+    ----------
+    dr1 : list
+        A list representing the coefficients of the first element of the vector of
+        canonical meromorphic differentials.
+    dr2 : list
+        A list representing the coefficients of the second element of the vector of
+        canonical meromorphic differentials.
+    realNS : list
+        A list of real numbers, the real roots of the polynomial defining the Riemann
+        surface.
+    complexNS : list
+        A list of complex numbers, the complex roots of the polynomial defining the Riemann
+        surface.
+    digits : int
+        The number of digits to be used in the computation.
+
+    Returns
+    -------
+    matrix
+        A 2x4 matrix: the first 2x2 matrix represents the period matrix corresponding to the
+        integrations along the contours encircling the branch cuts. The second 2x2 matrix
+        represents the period matrix corresponding to the integrations along the contours
+        connecting the branch cuts.
+
+    """
 
     if len(complexNS) == 2:
         return ima2_second(dr1, dr2, realNS, complexNS, digits)
@@ -73,6 +165,42 @@ def ima_second(dr1, dr2, realNS, complexNS, digits):
 
 
 def ima2_second(dr1, dr2, realNS, complexNS, digits):
+    """
+    Computes the periods of the second kind for a genus 2 Riemann surface for the case that
+    two zeros of the polynomial defining the Riemann surface are complex. There are 4 different
+    subcases, ima2Perk, where k is an integer related to the ordering of the zeros.
+
+    For all <k> subcases it is necessary to compute integrals along branch cuts perpendicular
+    to the real axis. For the calculation it has to be taken into account that the real part of
+    the integrals computed along such branch cuts is symmetrical with respect to the real axis
+    but that the imaginary part is antisymmetric. Therefore, the whole integral will be real.
+
+    Parameters
+    ----------
+    dr1 : list
+        A list representing the coefficients of the first element of the vector of
+        canonical meromorphic differentials.
+    dr2 : list
+        A list representing the coefficients of the second element of the vector of
+        canonical meromorphic differentials.
+    realNS : list
+        A list of real numbers, the real roots of the polynomial defining the Riemann
+        surface.
+    complexNS : list
+        A list of complex numbers, the complex roots of the polynomial defining the Riemann
+        surface.
+    digits : int
+        The number of digits to be used in the computation.
+
+    Returns
+    -------
+    matrix
+        A 2x4 matrix: the first 2x2 matrix represents the period matrix corresponding to the
+        integrations along the contours encircling the branch cuts. The second 2x2 matrix
+        represents the period matrix corresponding to the integrations along the contours
+        connecting the branch cuts.
+
+    """
 
     k = inlist(
         re(complexNS[0]), sorted(realNS + [re(complexNS[0])], key=lambda x: re(x))
@@ -89,6 +217,45 @@ def ima2_second(dr1, dr2, realNS, complexNS, digits):
 
 
 def ima4_second(dr1, dr2, realNS, complexNS, digits):
+    """
+    Computes the periods of the second kind for a genus 2 Riemann surface for the case that
+    four zeros z1, z2, z3, z4 of the polynomial defining the Riemann surface are complex, where
+    Re(z1) = Re(z2), Re(z3) = Re(z4), and Re(z1) < Re(z3). There are 3 different subcases,
+    ima4Perk, where k is an integer related to the ordering of the zeros.
+
+    For all <k> subcases it is necessary to compute integrals along branch cuts perpendicular
+    to the real axis. For the calculation it has to be taken into account that the real part
+    of the integrals computed along such branch cuts is symmetrical with respect to the real
+    axis but that the imaginary part is antisymmetric. Therefore, the whole integral will be
+    real.
+
+    Parameters
+    ----------
+    dr1 : list
+        A list representing the coefficients of the first element of the vector of
+        canonical meromorphic differentials.
+    dr2 : list
+        A list representing the coefficients of the second element of the vector of
+        canonical meromorphic differentials.
+    realNS : list
+        A list of real numbers, the real roots of the polynomial defining the Riemann
+        surface.
+    complexNS : list
+        A list of complex numbers, the complex roots of the polynomial defining the Riemann
+        surface.
+    digits : int
+        The number of digits to be used in the computation.
+
+    Returns
+    -------
+    matrix
+        A 2x4 matrix: the first 2x2 matrix represents the period matrix corresponding to the
+        integrations along the contours encircling the branch cuts. The second 2x2 matrix
+        represents the period matrix corresponding to the integrations along the contours
+        connecting the branch cuts.
+
+    """
+
     rea = sorted([re(i) for i in complexNS], key=lambda x: re(x))
 
     ima1 = fabs(im(complexNS[inlist(rea[0], [re(i) for i in complexNS])]))
@@ -105,6 +272,37 @@ def ima4_second(dr1, dr2, realNS, complexNS, digits):
 
 
 def ima2Per1_second(dr1, dr2, realNS, complexNS, digits):
+    """
+    Computes the periods of the second kind for a genus 2 Riemann surface for the case that
+    two zeros of the polynomial defining the Riemann surface are complex, with subcase <k> = 1. There are 4 different
+
+    Parameters
+    ----------
+    dr1 : list
+        A list representing the coefficients of the first element of the vector of
+        canonical meromorphic differentials.
+    dr2 : list
+        A list representing the coefficients of the second element of the vector of
+        canonical meromorphic differentials.
+    realNS : list
+        A list of real numbers, the real roots of the polynomial defining the Riemann
+        surface.
+    complexNS : list
+        A list of complex numbers, the complex roots of the polynomial defining the Riemann
+        surface.
+    digits : int
+        The number of digits to be used in the computation.
+
+    Returns
+    -------
+    matrix
+        A 2x4 matrix: the first 2x2 matrix represents the period matrix corresponding to the
+        integrations along the contours encircling the branch cuts. The second 2x2 matrix
+        represents the period matrix corresponding to the integrations along the contours
+        connecting the branch cuts.
+
+    """
+
     rea = re(complexNS[0])
     ima = fabs(im(complexNS[0]))
 
@@ -135,6 +333,37 @@ def ima2Per1_second(dr1, dr2, realNS, complexNS, digits):
 
 
 def ima2Per2_second(dr1, dr2, realNS, complexNS, digits):
+    """
+    Computes the periods of the second kind for a genus 2 Riemann surface for the case that
+    two zeros of the polynomial defining the Riemann surface are complex, with subcase <k> = 2. There are 4 different
+
+    Parameters
+    ----------
+    dr1 : list
+        A list representing the coefficients of the first element of the vector of
+        canonical meromorphic differentials.
+    dr2 : list
+        A list representing the coefficients of the second element of the vector of
+        canonical meromorphic differentials.
+    realNS : list
+        A list of real numbers, the real roots of the polynomial defining the Riemann
+        surface.
+    complexNS : list
+        A list of complex numbers, the complex roots of the polynomial defining the Riemann
+        surface.
+    digits : int
+        The number of digits to be used in the computation.
+
+    Returns
+    -------
+    matrix
+        A 2x4 matrix: the first 2x2 matrix represents the period matrix corresponding to the
+        integrations along the contours encircling the branch cuts. The second 2x2 matrix
+        represents the period matrix corresponding to the integrations along the contours
+        connecting the branch cuts.
+
+    """
+
     rea = re(complexNS[0])
     ima = fabs(im(complexNS[0]))
 
@@ -164,6 +393,37 @@ def ima2Per2_second(dr1, dr2, realNS, complexNS, digits):
 
 
 def ima2Per3_second(dr1, dr2, realNS, complexNS, digits):
+    """
+    Computes the periods of the second kind for a genus 2 Riemann surface for the case that
+    two zeros of the polynomial defining the Riemann surface are complex, with subcase <k> = 3. There are 4 different
+
+    Parameters
+    ----------
+    dr1 : list
+        A list representing the coefficients of the first element of the vector of
+        canonical meromorphic differentials.
+    dr2 : list
+        A list representing the coefficients of the second element of the vector of
+        canonical meromorphic differentials.
+    realNS : list
+        A list of real numbers, the real roots of the polynomial defining the Riemann
+        surface.
+    complexNS : list
+        A list of complex numbers, the complex roots of the polynomial defining the Riemann
+        surface.
+    digits : int
+        The number of digits to be used in the computation.
+
+    Returns
+    -------
+    matrix
+        A 2x4 matrix: the first 2x2 matrix represents the period matrix corresponding to the
+        integrations along the contours encircling the branch cuts. The second 2x2 matrix
+        represents the period matrix corresponding to the integrations along the contours
+        connecting the branch cuts.
+
+    """
+
     rea = re(complexNS[0])
     ima = fabs(im(complexNS[0]))
 
@@ -208,6 +468,37 @@ def ima2Per3_second(dr1, dr2, realNS, complexNS, digits):
 
 
 def ima2Per4_second(dr1, dr2, realNS, complexNS, digits):
+    """
+    Computes the periods of the second kind for a genus 2 Riemann surface for the case that
+    two zeros of the polynomial defining the Riemann surface are complex, with subcase <k> = 4. There are 4 different
+
+    Parameters
+    ----------
+    dr1 : list
+        A list representing the coefficients of the first element of the vector of
+        canonical meromorphic differentials.
+    dr2 : list
+        A list representing the coefficients of the second element of the vector of
+        canonical meromorphic differentials.
+    realNS : list
+        A list of real numbers, the real roots of the polynomial defining the Riemann
+        surface.
+    complexNS : list
+        A list of complex numbers, the complex roots of the polynomial defining the Riemann
+        surface.
+    digits : int
+        The number of digits to be used in the computation.
+
+    Returns
+    -------
+    matrix
+        A 2x4 matrix: the first 2x2 matrix represents the period matrix corresponding to the
+        integrations along the contours encircling the branch cuts. The second 2x2 matrix
+        represents the period matrix corresponding to the integrations along the contours
+        connecting the branch cuts.
+
+    """
+
     rea = re(complexNS[0])
     ima = fabs(im(complexNS[0]))
 
@@ -241,6 +532,43 @@ def ima2Per4_second(dr1, dr2, realNS, complexNS, digits):
 
 
 def ima4Per1_second(dr1, dr2, realNS, rea1, ima1, rea2, ima2, digits):
+    """
+    Computes the periods of the second kind for a genus 2 Riemann surface for the case that
+    four zeros z1, z2, z3, z4 of the polynomial defining the Riemann surface are complex, where
+    Re(z1) = Re(z2), Re(z3) = Re(z4), and Re(z1) < Re(z3), with subcase <k> = 1.
+
+    Parameters
+    ----------
+    dr1 : list
+        A list representing the coefficients of the first element of the vector of
+        canonical meromorphic differentials.
+    dr2 : list
+        A list representing the coefficients of the second element of the vector of
+        canonical meromorphic differentials.
+    realNS : list
+        A list of real numbers, the real roots of the polynomial defining the Riemann
+        surface.
+    rea1 : float
+        The real part of the first complex zero.
+    ima1 : float
+        The absolute value of the imaginary part of the first complex zero.
+    rea2 : float
+        The real part of the third complex zero.
+    ima2 : float
+        The absolute value of the imaginary part of the third complex zero.
+    digits : int
+        The number of digits to be used in the computation.
+
+    Returns
+    -------
+    matrix
+        A 2x4 matrix: the first 2x2 matrix represents the period matrix corresponding to the
+        integrations along the contours encircling the branch cuts. The second 2x2 matrix
+        represents the period matrix corresponding to the integrations along the contours
+        connecting the branch cuts.
+
+    """
+
     eta = matrix(2, 4)
     x = Symbol("x")
 
@@ -310,6 +638,42 @@ def ima4Per1_second(dr1, dr2, realNS, rea1, ima1, rea2, ima2, digits):
 
 
 def ima4Per2_second(dr1, dr2, realNS, rea1, ima1, rea2, ima2, digits):
+    """
+    Computes the periods of the second kind for a genus 2 Riemann surface for the case that
+    four zeros z1, z2, z3, z4 of the polynomial defining the Riemann surface are complex, where
+    Re(z1) = Re(z2), Re(z3) = Re(z4), and Re(z1) < Re(z3), with subcase <k> = 2.
+
+    Parameters
+    ----------
+    dr1 : list
+        A list representing the coefficients of the first element of the vector of
+        canonical meromorphic differentials.
+    dr2 : list
+        A list representing the coefficients of the second element of the vector of
+        canonical meromorphic differentials.
+    realNS : list
+        A list of real numbers, the real roots of the polynomial defining the Riemann
+        surface.
+    rea1 : float
+        The real part of the first complex zero.
+    ima1 : float
+        The absolute value of the imaginary part of the first complex zero.
+    rea2 : float
+        The real part of the third complex zero.
+    ima2 : float
+        The absolute value of the imaginary part of the third complex zero.
+    digits : int
+        The number of digits to be used in the computation.
+
+    Returns
+    -------
+    matrix
+        A 2x4 matrix: the first 2x2 matrix represents the period matrix corresponding to the
+        integrations along the contours encircling the branch cuts. The second 2x2 matrix
+        represents the period matrix corresponding to the integrations along the contours
+        connecting the branch cuts.
+
+    """
 
     eta = matrix(2, 4)
     h1 = matrix(1, 2)
@@ -351,6 +715,42 @@ def ima4Per2_second(dr1, dr2, realNS, rea1, ima1, rea2, ima2, digits):
 
 
 def ima4Per3_second(dr1, dr2, realNS, rea1, ima1, rea2, ima2, digits):
+    """
+    Computes the periods of the second kind for a genus 2 Riemann surface for the case that
+    four zeros z1, z2, z3, z4 of the polynomial defining the Riemann surface are complex, where
+    Re(z1) = Re(z2), Re(z3) = Re(z4), and Re(z1) < Re(z3), with subcase <k> = 3.
+
+    Parameters
+    ----------
+    dr1 : list
+        A list representing the coefficients of the first element of the vector of
+        canonical meromorphic differentials.
+    dr2 : list
+        A list representing the coefficients of the second element of the vector of
+        canonical meromorphic differentials.
+    realNS : list
+        A list of real numbers, the real roots of the polynomial defining the Riemann
+        surface.
+    rea1 : float
+        The real part of the first complex zero.
+    ima1 : float
+        The absolute value of the imaginary part of the first complex zero.
+    rea2 : float
+        The real part of the third complex zero.
+    ima2 : float
+        The absolute value of the imaginary part of the third complex zero.
+    digits : int
+        The number of digits to be used in the computation.
+
+    Returns
+    -------
+    matrix
+        A 2x4 matrix: the first 2x2 matrix represents the period matrix corresponding to the
+        integrations along the contours encircling the branch cuts. The second 2x2 matrix
+        represents the period matrix corresponding to the integrations along the contours
+        connecting the branch cuts.
+
+    """
 
     eta = matrix(2, 4)
     h1 = matrix(1, 2)
