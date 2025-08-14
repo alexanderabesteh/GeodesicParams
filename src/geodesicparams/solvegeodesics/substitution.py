@@ -24,12 +24,15 @@ References
 
 """
 
-from mpmath import sign
-from sympy import Abs, Poly, Symbol, collect, degree, lambdify, pprint, re, sign
+from jax import jit
+
+# from mpmath import sign
+from sympy import Abs, Poly, Symbol, collect, degree, lambdify, re, sign
 
 from ..utilities import eval_roots, extract_multiple_elems, inlist, separate_zeros
 
 
+@jit
 def convert_deg5(polynomial, zeros):
     """
     Convert a 5th degree polynomial to its standard form, using the substitution y = - z
@@ -90,6 +93,7 @@ def convert_deg5(polynomial, zeros):
     return [p_standard, constant, lambdify(y, substitution), substitution, sign]
 
 
+@jit
 def convert_deg3(polynomial, zeros):
     """
     Convert a 3rd degree polynomial to its standard form, using the substitution
@@ -141,6 +145,7 @@ def convert_deg3(polynomial, zeros):
     return [p_standard, 1, lambdify(y, substitution), substitution, sign_a3]
 
 
+@jit
 def convert_degeven(polynomial, zeros, badzeros):
     """
     Convert a 4th degree polynomial to a 3rd degree polynomial or a 6th degree to a 5th
@@ -221,6 +226,7 @@ def convert_degeven(polynomial, zeros, badzeros):
     ]
 
 
+@jit
 def convert_polynomial(polynomial, degree, zeros, badzeros):
     """
     Convert a polynomial used in a hyperelliptic or elliptic differential equation into
