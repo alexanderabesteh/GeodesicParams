@@ -19,7 +19,39 @@ References
 from os import path, unlink, walk
 from shutil import rmtree
 
+from jax import jit, numpy
+from jax.config import config
 from sympy import im, re
+
+config.update("jax_enable_x64", True)
+
+
+@jit
+def jax_inlist(element, lst):
+    lst_arr = numpy.array(lst)
+    matches = numpy.where(lst_arr == element, size=len(lst))[0]
+    return matches[0] if matches.size > 0 else -1
+
+
+@jit
+def jax_find_next(expression, lst):
+    lst_arr = numpy.array(lst)
+    distances = numpy.abs(lst_arr - expression)
+    return lst_arr[numpy.argmin(distances)]
+
+
+@jit
+def jax_separate_zeros(zeros):
+    zeros_arr = numpy.array(zeros)
+    real_mask = numpy.imag(zeros_arr) == 0
+    realNS = numpy.sort(zeros_arr[real_mask])
+    complexNS = zeros_arr[~real_mask]
+    return realNS, complexNS
+
+
+@jit
+def jax_eval_roots(lst):
+    return numpy.array([x.evalf() for x in lst], dtype=numpy.complex128)
 
 
 def inlist(element, lst):
