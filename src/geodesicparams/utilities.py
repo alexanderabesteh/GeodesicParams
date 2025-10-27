@@ -16,44 +16,17 @@ References
 
 """
 
-from os import path, unlink, walk
+from os import makedirs, path
 from shutil import rmtree
 
-from jax import jit, numpy
-from jax.config import config
-from sympy import im, re
+import jax.numpy as jnp
+from jax import config, jit, lax
+from sympy import Expr
 
 config.update("jax_enable_x64", True)
 
 
 @jit
-def jax_inlist(element, lst):
-    lst_arr = numpy.array(lst)
-    matches = numpy.where(lst_arr == element, size=len(lst))[0]
-    return matches[0] if matches.size > 0 else -1
-
-
-@jit
-def jax_find_next(expression, lst):
-    lst_arr = numpy.array(lst)
-    distances = numpy.abs(lst_arr - expression)
-    return lst_arr[numpy.argmin(distances)]
-
-
-@jit
-def jax_separate_zeros(zeros):
-    zeros_arr = numpy.array(zeros)
-    real_mask = numpy.imag(zeros_arr) == 0
-    realNS = numpy.sort(zeros_arr[real_mask])
-    complexNS = zeros_arr[~real_mask]
-    return realNS, complexNS
-
-
-@jit
-def jax_eval_roots(lst):
-    return numpy.array([x.evalf() for x in lst], dtype=numpy.complex128)
-
-
 def inlist(element, lst):
     """
     Given a complex number <element>, find what index the element is
@@ -71,16 +44,23 @@ def inlist(element, lst):
     result : integer
         The index at which <element> is located in <lst>.
     """
+    lst_arr = jnp.asarray(lst, dtype=jnp.complex128)
+    matches = lst_arr == element
 
-    for i in range(len(lst)):
-        if element == lst[i]:
-            result = i
-            break
-        else:
-            result = -1
+    # find index where match occurs; returns 0 if none, will correct later
+    idx = jnp.argmax(matches)
+
+    # If no match, argmax returns 0, so check if element is really present
+    result = lax.cond(
+        jnp.any(matches),
+        lambda _: idx,
+        lambda _: -1,
+        operand=None,
+    )
     return result
 
 
+@jit
 def extract_multiple_elems(lst):
     """
     Remove duplicate elements from <lst> and store them in a separate
@@ -98,24 +78,27 @@ def extract_multiple_elems(lst):
     mult_elems : list
         A list of the duplicate elements removed from <lst>.
     """
+    arr = jnp.asarray(lst, dtype=jnp.complex128)
 
-    sorted_list = sorted(lst, key=lambda x: re(x))
-    mult_elems = []
-    clean_list = sorted_list
-    i = 0
+    # Sort by real part
+    sorted_arr = arr[jnp.argsort(jnp.real(arr))]
 
-    while i < len(sorted_list):
-        if i == len(sorted_list) - 1:
-            break
-        else:
-            if sorted_list[i] == sorted_list[i + 1]:
-                mult_elems.append(sorted_list[i])
-                clean_list.pop(i)
-            else:
-                i += 1
+    # Identify duplicates (adjacent equal elements)
+    duplicates_mask = jnp.concatenate(
+        [jnp.array([False]), sorted_arr[1:] == sorted_arr[:-1]]
+    )
+
+    mult_elems = sorted_arr[duplicates_mask]
+
+    # Keep only unique elements (first occurrence)
+    clean_list = jnp.array(
+        [x for i, x in enumerate(sorted_arr) if not duplicates_mask[i]]
+    )
+
     return clean_list, mult_elems
 
 
+@jit
 def find_next(expression, lst):
     """
     Find a number in <lst> that is closest to the value of <expression>.
@@ -132,20 +115,16 @@ def find_next(expression, lst):
     real
         The number in <lst> closest to <expression>.
     """
-
-    if type(expression) == list:
+    if isinstance(expression, (list, jnp.ndarray)):
         expression = expression[0]
 
-    d = abs(expression - lst[0])
-    j = 0
-
-    for i in range(1, len(lst)):
-        if abs(expression - lst[i]) < d:
-            d = abs(expression - lst[i])
-            j = i
-    return lst[j]
+    arr = jnp.asarray(lst, dtype=jnp.float64)
+    diffs = jnp.abs(arr - expression)
+    idx = jnp.argmin(diffs)
+    return arr[idx]
 
 
+@jit
 def separate_zeros(zeros):
     """
     Seperate the zeros of a polynomial into its real roots
@@ -164,20 +143,18 @@ def separate_zeros(zeros):
      complexNS : list
         A list of complex numbers ordered from least to greatest.
     """
+    zeros_arr = jnp.asarray(zeros, dtype=jnp.complex128)
 
-    realNS = []
-    complexNS = []
+    # Boolean mask for real numbers (imaginary part == 0)
+    is_real = jnp.isclose(jnp.imag(zeros_arr), 0.0)
 
-    for i in range(len(zeros)):
-        if im(zeros[i]) == 0:
-            realNS.append(zeros[i])
-        else:
-            complexNS.append(zeros[i])
-    realNS.sort()
+    realNS = jnp.sort(jnp.real(zeros_arr[is_real]))
+    complexNS = zeros_arr[~is_real]
 
     return realNS, complexNS
 
 
+@jit
 def eval_roots(lst):
     """
     Evaluate the symbolic roots of a polynomial numerically.
@@ -195,11 +172,15 @@ def eval_roots(lst):
 
     """
 
-    eval_lst = [lst[i].evalf() for i in range(len(lst))]
-    return eval_lst
+    def _eval(x):
+        if isinstance(x, Expr):
+            return float(x.evalf())
+        return float(x)
+
+    return [_eval(x) for x in lst]
 
 
-def clear_directory(dir):
+def clear_directory(dir_path):
     """
     Remove all files in a directory.
 
@@ -214,8 +195,6 @@ def clear_directory(dir):
 
     """
 
-    for root, dirs, files in walk(dir):
-        for f in files:
-            unlink(path.join(root, f))
-        for d in dirs:
-            rmtree(path.join(root, d))
+    if path.exists(dir_path):
+        rmtree(dir_path)
+    makedirs(dir_path, exist_ok=True)
