@@ -2,45 +2,29 @@
 name = "geodesicparams"
 version = "0.2.1"
 description = "A python package for determining the astrophysical parameters of a body in Plebański-Demiański spacetimes."
-authors = [{ name = "Alexander Abesteh", email = "alexabesteh@gmail.com" }]
-requires-python = ">=3.12,<4"
 readme = "README.md"
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
-    "Programming Language :: Python :: 3.14",
+authors = [
+  { name = "Alexander Abesteh", email = "alexabesteh@gmail.com" }
 ]
+requires-python = ">=3.14"
 dependencies = [
-    "mpmath>=1.3.0,<2",
-    "sympy>=1.13.0,<2",
-    "numpy>=2.0.0,<3",
-    "scipy>=1.14.0,<2",
-    "jax>=0.7.0,<0.8",
+  "mpmath",
+  "sympy",
+  "numpy",
+  "scipy",
+  "jax",
 ]
 
 [dependency-groups]
 test = [
-    "matplotlib>=3.9.1,<4",
-    "pyqt6>=6.7.1,<7",
-    "astropy>=6.1.2,<7",
-    "astroquery>=0.4.7,<0.5",
-    "jupyter>=1.1.1,<2",
-    "vpython>=7.6.5,<8",
+  "matplotlib",
+  "pyqt6",
+  "astropy",
+  "astroquery",
+  "jupyter",
+  "vpython",
 ]
 
-[tool.uv]
-default-groups = ["test"]
-
-[tool.hatch.build.targets.sdist]
-include = ["src/geodesicparams"]
-
-[tool.hatch.build.targets.wheel]
-include = ["src/geodesicparams"]
-
-[tool.hatch.build.targets.wheel.sources]
-"src/geodesicparams" = "geodesicparams"
-
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["uv_build>=0.9.13,<0.10.0"]
+build-backend = "uv_build"
