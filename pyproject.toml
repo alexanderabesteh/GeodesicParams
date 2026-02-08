@@ -1,5 +1,5 @@
 [project]
-name = "geodesicparams"
+name = "orbitronx"
 version = "0.2.1"
 description = "A python package for determining the astrophysical parameters of a body in Plebański-Demiański spacetimes."
 readme = "README.md"
