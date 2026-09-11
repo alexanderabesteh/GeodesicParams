@@ -1,10 +1,32 @@
-from jax import config, jit, lax, vmap, grad, asarray, broadcast_arrays, isnan, isinf, logical_and
-from jax.numpy import (arange, complex128, cos, exp, inf, log, maximum,
-                       nan, pi, sin, sqrt, sum, where, int32)
+from functools import partial
+
+from jax import config, grad, jit, lax, vmap
+from jax.numpy import (
+    any as jnp_any,
+    arange,
+    asarray,
+    broadcast_arrays,
+    complex128,
+    cos,
+    exp,
+    inf,
+    int32,
+    isinf,
+    isnan,
+    log,
+    logical_and,
+    maximum,
+    nan,
+    pi,
+    sin,
+    sqrt,
+    sum,
+    where,
+)
 
 config.update("jax_enable_x64", True)
 
-@jit
+@partial(jit, static_argnums=(0, 3, 4))
 def jacobi_theta(n, z, q, derivative=0, n_terms=50):
     """
     Jacobi theta function θ_n(z, q) with optional derivative.
@@ -34,10 +56,6 @@ def jacobi_theta(n, z, q, derivative=0, n_terms=50):
     if n not in [1, 2, 3, 4]:
         raise ValueError(f"n must be 1, 2, 3, or 4, got {n}")
     
-    q_abs = abs(q)
-    if any(q_abs >= 1.0):
-        print(f"Warning: |q| = {q_abs} may not converge (requires |q| < 1)")
-    
     z_is_scalar = z.ndim == 0
     if z_is_scalar:
         z = z.reshape(1)
@@ -55,7 +73,6 @@ def jacobi_theta(n, z, q, derivative=0, n_terms=50):
     log_q = log(q)
     q_powers = exp(exponents * log_q)
     
-    @jit
     def compute_theta(z_val):
         """Compute theta function for a single z value."""
         if n == 1:
@@ -120,7 +137,6 @@ def qfrom(tau):
     tau = asarray(tau, dtype=complex128)
     return exp(1j * pi * tau)
 
-
 def chop(x, tol=1e-15):
     """
     Set values very close to zero to exactly zero (like mpmath.chop).
@@ -177,7 +193,7 @@ def carlson_first(x, y, z, tol=1e-12, max_iter=60):
         max_diff = maximum(maximum(dx, dy), dz)
         scale = maximum(abs(ac), 1.0)
         not_converged = max_diff > (tol * scale)
-        any_not_converged = any(not_converged)
+        any_not_converged = jnp_any(not_converged)
         return (it < max_iter) & any_not_converged
     
     def body_fn(state):
@@ -228,9 +244,6 @@ def carlson_first(x, y, z, tol=1e-12, max_iter=60):
     rf_flat = where(is_nan, nan + 1j*nan, rf_flat)
     
     rf = rf_flat.reshape(shape)
-    
-    if rf.shape == ():
-        return rf.item()
     return rf
 
 @jit
@@ -291,7 +304,4 @@ def agm(a, b=1.0, tol=1e-15, max_iter=200):
     results, iterations = vmap(agm_single)(a_flat, b_flat)
     
     results = results.reshape(a_arr.shape)
-    
-    if results.shape == ():
-        return results.item()
     return results
