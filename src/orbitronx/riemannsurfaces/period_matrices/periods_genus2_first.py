@@ -19,6 +19,7 @@ References
 
 """
 
+from jax.numpy import array as jnp_array, complex128 as jnp_complex128
 from mpmath import eig, fabs, matrix, quad
 from sympy import Symbol, collect, im, lambdify, re, sqrt
 
@@ -749,4 +750,16 @@ def set_period_globals_genus2(period_matrix):
     m = eig(riemannM.apply(im))[0]
     if im(m[0]) != 0 and im(m[1]) == 0 and re(m[0]) > 0 and re(m[1]) > 0:
         raise ValueError("Imaginary part of Riemann matrix is not positive definite")
-    return periods_inverse, riemannM
+
+    # riemannM is only ever consumed downstream as an argument to the
+    # JAX-jitted hyp_theta_* functions (never as raw mpmath matrix
+    # arithmetic), so convert it here once rather than relying on every
+    # caller to guard against receiving a raw mpmath matrix. Build the
+    # nested list explicitly: mpmath matrices don't iterate into nested rows
+    # the way jnp_array expects, so passing the matrix straight through
+    # would silently flatten it to 1-D.
+    riemannM_jax = jnp_array(
+        [[complex(riemannM[i, j]) for j in range(2)] for i in range(2)],
+        dtype=jnp_complex128,
+    )
+    return periods_inverse, riemannM_jax
