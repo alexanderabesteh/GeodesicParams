@@ -17,54 +17,72 @@ References
 """
 
 
-from jax import config, jit, array, float64, isclose, arange, where, logical_and, argmax
 from pathlib import Path
+from shutil import Error, rmtree
+
+from jax import config
+from jax.numpy import arange, argmax, array, float64, isclose, logical_and, nan, where
 from sympy import im, re
-from shutil import rmtree, Error
 
 config.update("jax_enable_x64", True)
 
 
-@jit
-def inlist(element: complex, lst: list[complex]) -> int:
+def inlist(element: complex | str, lst: list[complex | str]) -> int:
     """
-    Given a complex number <element>, find what index the element is
-    located at in <lst>. Return -1 if <element> is not in <lst>.
+    Given an element, find what index the element is located at in <lst>.
+    Return -1 if <element> is not in <lst>. Supports complex numbers
+    (with approximate matching) and strings (with exact matching).
 
     Parameters
     ----------
-    element : complex
-        A complex number.
+    element : complex or str
+        A complex number or string.
     lst : list
-        A list of complex or real numbers.
+        A list of complex numbers, real numbers, or strings.
 
     Returns
     -------
     result : integer
         The index at which <element> is located in <lst>.
     """
-    element_array = array([element.real, element.imag], dtype = float64)
-    
-    lst_array = array(
-        [[z.real, z.imag] if isinstance(z, complex) else [float(z), 0.0] for z in lst],
-        dtype = float64
-    )
-    
+    if isinstance(element, str):
+        for i, item in enumerate(lst):
+            if item == element:
+                return i
+        return -1
+
+    elem = complex(element)
+    element_array = array([elem.real, elem.imag], dtype = float64)
+
+    # Entries that aren't a single number (e.g. a nested list/tuple) can never
+    # equal <element>; mark them with NaN so they fall out of isclose() below
+    # instead of raising, matching plain Python's "==" behavior on a type
+    # mismatch (always False, never an exception).
+    pairs = []
+    for z in lst:
+        try:
+            c = complex(z)
+            pairs.append([c.real, c.imag])
+        except TypeError:
+            pairs.append([nan, nan])
+
+    lst_array = array(pairs, dtype = float64)
+
     real_matches = isclose(lst_array[:, 0], element_array[0], rtol=1e-10, atol=1e-12)
     imag_matches = isclose(lst_array[:, 1], element_array[1], rtol=1e-10, atol=1e-12)
     matches = logical_and(real_matches, imag_matches)
-    
+
     indices = arange(len(lst))
-    match_indices = indices * matches  
-    
+    match_indices = indices * matches
+
     max_index = argmax(match_indices)
-    
+
     result_index = where(
         matches[max_index] > 0,
         max_index,
         -1
     )
-    
+
     return int(result_index)
 
 def extract_multiple_elems(lst):
@@ -164,7 +182,7 @@ def separate_zeros(zeros):
     return realNS, complexNS
 
 
-def eval_roots(lst):
+def eval_roots(lst, digits=15):
     """
     Evaluate the symbolic roots of a polynomial numerically.
 
@@ -173,6 +191,16 @@ def eval_roots(lst):
     lst : list
         A list of complex or real numbers representing the roots of a
         polynomial symbolically.
+    digits : int, optional
+        The number of significant digits to evaluate each root to. Defaults
+        to 15 (sympy's own `.evalf()` default), which is not enough to
+        resolve roots that end up tightly clustered after a genus-2
+        substitution (e.g. a small but nonzero cosmological constant):
+        expanding a branch-cut polynomial from such near-coincident roots
+        is a Wilkinson-style ill-conditioned computation that can lose 10+
+        significant digits to cancellation, so callers working with such
+        configurations should pass the ambient `digits`/`mp.prec` precision
+        instead of relying on this default.
 
     Returns
     -------
@@ -181,7 +209,7 @@ def eval_roots(lst):
 
     """
 
-    eval_lst = [lst[i].evalf() for i in range(len(lst))]
+    eval_lst = [lst[i].evalf(digits) for i in range(len(lst))]
     return eval_lst
 
 def clear_directory(dir_path):
