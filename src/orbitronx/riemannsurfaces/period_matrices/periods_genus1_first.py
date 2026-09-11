@@ -69,7 +69,18 @@ def periods_firstkind(g2, g3):
         return mpf("inf"), mpc(0, "inf")
     # Normal results
     else:
-        e3, e2, e1 = roots
+        # roots is ascending and all-real when the discriminant is positive,
+        # but is [real_root, conj_minus, conj_plus] when there is exactly one
+        # real root (negative discriminant). The AGM formulas below require
+        # e1 to be the real root, so detect the latter case and re-assign.
+        real_idx = [i for i, root in enumerate(roots) if im(root) == 0]
+        if len(real_idx) == 3:
+            e3, e2, e1 = roots
+        else:
+            i1 = real_idx[0]
+            others = [roots[i] for i in range(3) if i != i1]
+            e1 = roots[i1]
+            e2, e3 = others
         a = sqrt(e1 - e3)
         b = sqrt(e1 - e2)
         c = sqrt(e2 - e3)
