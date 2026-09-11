@@ -15,7 +15,9 @@ References
 """
 
 from mpmath import (
+    atan2,
     binomial,
+    cos,
     exp,
     fabs,
     im,
@@ -23,15 +25,33 @@ from mpmath import (
     mpc,
     mpf,
     pi,
+    quad,
+    sin,
 )
+from mpmath import sqrt as mp_sqrt
 from sympy import Symbol, collect, degree, lambdify, oo, re, sqrt
-from torch import sqrt as t_sqrt, sin as t_sin, cos as t_cos, atan2 as t_atan2
-from torchquad import set_up_backend, GaussLegendre
+from torch import (
+    complex128 as t_complex128,
+    sqrt as t_sqrt,
+)
+from torchquad import GaussLegendre, set_up_backend
+
 from ...utilities import inlist, separate_zeros
 
-set_up_backend("torch", data_type = "complex64", torch_enable_cuda = True)
+set_up_backend("torch", data_type = "float64", torch_enable_cuda = True)
 
-def int_genus2_real_exp(zeros, lower, upper, exponent, branch):
+
+def _torch_to_complex(t):
+    """
+    Convert a torchquad integration result (a torch.Tensor) into a plain
+    Python complex, so it interoperates with the surrounding mpmath/sympy
+    arithmetic in this module.
+    """
+
+    return complex(t.detach().cpu().item())
+
+
+def int_genus2_real_exp(zeros, lower, upper, exponent, branch, digits):
     """
     Integrates a holomorphic differential z**j / sqrt(P(z)) from <lower> to <upper>,
     where at least one of <lower> or <upper> is a real zero of the polynomial P(z).
@@ -48,6 +68,8 @@ def int_genus2_real_exp(zeros, lower, upper, exponent, branch):
         The exponent j in the differential z**j / sqrt(P(z)), where j = 0 or 1.
     branch : int
         The branch of the sqrt(P(z)).
+    digits : int
+        The number of digits used in the computation.
 
     Returns
     -------
@@ -58,7 +80,16 @@ def int_genus2_real_exp(zeros, lower, upper, exponent, branch):
 
     if lower == upper:
         return 0
-    elif lower > upper:
+    elif re(lower) > re(upper):
+        # lower/upper are ordered by real part rather than compared directly:
+        # this function's u/g machinery is evaluated pointwise along the
+        # straight-line path from lb to ub and is well-defined for a complex
+        # endpoint (e.g. a third-kind integral's pole, which need not lie on
+        # the real axis), but a direct "<" comparison of two complex numbers
+        # is mathematically undefined and sympy correctly refuses it. Since
+        # at least one of lower/upper is a real zero of the polynomial by
+        # this function's contract, ordering by real part reduces to the
+        # original real-axis comparison whenever both bounds are real.
         lb = upper
         ub = lower
         sign = -1
@@ -66,6 +97,22 @@ def int_genus2_real_exp(zeros, lower, upper, exponent, branch):
         lb = lower
         ub = upper
         sign = 1
+
+    # Normalize to plain Python numbers. lower/upper may arrive as sympy
+    # Float/complex objects (e.g. a pole from sympy's solve()); left as-is,
+    # mixing those with the mpmath numbers mpmath.quad's quadrature nodes
+    # are made of leaves sqrt(...) unevaluated deep inside the integrand,
+    # which mpmath then can't convert back to a number. Keep genuinely-real
+    # bounds as plain floats rather than complex(..., 0.0): mpmath.quad
+    # appears to cache quadrature state keyed in a way that a zero-imaginary
+    # Python complex bound trips into "complex" mode and leaks into
+    # unrelated later mpmath.quad calls in the same process.
+    lb = complex(lb)
+    ub = complex(ub)
+    if lb.imag == 0:
+        lb = lb.real
+    if ub.imag == 0:
+        ub = ub.real
 
     k = inlist(lb, zeros)
     l = inlist(ub, zeros)
@@ -77,78 +124,117 @@ def int_genus2_real_exp(zeros, lower, upper, exponent, branch):
                 tag = (lb + ub) / 2
             else:
                 tag = re(zeros[inlist(lb, zeros) + 1])
-                return sign * (
-                    int_genus2_real_exp(zeros, lb, tag, exponent, branch)
-                    + int_genus2_real_exp(zeros, tag, ub, exponent, branch)
-                )
+            return sign * (
+                int_genus2_real_exp(zeros, lb, tag, exponent, branch, digits)
+                + int_genus2_real_exp(zeros, tag, ub, exponent, branch, digits)
+            )
         else:
             raise ValueError("Invalid use")
 
     if k == -1 and l >= 0:
         # Integration from lb to zeros[l]
         # g is real and positive for real x in (zeros[l - 1], zeros[l]]
-        g = 1
-        x = Symbol("x")
-        for i in range(l):
-            g *= x - zeros[i]
-        for i in range(l + 1, 5):
-            g *= zeros[i] - x
-        g = collect(g.expand(), x)
+        before, after = range(l), range(l + 1, 5)
 
         # Branch factor
         if (l + 1) % 2 > 0:
             eval_branch = exp(-pi * 1j * (branch + 1 / 2))
         else:
             eval_branch = exp(-pi * 1j * branch)
-        u = lambdify(x, -2 * sqrt(ub - x), "torch")
+        u = lambda x: -2 * mp_sqrt(ub - x)
     elif l == -1 and k >= 0:
         # Integration from zeros[k] to ub
         # g is real and positive for real x in [zeros[k], zeros[k + 1]]
-        g = 1
-        x = Symbol("x")
-        for i in range(k):
-            g *= x - zeros[i]
-        for i in range(k + 1, 5):
-            g *= zeros[i] - x
-        g = collect(g.expand(), x)
+        before, after = range(k), range(k + 1, 5)
 
         # Branch factor
         if (k + 2) % 2 > 0:
             eval_branch = exp(-pi * 1j * (branch + 1 / 2))
         else:
             eval_branch = exp(-pi * 1j * branch)
-        u = lambdify(x, 2 * sqrt(x - lb), "torch")
+        u = lambda x: 2 * mp_sqrt(x - lb)
     else:
         raise ValueError("Invalid use")
 
-    # Integration by parts
-    q = 0
-    qPrime = 0
+    # q(y) = g(y) = prod_{i in before} (y - zeros[i]) * prod_{i in after} (zeros[i] - y)
+    # -- the "other 4 factors" of P with the singular zero excluded, signed so
+    # g is real and positive on the target interval.
+    #
+    # NOTE: this used to be built by expanding g into monomial form via
+    # sympy's expand()/collect() and reading off coefficients (`q = sum
+    # re(g.coeff(x, i)) * x**i`), then evaluating that expanded form. For a
+    # tightly-clustered root configuration (e.g. a small nonzero
+    # cosmological constant, where several converted roots can end up
+    # within ~1e-6 of each other) that expansion is a Wilkinson-style
+    # ill-conditioned computation: forming the monomial coefficients
+    # involves cancellation between terms of very different relative
+    # magnitude, and evaluating the expanded polynomial back out reintroduces
+    # further cancellation -- together these were silently corrupting `q`
+    # (and hence the whole period-matrix integral built on it) for exactly
+    # this kind of near-degenerate configuration, while leaving
+    # well-separated configurations looking fine. Evaluating g directly as a
+    # product, at each point it's needed, never expands into monomials and
+    # so never hits this cancellation.
+    def q_func(y):
+        val = mpc(1)
+        for i in before:
+            val *= y - mpc(complex(zeros[i]))
+        for i in after:
+            val *= mpc(complex(zeros[i])) - y
+        return val.real
 
-    for i in range(0, degree(g) + 1):
-        q += re(g.coeff(x, i)) * x**i
-    for i in range(1, degree(g) + 1):
-        qPrime += i * re(g.coeff(x, i)) * x ** (i - 1)
+    def qPrime_func(y):
+        val = mpc(1)
+        deriv_sum = mpc(0)
+        for i in before:
+            factor = y - mpc(complex(zeros[i]))
+            val *= factor
+            deriv_sum += 1 / factor
+        for i in after:
+            factor = mpc(complex(zeros[i])) - y
+            val *= factor
+            deriv_sum -= 1 / factor
+        return (val * deriv_sum).real
 
-    v = lambdify(x, x ** (exponent) / sqrt(q), "sympy")
-    vPrime = lambdify(
-        x,
-        -(x ** (exponent)) / (2 * sqrt(q) ** 3) * qPrime
-        + exponent * x ** (exponent - 1) / sqrt(q),
-        "torch",
-    )
-    partInt = (float(u(ub)) * v(ub) - float(u(lb)) * v(lb)).evalf()
-    gl = GaussLegendre()
+    def v(y):
+        y = mpc(y)
+        return y ** exponent / mp_sqrt(mpc(q_func(y)))
 
-    h = -1 * gl.integrate(lambda x: vPrime(x) * u(x), dim=1, N=101, integration_domain=[[lb, ub]], backend = "torch") 
+    def vPrime(y):
+        y = mpc(y)
+        qy = mpc(q_func(y))
+        term1 = -(y ** exponent) / (2 * mp_sqrt(qy) ** 3) * qPrime_func(y)
+        term2 = exponent * y ** (exponent - 1) / mp_sqrt(qy) if exponent != 0 else 0
+        return term1 + term2
+
+    partInt = u(ub) * v(ub) - u(lb) * v(lb)
+
+    # Integration: mpmath's arbitrary-precision quad, retrying across
+    # quadrature methods (and, if needed, at reduced precision) so a
+    # near-degenerate root configuration returns a proper mpf/mpc instead of
+    # silently going to NaN under fixed double precision.
+    dig = digits
+    methods = ["tanh-sinh", "gauss-legendre"]
+    i = 0
+    h = -1 * quad(lambda x: mpc(vPrime(x) * u(x)), [lb, ub], method=methods[i])
+    while isinstance(h, (mpf, mpc)) == False and dig > digits - 5:
+        while isinstance(h, (mpf, mpc)) == False and i < 2:
+            h = -1 * quad(lambda x: mpc(vPrime(x) * u(x)), [lb, ub], method=methods[i])
+            i += 1
+        dig = dig - 1
+        i = 0
 
     if isinstance(h, (mpf, mpc)) == False:
         raise ValueError("Integration failed")
+    if dig < digits - 1:
+        print(
+            f"WARNING in int_genus2_real_exp: digits for integration reduced to {dig + 1}"
+        )
 
     return sign * eval_branch * (partInt + h)
 
 
-def int_genus2_complex_exp(zeros, realPart, imaPart, position, exponent, branch):
+def int_genus2_complex_exp(zeros, realPart, imaPart, position, exponent, branch, digits):
     """
     Integrates a differential of the form It**j dt/ sqrt(P(<realPart> + It)) from t = 0 to
     t = <imaPart>, where I is the imaginary unit.
@@ -180,34 +266,40 @@ def int_genus2_complex_exp(zeros, realPart, imaPart, position, exponent, branch)
 
     """
 
-    x = Symbol("x")
     t = [i for i in [0, 1, 2, 3, 4] if i not in [position, position + 1]]
 
-    g = 1
-    for i in t:
-        g *= x - zeros[i]
+    # g(w) = prod_{i in t} (w - zeros[i]), evaluated directly at the complex
+    # point w = realPart + i*tt (rather than expanded into monomial
+    # coefficients-of-x and then substituted/re-collected into powers of tt,
+    # as this used to do via sympy's expand()/collect()). That expansion is
+    # a Wilkinson-style ill-conditioned computation for a tightly-clustered
+    # root configuration (see the identical fix and rationale in
+    # int_genus2_real_exp above / project_genus2_ima2per2_bug.md) --
+    # evaluating the product directly at each point needed sidesteps it
+    # entirely. g is holomorphic in w, so d/dtt g(realPart + i*tt) = i *
+    # g'(w), with g'(w) via the logarithmic derivative
+    # g(w) * sum(1 / (w - zeros[i])).
+    def g_complex(w):
+        val = mpc(1)
+        for i in t:
+            val *= w - mpc(complex(zeros[i]))
+        return val
 
-    g = collect(g.expand(), x)
+    def gPrime_complex(w):
+        val = mpc(1)
+        deriv_sum = mpc(0)
+        for i in t:
+            factor = w - mpc(complex(zeros[i]))
+            val *= factor
+            deriv_sum += 1 / factor
+        return val * deriv_sum
 
-    # g has real coefficients: remove +0 * I
-    coeffsg = [re(g.coeff(x, i)) for i in range(4)]
+    rQ = lambda tt: g_complex(mpc(realPart, tt)).real
+    iQ = lambda tt: g_complex(mpc(realPart, tt)).imag
+    rQPrime = lambda tt: (1j * gPrime_complex(mpc(realPart, tt))).real
+    iQPrime = lambda tt: (1j * gPrime_complex(mpc(realPart, tt))).imag
 
-    # Separate real and imaginary parts of g and derivative of g
-    iQ = lambdify(x, -coeffsg[3] * x**3 + x * (
-        3 * coeffsg[3] * realPart**2 + 2 * coeffsg[2] * realPart + coeffsg[1]
-    ), "torch")
-
-    rQ = lambdify(x, -(x**2) * (3 * coeffsg[3] * realPart + coeffsg[2])
-        + coeffsg[3] * realPart**3
-        + coeffsg[2] * realPart**2
-        + coeffsg[1] * realPart
-        + coeffsg[0], "torch") 
-
-    iQPrime = lambdify(x, -3 * coeffsg[3] * x**2 + (
-        3 * coeffsg[3] * realPart**2 + 2 * coeffsg[2] * realPart + coeffsg[1]
-    ), "torch")
-
-    rQPrime = lambdify(x, -2 * x * (3 * coeffsg[3] * realPart + coeffsg[2]), "torch")
+    methods = ["tanh-sinh", "gauss-legendre"]
 
     """
     For the computation of partInt you need to be careful for negative rQ(0):
@@ -217,60 +309,166 @@ def int_genus2_complex_exp(zeros, realPart, imaPart, position, exponent, branch)
     (This is not a problem for the integration as the discontinuity is a null set).
     """
     if exponent == 0:
-        if float(rQ(0)) > 0:
-            partInt = (2 / sqrt(float(rQ(0)))).evalf()
+        if rQ(0) > 0:
+            # iQ(0) = 0
+            partInt = (2 / sqrt(rQ(0))).evalf()
         else:
             if iQ(imaPart / 100) < 0:
-                partInt = (2 / sqrt(-float(rQ(0))) * 1j).evalf()
+                partInt = (2 / sqrt(-rQ(0)) * 1j).evalf()
             else:
-                partInt = (2 / sqrt(-float(rQ(0))) * (-1j)).evalf()
+                partInt = (2 / sqrt(-rQ(0)) * (-1j)).evalf()
     else:
         partInt = 0
-    gl = GaussLegendre()
-    # First real part
-    a1_int = lambda x: ( x ** (exponent) * t_sqrt(imaPart - x) / t_sqrt(x + imaPart) ** 3
-                * ((rQ(x)) ** 2 + (iQ(x)) ** 2) ** (-1 / 4)
-                * t_cos(-1 / 2 * t_atan2(iQ(x), rQ(x))))
 
-    a1 = -1 * gl.integrate(a1_int, dim=1, N=101, integration_domain=[[0, imaPart]], backend = "torch")
+    # First real part
+    dig = digits
+    i = 0
+    a1 = -1 * quad(
+        lambda x: x ** (exponent)
+        * sqrt(imaPart - x)
+        / sqrt(x + imaPart) ** 3
+        * ((rQ(x)) ** 2 + (iQ(x)) ** 2) ** (-1 / 4)
+        * cos(-1 / 2 * atan2(iQ(x), rQ(x))),
+        [0, imaPart],
+        method=methods[i],
+    )
+    while isinstance(a1, (mpc, mpf)) == False and dig > digits - 5:
+        while isinstance(a1, (mpc, mpf)) == False and i < 2:
+            a1 = -1 * quad(
+                lambda x: x ** (exponent)
+                * sqrt(imaPart - x)
+                / sqrt(x + imaPart) ** 3
+                * ((rQ(x)) ** 2 + (iQ(x)) ** 2) ** (-1 / 4)
+                * cos(-1 / 2 * atan2(iQ(x), rQ(x))),
+                [0, imaPart],
+                method=methods[i],
+            )
+            i += 1
+        dig = dig - 1
+        i = 0
 
     if isinstance(a1, (mpf, mpc)) == False:
         raise ValueError("First integration failed")
+    if dig < digits - 1:
+        print(
+            f"WARNING in int_genus2_complex_exp: digits for first integration reduced to {dig+1}"
+        )
 
     # First imaginary part
-    a2_int = lambda x: (x ** (exponent) * t_sqrt(imaPart - x) / t_sqrt(x + imaPart) ** 3
+    dig = digits
+    i = 0
+    a2 = -1j * quad(
+        lambda x: x ** (exponent)
+        * sqrt(imaPart - x)
+        / sqrt(x + imaPart) ** 3
+        * ((rQ(x)) ** 2 + (iQ(x)) ** 2) ** (-1 / 4)
+        * sin(-1 / 2 * atan2(iQ(x), rQ(x))),
+        [0, imaPart],
+        method=methods[i],
+    )
+    while isinstance(a2, (mpc, mpf)) == False and dig > digits - 5:
+        while isinstance(a2, (mpc, mpf)) == False and i < 2:
+            a2 = -1j * quad(
+                lambda x: x ** (exponent)
+                * sqrt(imaPart - x)
+                / sqrt(x + imaPart) ** 3
                 * ((rQ(x)) ** 2 + (iQ(x)) ** 2) ** (-1 / 4)
-                * t_sin(-1 / 2 * t_atan2(iQ(x), rQ(x))))
-    a2 = -1j * gl.integrate(a2_int, dim=1, N=101, integration_domain=[[0, imaPart]], backend = "torch") 
+                * sin(-1 / 2 * atan2(iQ(x), rQ(x))),
+                [0, imaPart],
+                method=methods[i],
+            )
+            i += 1
+        dig = dig - 1
+        i = 0
 
     if isinstance(a2, (mpf, mpc)) == False:
         raise ValueError("Second integration failed")
+    if dig < digits - 1:
+        print(
+            f"WARNING in int_genus2_complex_exp: digits for second integration reduced to {dig+1}"
+        )
 
     a = a1 + a2
 
     # Second real part
-    b1_int = lambda x: (x ** (exponent) * t_sqrt(imaPart - x) / t_sqrt(x + imaPart)
+    dig = digits
+    i = 0
+    b1 = -1 * quad(
+        lambda x: x ** (exponent)
+        * sqrt(imaPart - x)
+        / sqrt(x + imaPart)
         * ((rQ(x)) ** 2 + (iQ(x)) ** 2) ** (-3 / 4)
         * (
-            t_cos(-3 / 2 * t_atan2(iQ(x), rQ(x))) * rQPrime(x)
-            - t_sin(-3 / 2 * t_atan2(iQ(x), rQ(x))) * iQPrime(x)
-        ))
-    b1 = -1 * gl.integrate(b1_int, dim=1, N=101, integration_domain=[[0, imaPart]], backend = "torch")
-    
+            cos(-3 / 2 * atan2(iQ(x), rQ(x))) * rQPrime(x)
+            - sin(-3 / 2 * atan2(iQ(x), rQ(x))) * iQPrime(x)
+        ),
+        [0, imaPart],
+        method=methods[i],
+    )
+    while isinstance(b1, (mpf, mpc)) == False and dig > digits - 5:
+        while isinstance(b1, (mpc, mpf)) == False and i < 2:
+            b1 = -1 * quad(
+                lambda x: x ** (exponent)
+                * sqrt(imaPart - x)
+                / sqrt(x + imaPart)
+                * ((rQ(x)) ** 2 + (iQ(x)) ** 2) ** (-3 / 4)
+                * (
+                    cos(-3 / 2 * atan2(iQ(x), rQ(x))) * rQPrime(x)
+                    - sin(-3 / 2 * atan2(iQ(x), rQ(x))) * iQPrime(x)
+                ),
+                [0, imaPart],
+                method=methods[i],
+            )
+            i += 1
+        dig = dig - 1
+        i = 0
+
     if isinstance(b1, (mpf, mpc)) == False:
         raise ValueError("Third integration failed")
+    if dig < digits - 1:
+        print(
+            f"WARNING in int_genus2_complex_exp: digits for third integration reduced to {dig+1}"
+        )
 
     # Second imaginary part
-    b2_int = lambda x: (x ** (exponent) * t_sqrt(imaPart - x) / t_sqrt(x + imaPart)
+    dig = digits
+    i = 0
+    b2 = -1j * quad(
+        lambda x: x ** (exponent)
+        * sqrt(imaPart - x)
+        / sqrt(x + imaPart)
         * ((rQ(x)) ** 2 + (iQ(x)) ** 2) ** (-3 / 4)
         * (
-            t_sin(-3 / 2 * t_atan2(iQ(x), rQ(x))) * rQPrime(x)
-            + t_cos(-3 / 2 * t_atan2(iQ(x), rQ(x))) * iQPrime(x)
-        ))
-    b2 = -1j * gl.integrate(b2_int, dim=1, N=101, integration_domain=[[0, imaPart]], backend = "torch")
+            sin(-3 / 2 * atan2(iQ(x), rQ(x))) * rQPrime(x)
+            + cos(-3 / 2 * atan2(iQ(x), rQ(x))) * iQPrime(x)
+        ),
+        [0, imaPart],
+        method=methods[i],
+    )
+    while isinstance(b2, (mpc, mpf)) == False and dig > digits - 5:
+        while isinstance(b2, (mpf, mpc)) == False and i < 2:
+            b2 = -1j * quad(
+                lambda x: x ** (exponent)
+                * sqrt(imaPart - x)
+                / sqrt(x + imaPart)
+                * ((rQ(x)) ** 2 + (iQ(x)) ** 2) ** (-3 / 4)
+                * (
+                    sin(-3 / 2 * atan2(iQ(x), rQ(x))) * rQPrime(x)
+                    + cos(-3 / 2 * atan2(iQ(x), rQ(x))) * iQPrime(x)
+                ),
+                [0, imaPart],
+                method=methods[i],
+            )
+            i += 1
+        dig = dig - 1
+        i = 0
 
     if isinstance(b2, (mpf, mpc)) == False:
         raise ValueError("Fourth integration failed")
+    if dig < digits - 1:
+        print(
+            f"WARNING in int_genus2_complex_exp: digits for fourth integration reduced to {dig+1}"
+        )
 
     b = b1 + b2
 
@@ -278,29 +476,97 @@ def int_genus2_complex_exp(zeros, realPart, imaPart, position, exponent, branch)
         c = 0
     else:
         # Third real part
-        c1_int = lambda x: (x ** (exponent - 1) * t_sqrt(imaPart - x) / t_sqrt(x + imaPart)
+        dig = digits
+        i = 0
+        c1 = (
+            2
+            * exponent
+            * quad(
+                lambda x: x ** (exponent - 1)
+                * sqrt(imaPart - x)
+                / sqrt(x + imaPart)
                 * ((rQ(x)) ** 2 + (iQ(x)) ** 2) ** (-1 / 4)
-                * t_cos(-1 / 2 * t_atan2(iQ(x), rQ(x))))
-        c1 = 2 * exponent * gl.integrate(c1_int, dim=1, N=101, integration_domain=[[0, imaPart]], backend = "torch")
-        
+                * cos(-1 / 2 * atan2(iQ(x), rQ(x))),
+                [0, imaPart],
+                method=methods[i],
+            )
+        )
+        while isinstance(c1, (mpc, mpf)) == False and dig > digits - 5:
+            while isinstance(c1, (mpc, mpf)) == False and i < 2:
+                c1 = (
+                    2
+                    * exponent
+                    * quad(
+                        lambda x: x ** (exponent - 1)
+                        * sqrt(imaPart - x)
+                        / sqrt(x + imaPart)
+                        * ((rQ(x)) ** 2 + (iQ(x)) ** 2) ** (-1 / 4)
+                        * cos(-1 / 2 * atan2(iQ(x), rQ(x))),
+                        [0, imaPart],
+                        method=methods[i],
+                    )
+                )
+                i += 1
+            dig = dig - 1
+            i = 0
+
         if isinstance(c1, (mpc, mpf)) == False:
             raise ValueError("Fifth integration failed")
+        if dig < digits - 1:
+            print(
+                f"WARNING in int_genus2_complex_exp: digits for fifth integration reduced to {dig+1}"
+            )
 
         # Third imaginary part
-        c2_int = lambda x: (x ** (exponent - 1) * t_sqrt(imaPart - x) / t_sqrt(x + imaPart)
+        dig = digits
+        i = 0
+        c2 = (
+            2
+            * exponent
+            * 1j
+            * quad(
+                lambda x: x ** (exponent - 1)
+                * sqrt(imaPart - x)
+                / sqrt(x + imaPart)
                 * ((rQ(x)) ** 2 + (iQ(x)) ** 2) ** (-1 / 4)
-                * t_sin(-1 / 2 * t_atan2(iQ(x), rQ(x))))
-        c2 = 2 * exponent * 1j * gl.integrate(c2_int, dim=1, N=101, integration_domain=[[0, imaPart]], backend = "torch")
-        
+                * sin(-1 / 2 * atan2(iQ(x), rQ(x))),
+                [0, imaPart],
+                method=methods[i],
+            )
+        )
+        while isinstance(c1, (mpc, mpf)) == False and dig > digits - 5:
+            while isinstance(c1, (mpc, mpf)) == False and i < 2:
+                c2 = (
+                    2
+                    * exponent
+                    * 1j
+                    * quad(
+                        lambda x: x ** (exponent - 1)
+                        * sqrt(imaPart - x)
+                        / sqrt(x + imaPart)
+                        * ((rQ(x)) ** 2 + (iQ(x)) ** 2) ** (-1 / 4)
+                        * sin(-1 / 2 * atan2(iQ(x), rQ(x))),
+                        [0, imaPart],
+                        method=methods[i],
+                    )
+                )
+                i += 1
+            dig = dig - 1
+            i = 0
+
         if isinstance(c2, (mpc, mpf)) == False:
             raise ValueError("Sixth integration failed")
+        if dig < digits - 1:
+            print(
+                f"WARNING in int_genus2_complex_exp: digits for sixth integration reduced to {dig+1}"
+            )
 
         c = c1 + c2
 
     return exp(-pi * 1j * branch) * 1j * (partInt + a + b + c)
 
 
-def myint_genus2(zeros, lower, upper, branch):
+def myint_genus2(zeros, lower, upper, branch, digits):
     """
     Integrates the vector of canonical holomorphic differentials dz = [1 / sqrt(P(z),
     z / sqrt(P(z))] from <lower> to <upper>, where at least one of <lower> or <upper> is
@@ -328,13 +594,13 @@ def myint_genus2(zeros, lower, upper, branch):
 
     return matrix(
         [
-            int_genus2_real_exp(zeros, lower, upper, 0, branch),
-            int_genus2_real_exp(zeros, lower, upper, 1, branch),
+            int_genus2_real_exp(zeros, lower, upper, 0, branch, digits),
+            int_genus2_real_exp(zeros, lower, upper, 1, branch, digits),
         ]
     )
 
 
-def int_genus2_complex(zeros, realPart, imaPart, position, branch):
+def int_genus2_complex(zeros, realPart, imaPart, position, branch, digits):
     """
     Integrates the vector of canonical holomorphic differentials dz = [1 / sqrt(P(z),
     z / sqrt(P(z))] from the real part <realPart> of a complex zero of the polynomial P(z) to
@@ -362,8 +628,8 @@ def int_genus2_complex(zeros, realPart, imaPart, position, branch):
 
     """
 
-    a = int_genus2_complex_exp(zeros, realPart, imaPart, position, 0, branch)
-    b = int_genus2_complex_exp(zeros, realPart, imaPart, position, 1, branch)
+    a = int_genus2_complex_exp(zeros, realPart, imaPart, position, 0, branch, digits)
+    b = int_genus2_complex_exp(zeros, realPart, imaPart, position, 1, branch, digits)
 
     return matrix([a, realPart * a + 1j * b])
 
@@ -592,7 +858,7 @@ def branch_list_genus2(zeros, num_realNS):
     return erg
 
 
-def int_genus2_first(zeros, lower, upper, period_matrix):
+def int_genus2_first(zeros, lower, upper, digits, period_matrix):
     """
     Integrates the vector of canonical holomorphic differentials dz = [1/sqrt(P(z)),
     z/sqrt(P(z))] from <lower> to <upper>.
@@ -649,8 +915,8 @@ def int_genus2_first(zeros, lower, upper, period_matrix):
         branch_list = branch_list_genus2(e, len(realNS))
 
         return sign * (
-            myint_genus2(e, lb, tags, branch_list[inlist(lb, e)][2])
-            + myint_genus2(e, tags, ub, branch_list[inlist(ub, e)][0])
+            myint_genus2(e, lb, tags, branch_list[inlist(lb, e)][2], digits)
+            + myint_genus2(e, tags, ub, branch_list[inlist(ub, e)][0], digits)
         )
     # ------------------ Case 2: only one of lb and ub is a real zero
     elif inlist(lb, realNS) >= 0 or inlist(ub, realNS) >= 0:
@@ -663,7 +929,8 @@ def int_genus2_first(zeros, lower, upper, period_matrix):
                     e,
                     lb,
                     ub,
-                    branch_list_genus2(e, len(realNS))[inlist(ub, e)][0]
+                    branch_list_genus2(e, len(realNS))[inlist(ub, e)][0],
+                    digits
                 )
             else:
                 raise ValueError("Invalid bounds")
@@ -678,7 +945,8 @@ def int_genus2_first(zeros, lower, upper, period_matrix):
                     e,
                     lb,
                     ub,
-                    branch_list_genus2(e, len(realNS))[inlist(lb, e)][2]
+                    branch_list_genus2(e, len(realNS))[inlist(lb, e)][2],
+                    digits
                 )
             else:
                 raise ValueError("Invalid bounds")
@@ -695,7 +963,8 @@ def int_genus2_first(zeros, lower, upper, period_matrix):
                         e,
                         lb,
                         realNS[-1],
-                        branch_list_genus2(e, len(realNS))[inlist(realNS[-1], e)][2]
+                        branch_list_genus2(e, len(realNS))[inlist(realNS[-1], e)][2],
+                        digits
                     )
                     + matrix(
                         [
@@ -717,8 +986,8 @@ def int_genus2_first(zeros, lower, upper, period_matrix):
                 * (x - e[4]), "torch")
                 gl = GaussLegendre()
 
-                integrand1 = lambda x: 1 / t_sqrt(p(x))
-                integrand2 = lambda x: x / t_sqrt(p(x))
+                integrand1 = lambda x: 1 / t_sqrt(p(x).to(t_complex128))
+                integrand2 = lambda x: x / t_sqrt(p(x).to(t_complex128))
 
                 sign = sign * exp(
                     pi
@@ -729,27 +998,31 @@ def int_genus2_first(zeros, lower, upper, period_matrix):
                 )
                 return matrix(
                     [
-                        sign * gl.integrate(integrand1, dim=1, N=101, integration_domain=[[lb, ub]], backend = "torch"),
-                        sign * gl.integrate(integrand2, dim=1, N=101, integration_domain=[[lb, ub]], backend = "torch"),
+                        sign * _torch_to_complex(
+                            gl.integrate(integrand1, dim=1, N=101, integration_domain=[[lb, ub]], backend = "torch")
+                        ),
+                        sign * _torch_to_complex(
+                            gl.integrate(integrand2, dim=1, N=101, integration_domain=[[lb, ub]], backend = "torch")
+                        ),
                     ])
         else:
             raise ValueError("Invalid bounds")
 
 
-def myint_genus2_second(zeros, differential, lower, upper, branch):
+def myint_genus2_second(zeros, differential, lower, upper, branch, digits):
     # Subject to change
 
     result = 0
 
     for i in range(len(differential)):
         result += differential[i] * int_genus2_real_exp(
-            zeros, lower, upper, i, branch 
+            zeros, lower, upper, i, branch, digits
         )
     return result
 
 
 def int_genus2_complex_second(
-    zeros, differential, realPart, imaPart, position, branch 
+    zeros, differential, realPart, imaPart, position, branch, digits
 ):
     # Subject to change
 
@@ -760,7 +1033,7 @@ def int_genus2_complex_second(
     for i in range(len(differential)):
         results.append(
             int_genus2_complex_exp(
-                zeros, realPart, imaPart, position, i, branch 
+                zeros, realPart, imaPart, position, i, branch, digits
             )
         )
 
