@@ -142,7 +142,7 @@ def convert_deg3(polynomial, zeros):
     return [p_standard, 1, lambdify(y, substitution, "jax"), substitution, sign_a3]
 
 
-def convert_degeven(polynomial, zeros, badzeros):
+def convert_degeven(polynomial, zeros, badzeros, digits=15):
     """
     Convert a 4th degree polynomial to a 3rd degree polynomial or a 6th degree to a 5th
     degree.
@@ -160,6 +160,12 @@ def convert_degeven(polynomial, zeros, badzeros):
     badzeros : list
         A list of complex or real numbers representing the roots of <polynomial> that are
         not to be used in the conversion.
+    digits : int, optional
+        The number of significant digits used to numerically evaluate the roots of the
+        degree-reduced polynomial. Defaults to 15; should be set to the ambient
+        precision (e.g. mp.dps) for polynomials whose roots may end up tightly
+        clustered after the 1/z substitution (e.g. genus-2 with a small cosmological
+        constant).
 
     Returns
     -------
@@ -186,7 +192,7 @@ def convert_degeven(polynomial, zeros, badzeros):
         raise ValueError("Error: multiple zeros, tbd")
 
     # Determine substitution
-    if inlist(0, zeros_list) >= 0:
+    if inlist(0, zeros_list) >= 0 and inlist(0, badzeros) == -1:
         substitution = 1 / z
     else:
         realNS, complexNS = separate_zeros(zeros_list)
@@ -203,13 +209,13 @@ def convert_degeven(polynomial, zeros, badzeros):
     if degree(p) == 4:
         p_degodd = (z**4 * p.subs(Poly(p).gen, substitution)).simplify()
         integrand = 1
-        zeros_degodd = eval_roots(Poly(p_degodd).all_roots())
+        zeros_degodd = eval_roots(Poly(p_degodd).all_roots(), digits)
         data_degodd = convert_deg3(p_degodd, zeros_degodd)
         prefactor = integrand * data_degodd[1]
     elif degree(p) == 6:
         p_degodd = (z**6 * p.subs(Poly(p).gen, substitution)).simplify()
         integrand = 1 / z**2
-        zeros_degodd = eval_roots(Poly(p_degodd).all_roots())
+        zeros_degodd = eval_roots(Poly(p_degodd).all_roots(), digits)
         data_degodd = convert_deg5(p_degodd, zeros_degodd)
         prefactor = (data_degodd[1] * integrand).subs(z, data_degodd[3])
 
@@ -222,7 +228,7 @@ def convert_degeven(polynomial, zeros, badzeros):
     ]
 
 
-def convert_polynomial(polynomial, degree, zeros, badzeros):
+def convert_polynomial(polynomial, degree, zeros, badzeros, digits=15):
     """
     Convert a polynomial used in a hyperelliptic or elliptic differential equation into
     standard form.
@@ -238,6 +244,11 @@ def convert_polynomial(polynomial, degree, zeros, badzeros):
     badzeros : list, optional
         A list of complex or real numbers representing the roots of <polynomial> that are
         not to be used in the conversion.
+    digits : int, optional
+        The number of significant digits used to numerically evaluate the roots of the
+        degree-reduced polynomial (only relevant for degree 4/6, which reduce via
+        convert_degeven). Defaults to 15; should be set to the ambient precision
+        (e.g. mp.dps) for polynomials whose roots may end up tightly clustered.
 
     Returns
     -------
@@ -259,7 +270,7 @@ def convert_polynomial(polynomial, degree, zeros, badzeros):
     if degree > 6:
         raise ValueError("Degree larger than 6 is not supported")
     elif degree == 6 or degree == 4:
-        return convert_degeven(polynomial, zeros, badzeros)
+        return convert_degeven(polynomial, zeros, badzeros, digits)
     elif degree == 5:
         return convert_deg5(polynomial, zeros)
     elif degree == 3:
