@@ -1,12 +1,13 @@
-from geodesicparams import *
-
 from datetime import datetime
-from os.path import dirname, abspath
-from astroquery.jplhorizons import Horizons
-from astropy.coordinates import SkyCoord
-from numpy import array
-from mpmath import sqrt
+from os.path import abspath, dirname
+
 import matplotlib.pyplot as plt
+from astropy.coordinates import SkyCoord
+from astroquery.jplhorizons import Horizons
+from geodesicparams import *
+from mpmath import sqrt
+from numpy import array
+
 obj = Horizons(id='199', location='500@10',
                epochs={'start':'1920-01-01', 'stop':'2019-12-31',
                        'step':'1y'})
