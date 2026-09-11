@@ -16,30 +16,32 @@ References
 
 """
 
-from jax import jit, vmap, config, asarray
+from functools import partial
+
+from jax import config, jit, vmap
 from jax.numpy import (
     arange,
     array,
+    asarray,
+    broadcast_arrays,
     complex128,
-    float64,
+    cos,
+    einsum,
     exp,
+    float64,
     imag,
+    int32,
     meshgrid,
     pi,
     real,
     sin,
-    cos,
     stack,
     sum,
-    einsum,
-    int32,
-    broadcast_arrays,
 )
 
 config.update("jax_enable_x64", True)
 
 
-@jit
 def derivative_factor(derivatives):
     """
     Computes the 2*pi*1j factor in front of the Fourier series definition of the theta function
@@ -59,12 +61,12 @@ def derivative_factor(derivatives):
     """
     if derivatives is None:
         return 1 + 0j
-    count = int(sum(1 for d in derivatives if d != 0))
+    count = len([d for d in derivatives if d != 0])
     return (2 * pi * 1j) ** count
 
 
-@jit
-def hyp_theta_fourier(z, riemannM, char, derivatives=[], minMax=5):
+@partial(jit, static_argnames=('derivatives', 'minMax'))
+def hyp_theta_fourier(z, riemannM, char, derivatives=(), minMax=5):
     """
     Computes the hyperelliptic theta function on a genus 2 Riemann surface using the Fourier
     series definition of the function. Optional derivatives can be computed.
@@ -122,9 +124,9 @@ def hyp_theta_fourier(z, riemannM, char, derivatives=[], minMax=5):
     tau_sum_0 = riemannM[0, 0] * m1g + riemannM[0, 1] * m2g
     tau_sum_1 = riemannM[1, 0] * m1g + riemannM[1, 1] * m2g
 
-    derivatives = [] if derivatives is None else list(derivatives)
-    count1 = sum(1 for d in derivatives if d == 1)
-    count2 = sum(1 for d in derivatives if d == 2)
+    derivatives = () if derivatives is None else tuple(derivatives)
+    count1 = len([d for d in derivatives if d == 1])
+    count2 = len([d for d in derivatives if d == 2])
 
     derivs_grid = (m1g ** array(count1, dtype=int32)) * (
         m2g ** array(count2, dtype=int32)
@@ -155,7 +157,7 @@ def hyp_theta_fourier(z, riemannM, char, derivatives=[], minMax=5):
         return results
 
 
-@jit
+@partial(jit, static_argnames=('l', 'minMax'))
 def hyp_theta_RR(xR, xI, wR, wI, l, riemannM, char, minMax=5):
     """
     Computes the partial derivative of the real part of the hyperelliptic theta function
@@ -258,7 +260,7 @@ def hyp_theta_RR(xR, xI, wR, wI, l, riemannM, char, minMax=5):
     return res
 
 
-@jit
+@partial(jit, static_argnames=('l', 'minMax'))
 def hyp_theta_IR(xR, xI, wR, wI, l, riemannM, char, minMax=5):
     """
     Computes the partial derivative of the imaginary part of the hyperelliptic theta function
@@ -363,9 +365,11 @@ def hyp_theta_IR(xR, xI, wR, wI, l, riemannM, char, minMax=5):
     return res
 
 
-@jit
+@partial(jit, static_argnames=('minMax',))
 def sigma1(z, riemannM, minMax=5):
 
+    z = asarray(z, dtype=complex128)
+    riemannM = asarray(riemannM, dtype=complex128)
     g = array([0.5, 0.5])
     h = array([0.0, 0.5])
 
@@ -384,9 +388,11 @@ def sigma1(z, riemannM, minMax=5):
     return result
 
 
-@jit
+@partial(jit, static_argnames=('minMax',))
 def sigma2(z, riemannM, minMax=5):
 
+    z = asarray(z, dtype=complex128)
+    riemannM = asarray(riemannM, dtype=complex128)
     g = array([0.5, 0.5])
     h = array([0.0, 0.5])
 
