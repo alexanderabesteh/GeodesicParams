@@ -26,10 +26,10 @@ References
 from mpmath import sqrt
 from sympy import Poly, Symbol, cos, limit, oo, pi, re, symbols
 
-from ..utilities import eval_roots, find_next, inlist, separate_zeros 
+from ..utilities import eval_roots, find_next, inlist, separate_zeros
 
 
-def get_allowed_orbits(polynomial, deg, isnegativeallowed=False):
+def get_allowed_orbits(polynomial, deg, isnegativeallowed=False, digits=15):
     """
     Determine the possible orbit types from a given polynomial as well as
     their respective boundaries.
@@ -44,6 +44,10 @@ def get_allowed_orbits(polynomial, deg, isnegativeallowed=False):
         If set to True, negative radial values are allowed, meaning that transit and
         crossover flyby orbits are possible, and terminating orbits are not possible.
         (transit and crossover flyby orbits have not been implemented yet, tbd).
+    digits : int, optional
+        The number of significant digits used to numerically evaluate the roots of
+        <polynomial>. Defaults to 15; should be set to the ambient precision (e.g.
+        mp.dps) for polynomials whose roots may end up tightly clustered.
 
     Returns
     -------
@@ -58,7 +62,7 @@ def get_allowed_orbits(polynomial, deg, isnegativeallowed=False):
 
     p = polynomial
 
-    zeros = sorted(eval_roots(Poly(p).all_roots()), key=lambda y: re(y))
+    zeros = sorted(eval_roots(Poly(p).all_roots(), digits), key=lambda y: re(y))
     print("Zeros = ", zeros)
 
     if len(zeros) != deg:
@@ -352,12 +356,7 @@ def check_thetainitials(zeros, initial_values):
         cos_init = cos(initial_values[2])
         if len(allowed_inits) == 2 and (
             cos_init.evalf() < allowed_inits[0] or cos_init.evalf() > allowed_inits[1]
-        ):
-            print(
-                f"WARNING in check_thetainitials: initial value {initial_values[2]} for theta motion is not allowed; set to default value {allowed_inits[0]}"
-            )
-            init_nu = [initial_values[0], allowed_inits[0] + eps]
-        elif len(allowed_inits) == 4 and (
+        ) or len(allowed_inits) == 4 and (
             (cos_init.evalf() < allowed_inits[0] or cos_init.evalf() > allowed_inits[1])
             and (
                 cos_init.evalf() < allowed_inits[2]
@@ -369,7 +368,7 @@ def check_thetainitials(zeros, initial_values):
             )
             init_nu = [initial_values[0], allowed_inits[0] + eps]
         else:
-            init_nu = [0, cos_init]
+            init_nu = [initial_values[0], cos_init]
 
     return allowed_inits, init_nu, bounds_nu
 
@@ -621,7 +620,7 @@ def four_velocity(
         - chi**2 * t_nu**2
     ).expand()
 
-    if NUT == 0:
+    if NUT == 0 and cosmo == 0:
         nu_vel = nu_vel.subs(nu**6, 0)
 
     phi_vel = [
