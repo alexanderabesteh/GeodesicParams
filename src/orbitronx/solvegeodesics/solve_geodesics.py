@@ -19,17 +19,17 @@ References
 
 """
 
-from mpmath import mp
-from sympy import Eq, Poly, degree, re, solve, sqrt, symbols
-from jax import jit
 from jax.numpy import (
+    arccos as jnp_arccos,
     array as jnp_array,
+    complex128 as jnp_complex128,
     float64 as jnp_float64,
     ndarray as jnp_ndarray,
-    arccos as jnp_arccos,
     real as jnp_real,
     zeros_like as jnp_zeros_like,
 )
+from mpmath import mp
+from sympy import Eq, Poly, degree, re, solve, sqrt, symbols
 
 from ..utilities import eval_roots, inlist
 from .general_relativity import (
@@ -224,9 +224,9 @@ def solve_geodesic_orbit(
     if (
         rot == 0
     ):  # spacetime in ["Schwarzschild", "Reissner Nordstrom", "Schwarzschild-de Sitter", "Reissner Nordstrom-de Sitter"]:
-        types, bounds, zeros_p = get_allowed_orbits(p_r, deg_p)
+        types, bounds, zeros_p = get_allowed_orbits(p_r, deg_p, digits=digits)
     else:
-        types, bounds, zeros_p = get_allowed_orbits(p_r, deg_p, True)
+        types, bounds, zeros_p = get_allowed_orbits(p_r, deg_p, True, digits)
 
     if inlist("transit", types) != -1:  # or inlist("crossover flyby", types) != -1:
         raise Exception(f"{orbittype} orbits have not been implemented. tbd")
@@ -252,10 +252,10 @@ def solve_geodesic_orbit(
     # Output convert_polynomial: [converted_polynomial, integrand, substitution]
     # i.e. (dr/dgamma)**2 = integrand(y) * (converted_polynomial)
     p_converted = convert_polynomial(
-        p_r, deg_p, zeros_p, bounds[inlist(orbittype, types)]
+        p_r, deg_p, zeros_p, bounds[inlist(orbittype, types)], digits
     )
     zeros_converted = sorted(
-        eval_roots(Poly(p_converted[0]).all_roots()), key=lambda y: re(y)
+        eval_roots(Poly(p_converted[0]).all_roots(), digits), key=lambda y: re(y)
     )
 
     # Apply substitution to bounds and initial_values
@@ -327,7 +327,7 @@ def solve_geodesic_orbit(
     ############################# theta Equation ################################
     # ----------- Define rhs of (dnu/dgamma)**2 = p(nu), nu = cos(theta)
     deg_p = degree(p_nu)
-    zeros_p = sorted(eval_roots(Poly(p_nu).all_roots()), key=lambda y: re(y))
+    zeros_p = sorted(eval_roots(Poly(p_nu).all_roots(), digits), key=lambda y: re(y))
     print("Zeros = ", zeros_p)
 
     if len(zeros_p) != deg_p:
@@ -340,9 +340,9 @@ def solve_geodesic_orbit(
 
     # ----------- Convert p to standard form
     # Output convert_polynomial: [converted_polynomial, integrand, substitution]
-    p_converted = convert_polynomial(p_nu, deg_p, zeros_p, bounds_nu)
+    p_converted = convert_polynomial(p_nu, deg_p, zeros_p, bounds_nu, digits)
     zeros_converted = sorted(
-        eval_roots(Poly(p_converted[0]).all_roots()), key=lambda y: re(y)
+        eval_roots(Poly(p_converted[0]).all_roots(), digits), key=lambda y: re(y)
     )
 
     # Apply substitution to initial_values
@@ -367,18 +367,18 @@ def solve_geodesic_orbit(
     )
 
     # Backsubstitution theta = arccos(nu)
-    @jit
     def sol_theta(s):
-        s_array = jnp_array(s, dtype=jnp_float64) if not isinstance(s, jnp_ndarray) else s
-    
-        nu_vals = sol_nu(s_array)
-    
-        theta_vals = jnp_arccos(nu_vals)
-    
-        if s_array.size == 1:
-            return float(theta_vals[0])  # Single value
+        nu_vals = sol_nu(s)
+
+        if isinstance(nu_vals, (int, float, complex)):
+            return float(jnp_arccos(nu_vals).real)
         else:
-            return [float(x) for x in theta_vals]  # List of values
+            # sol_nu may return a plain Python list (e.g. from the
+            # hyperelliptic/genus-2 solution path), which jnp_arccos can't
+            # consume directly.
+            nu_array = jnp_array(nu_vals, dtype=jnp_complex128)
+            theta_vals = jnp_arccos(nu_array)
+            return [float(jnp_real(x)) for x in theta_vals]
 
     ############################# Phi Equation, theta Integral ################################
     # Define rhs of dphi/dgamma = phir_integrand - phinu_integrand
@@ -403,7 +403,7 @@ def solve_geodesic_orbit(
             zeros_converted,
             p_converted[3],
             tnu_integrand,
-            workdir + "temp/rdata_" + date,
+            workdir + "temp/thetadata_" + date,
             digits,
         )
 
@@ -416,33 +416,47 @@ def solve_geodesic_orbit(
             zeros_converted,
             p_converted[3],
             taunu_integrand,
-            workdir + "temp/rdata_" + date,
+            workdir + "temp/thetadata_" + date,
             digits,
         )
 
     # Phi coordinate solution
-    @jit
     def sol_phi(s):
         s_array = jnp_array(s, dtype=jnp_float64) if not isinstance(s, jnp_ndarray) else s
-    
+
         s_len = s_array.shape[0] if s_array.ndim > 0 else 1
-    
-        phir_result = sol_phir(s_array)
-        phinu_result = sol_phinu(s_array)
-    
+
+        phinu_result = jnp_array(sol_phinu(s_array), dtype=jnp_complex128)
+
         if sol_phir == 0:
             phir_vals = jnp_zeros_like(phinu_result, dtype=jnp_float64)
         else:
-            phir_vals = phir_result
-    
-        init_phi_jax = jnp_float64(init_phi)
-    
+            phir_vals = jnp_array(sol_phir(s_array), dtype=jnp_complex128)
+
+        # phinu_result/phir_vals each come from their own Newton
+        # continuation (orbitdata) over <s>, which silently returns only
+        # the prefix of <s> it actually managed to converge for (the r- and
+        # nu-motions can, and often do, run out of convergent steps at
+        # different points -- e.g. the r-motion tracking through a turning
+        # point is harder than the nu-motion). Truncate both to the shorter
+        # of the two so the subtraction below doesn't crash on a length
+        # mismatch; the caller gets however much of the trajectory both
+        # motions could actually resolve, rather than an exception.
+        common_len = min(phinu_result.shape[0], phir_vals.shape[0])
+        if common_len < s_len:
+            s_array = s_array[:common_len]
+            s_len = common_len
+        phinu_result = phinu_result[:common_len]
+        phir_vals = phir_vals[:common_len]
+
+        init_phi_jax = jnp_float64(float(init_phi))
+
         diff = phir_vals - phinu_result
         real_diff = jnp_real(diff)
         result_vals = init_phi_jax + real_diff
-    
+
         if s_len == 1:
-            return float(result_vals[0]) if result_vals.shape == (1,) else float(result_vals)
+            return float(result_vals.ravel()[0])
         else:
             return [float(x) for x in result_vals]
 
@@ -450,7 +464,6 @@ def solve_geodesic_orbit(
     # If time components were selected
     if time:
         # Coordinate time solution
-        @jit
         def sol_t(s):
             s_array = jnp_array(s, dtype=jnp_float64) if not isinstance(s, jnp_ndarray) else s
     
@@ -471,7 +484,6 @@ def solve_geodesic_orbit(
                 return [float(x) for x in result_vals]
 
         # Proper time solution
-        @jit
         def sol_tau(s):
             s_array = jnp_array(s, dtype=jnp_float64) if not isinstance(s, jnp_ndarray) else s
     
